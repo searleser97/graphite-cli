@@ -18,7 +18,7 @@ describe("Restack", function () {
   });
   this.timeout(5000);
 
-  xit("Can restack a stack of three branches", () => {
+  it("Can restack a stack of three branches", () => {
     repo.createChange("2");
     execCliCommand("diff -b 'a' -m '2' -s", { fromDir: tmpDir.name });
     repo.createChangeAndCommit("2.5");
@@ -48,16 +48,6 @@ describe("Restack", function () {
     expect(repo.listCurrentBranchCommitMessages().join(", ")).to.equal(
       "4, 3.5, 3, 2.5, 2, 1.5, 1"
     );
-  });
-
-  it("Cannot restack branches that fail validation", () => {
-    repo.createAndCheckoutBranch("a");
-    repo.createChangeAndCommit("2");
-    repo.createAndCheckoutBranch("b");
-    repo.createChangeAndCommit("3");
-    expect(() => {
-      execCliCommand("restack -s", { fromDir: tmpDir.name });
-    }).to.throw();
   });
 
   it("Can restack a stack onto another", () => {
