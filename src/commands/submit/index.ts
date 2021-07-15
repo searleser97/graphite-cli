@@ -83,7 +83,7 @@ export default class SubmitCommand extends AbstractCommand<typeof args> {
           `gh pr create`,
           `--head ${branch.name}`,
           ...(parentBranch ? [`--base ${parentBranch.name}`] : []),
-          ...(argv.quick ? [`-f`] : []),
+          ...(argv.fill ? [`-f`] : []),
         ].join(" "),
         { stdio: "inherit" }
       );
