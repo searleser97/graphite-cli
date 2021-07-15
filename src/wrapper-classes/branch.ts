@@ -1,0 +1,246 @@
+import { execSync } from "child_process";
+import simpleGit, { SimpleGit } from "simple-git";
+import Commit from "./commit";
+const git: SimpleGit = simpleGit();
+
+type TBranchDesc = {
+  parentBranchName: string;
+};
+
+export const MAX_COMMITS_TO_TRAVERSE_FOR_NEXT_OR_PREV = 50;
+
+function gitTreeFromRevListOutput(output: string): Record<string, string[]> {
+  const ret: Record<string, string[]> = {};
+  for (const line of output.split("\n")) {
+    if (line.length > 0) {
+      const shas = line.split(" ");
+      ret[shas[0]] = shas.slice(1);
+    }
+  }
+
+  return ret;
+}
+
+function branchListFromShowRefOutput(output: string): Record<string, string> {
+  const ret: Record<string, string> = {};
+  for (const line of output.split("\n")) {
+    if (line.length > 0) {
+      const parts = line.split(" ");
+      ret[parts[0]] = parts[1].slice("refs/heads/".length);
+    }
+  }
+
+  return ret;
+}
+
+function traverseGitTreeFromCommitUntilBranch(
+  commit: string,
+  gitTree: Record<string, string[]>,
+  branchList: Record<string, string>,
+  n: number
+): Set<string> | null {
+  // Skip the first iteration b/c that is the CURRENT branch
+  if (n > 0 && commit in branchList) {
+    return new Set([branchList[commit]]);
+  }
+
+  if (n > MAX_COMMITS_TO_TRAVERSE_FOR_NEXT_OR_PREV) {
+    return null;
+  }
+
+  if (commit in gitTree) {
+    const ret = new Set<string>();
+    for (const next of gitTree[commit]) {
+      const childRet = traverseGitTreeFromCommitUntilBranch(
+        next,
+        gitTree,
+        branchList,
+        n + 1
+      );
+      if (childRet === null) {
+        return null;
+      } else {
+        childRet.forEach((v) => {
+          ret.add(v);
+        });
+      }
+    }
+
+    return ret;
+  }
+
+  return null;
+}
+
+export default class Branch {
+  name: string;
+
+  constructor(name: string) {
+    this.name = name;
+  }
+
+  public toString(): string {
+    return this.name;
+  }
+
+  private getMeta(): TBranchDesc | undefined {
+    try {
+      const metaString = execSync(
+        `git cat-file -p refs/branch-metadata/${this.name} 2> /dev/null`
+      )
+        .toString()
+        .trim();
+      if (metaString.length == 0) {
+        return undefined;
+      }
+      // TODO: Better account for malformed desc; possibly validate with retype
+      const meta = JSON.parse(metaString);
+      return meta;
+    } catch {
+      return undefined;
+    }
+  }
+
+  private writeMeta(desc: TBranchDesc) {
+    const metaSha = execSync(`git hash-object -w --stdin`, {
+      input: JSON.stringify(desc),
+    }).toString();
+    execSync(`git update-ref refs/branch-metadata/${this.name} ${metaSha}`, {
+      stdio: "ignore",
+    });
+  }
+
+  stackByTracingMetaParents(branch?: Branch): string[] {
+    const curBranch = branch || this;
+    const metaParent = curBranch.getParentFromMeta();
+    if (metaParent) {
+      return this.stackByTracingMetaParents(metaParent).concat([
+        curBranch.name,
+      ]);
+    } else {
+      return [curBranch.name];
+    }
+  }
+
+  stackByTracingGitParents(branch?: Branch): string[] {
+    const curBranch = branch || this;
+    const gitParents = curBranch.getParentsFromGit();
+    if (gitParents && gitParents.length === 1) {
+      return this.stackByTracingMetaParents(gitParents[0]).concat([
+        curBranch.name,
+      ]);
+    } else {
+      return [curBranch.name];
+    }
+  }
+
+  getParentFromMeta(): Branch | undefined {
+    const parentName = this.getMeta()?.parentBranchName;
+    if (parentName) {
+      return new Branch(parentName);
+    }
+    return undefined;
+  }
+
+  async getChildrenFromMeta(): Promise<Branch[]> {
+    const branchesSummary = await git.branch();
+    const branches = Object.values(branchesSummary.branches).map(
+      (b) => new Branch(b.name)
+    );
+    const children = branches.filter(
+      (b) => b.getMeta()?.parentBranchName === this.name
+    );
+    return children;
+  }
+
+  public setParentBranchName(parentBranchName: string) {
+    this.writeMeta({ parentBranchName });
+  }
+
+  static async branchWithName(name: string): Promise<Branch> {
+    const branchesSummary = await git.branch();
+    const branch = Object.values(branchesSummary.branches).find(
+      (b) => b.name === name
+    );
+    if (!branch) {
+      throw new Error(`Failed to find branch named ${name}`);
+    }
+    return new Branch(name);
+  }
+
+  static async getCurrentBranch(): Promise<Branch> {
+    const branchesSummary = await git.branch();
+    const currentBranchSummary =
+      branchesSummary.branches[branchesSummary.current];
+    return new Branch(currentBranchSummary.name);
+  }
+
+  static async getAllBranchesWithParents(): Promise<Branch[]> {
+    const branchesSummary = await git.branch();
+    const branches = Object.values(branchesSummary.branches).map(
+      (b) => new Branch(b.name)
+    );
+    return branches.filter((b) => {
+      const parents = b.getParentsFromGit();
+      return parents != undefined && parents.length > 0;
+    });
+  }
+
+  public head(): Commit {
+    return new Commit(execSync(`git rev-parse ${this.name}`).toString().trim());
+  }
+
+  public base(): Commit | undefined {
+    const parentBranchName = this.getMeta()?.parentBranchName;
+    if (!parentBranchName) {
+      return undefined;
+    }
+    return new Commit(
+      execSync(`git merge-base ${parentBranchName} ${this.name}`)
+        .toString()
+        .trim()
+    );
+  }
+
+  public getChildrenFromGit(): Branch[] | undefined {
+    return this.getChildrenOrParents("CHILDREN");
+  }
+
+  public getParentsFromGit(): Branch[] | undefined {
+    return this.getChildrenOrParents("PARENTS");
+  }
+
+  private getChildrenOrParents(
+    opt: "CHILDREN" | "PARENTS"
+  ): Branch[] | undefined {
+    const revListOutput = execSync(
+      `git rev-list ${opt === "CHILDREN" ? "--children" : "--parents"} --all`,
+      {
+        maxBuffer: 1024 * 1024 * 1024,
+      }
+    );
+    const gitTree = gitTreeFromRevListOutput(revListOutput.toString().trim());
+
+    const showRefOutput = execSync("git show-ref --heads", {
+      maxBuffer: 1024 * 1024 * 1024,
+    });
+    const branchList = branchListFromShowRefOutput(
+      showRefOutput.toString().trim()
+    );
+
+    const headSha = execSync(`git rev-parse ${this.name}`).toString().trim();
+
+    const candidates = traverseGitTreeFromCommitUntilBranch(
+      headSha,
+      gitTree,
+      branchList,
+      0
+    );
+
+    if (candidates === null) {
+      return undefined;
+    }
+
+    return Array.from(candidates.values()).map((c) => new Branch(c));
+  }
+}
