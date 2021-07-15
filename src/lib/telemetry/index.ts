@@ -3,7 +3,6 @@
 // All metrics logged are listed plain to see, and are non blocking in case the server is unavailable.
 
 import { execSync } from "child_process";
-import { request, telemetry } from "shared-routes";
 
 function shouldReportTelemetry(): boolean {
   return process.env.NODE_ENV != "development";
@@ -19,15 +18,7 @@ export function userEmail(): string | undefined {
 
 export async function logCommand(command: string, message?: string) {
   if (shouldReportTelemetry()) {
-    await request.requestWithArgs(
-      "https://screenplaylogs.com/v1",
-      telemetry.cliEvent,
-      {
-        eventName: command,
-        message: message || "",
-        user: userEmail(),
-      }
-    );
+    // TODO
   }
 }
 
@@ -46,16 +37,6 @@ export async function profile<T>(
 
 export async function logError(err: Error) {
   if (shouldReportTelemetry()) {
-    await request.requestWithArgs(
-      "https://screenplaylogs.com/v1",
-      telemetry.cli,
-      {
-        name: typeof err === "string" ? err : err.name || "",
-        message: err.message || "",
-        stack: err.stack || "",
-        argv: process.argv,
-        user: userEmail(),
-      }
-    );
+    // TODO
   }
 }
