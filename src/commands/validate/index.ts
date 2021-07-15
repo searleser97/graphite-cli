@@ -31,20 +31,10 @@ async function validateBranch(branch: Branch, opts: argsT) {
   const hasGitChildren = gitChildren && gitChildren.length > 0;
   const hasMetaChildren = metaChildren.length > 0;
   if (hasGitChildren && !hasMetaChildren) {
-    log(
-      chalk.yellow(`${branch.name} missing a child in sd's meta graph`),
-      opts
-    );
-    throw new Error("fail 1");
-    // process.exit(1);
+    throw new Error(`${branch.name} missing a child in sd's meta graph`);
   }
   if (!hasGitChildren && hasMetaChildren) {
-    log(
-      chalk.yellow(`Unable to find children in git history for ${branch.name}`),
-      opts
-    );
-    throw new Error("fail 2");
-    // process.exit(1);
+    throw new Error(`Unable to find children in git history for ${branch.name}`);
   }
   if (!hasGitChildren && !hasMetaChildren) {
     // Assume to be a trunk branch and implicately valid.
@@ -55,16 +45,9 @@ async function validateBranch(branch: Branch, opts: argsT) {
     (gitChild) => !metaChildren!.map((b) => b.name).includes(gitChild.name)
   );
   if (gitChildrenMissingInMeta.length > 0) {
-    log(
-      chalk.yellow(
-        `Child branches [${gitChildrenMissingInMeta
+    throw new Error(`Child branches [${gitChildrenMissingInMeta
           .map((b) => `(${b.name})`)
-          .join(", ")}] not found in sd's meta graph.`
-      ),
-      opts
-    );
-    throw new Error("fail 3");
-    // process.exit(1);
+          .join(", ")}] not found in sd's meta graph.`);
   }
   log(`✅ ${chalk.green(`(${branch.name}) validated`)}`, opts);
   for (const child of metaChildren!) {

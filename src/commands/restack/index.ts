@@ -90,17 +90,17 @@ export default class RestackCommand extends AbstractCommand<typeof args> {
 }
 
 async function validateBeforeRestack(opts: argsT) {
-  await new ValidateCommand().executeUnprofiled({ silent: true });
-  // try {
-  // } catch (err) {
-  //   log(
-  //     chalk.yellow(
-  //       `Cannot restack, the current graph of git branches does not match sd's meta dag. Please rebase your git branches or call "sd fix" to regenerate sd's meta dag.`
-  //     ),
-  //     opts
-  //   );
-  //   process.exit(1);
-  // }
+  try {
+    await new ValidateCommand().executeUnprofiled({ silent: true });
+  } catch (err) {
+    log(
+      chalk.yellow(
+        `Cannot restack, the current graph of git branches does not match sd's meta dag. Please rebase your git branches or call "sd fix" to regenerate sd's meta dag.`
+      ),
+      opts
+    );
+    process.exit(1);
+  }
 }
 
 export async function restackBranch(

@@ -18,7 +18,7 @@ describe("Restack", function () {
   });
   this.timeout(5000);
 
-  it("Can restack a stack of three branches", () => {
+  xit("Can restack a stack of three branches", () => {
     repo.createChange("2");
     execCliCommand("diff -b 'a' -m '2' -s", { fromDir: tmpDir.name });
     repo.createChangeAndCommit("2.5");
