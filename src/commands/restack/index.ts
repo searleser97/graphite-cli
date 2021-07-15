@@ -38,7 +38,6 @@ function checkBranchCanBeMoved(branch: Branch, opts: argsT) {
 export default class RestackCommand extends AbstractCommand<typeof args> {
   static args = args;
   public async _execute(argv: argsT): Promise<void> {
-
     log(`Before restack:`, argv);
     !argv.silent && (await new PrintStacksCommand().executeUnprofiled(args));
 
