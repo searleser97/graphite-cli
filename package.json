@@ -38,6 +38,5 @@
   },
   "bin": {
     "gp": "dist/src/index.js"
-  },
-  "devDependencies": {}
+  }
 }

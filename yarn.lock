@@ -1330,6 +1330,35 @@ fsevents@~2.3.1:
   languageName: node
   linkType: hard
 
+"graphite-cli@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "graphite-cli@workspace:."
+  dependencies:
+    "@types/chai": ^4.2.14
+    "@types/chalk": ^2.2.0
+    "@types/fs-extra": ^9.0.1
+    "@types/mocha": ^8.2.3
+    "@types/node": ^14.14.37
+    "@types/tmp": ^0.2.0
+    "@types/yargs": ^15.0.5
+    "@typescript-eslint/eslint-plugin": ^4.15.2
+    "@typescript-eslint/parser": ^4.15.2
+    chai: ^4.2.0
+    chalk: ^4.1.0
+    eslint: ^7.20.0
+    fs-extra: ^9.0.1
+    mocha: ^8.3.2
+    simple-git: ^2.40.0
+    tmp: ^0.2.1
+    ts-mocha: ^8.0.0
+    ts-node: ^9.0.0
+    typescript: ^4.2.4
+    yargs: ^17.0.1
+  bin:
+    gp: dist/src/index.js
+  languageName: unknown
+  linkType: soft
+
 "growl@npm:1.10.5":
   version: 1.10.5
   resolution: "growl@npm:1.10.5"
@@ -2030,35 +2059,6 @@ fsevents@~2.3.1:
   checksum: d51e630d72b7c38bc9e396710e7a068f0b813fe4db6f4a2d1ce2972e7fa11142c763c3aa39bcfd77c0133688c1ebfdd9b38fa3ac4c6ada20b62df26239c5c0e4
   languageName: node
   linkType: hard
-
-"pancake-cli@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "pancake-cli@workspace:."
-  dependencies:
-    "@types/chai": ^4.2.14
-    "@types/chalk": ^2.2.0
-    "@types/fs-extra": ^9.0.1
-    "@types/mocha": ^8.2.3
-    "@types/node": ^14.14.37
-    "@types/tmp": ^0.2.0
-    "@types/yargs": ^15.0.5
-    "@typescript-eslint/eslint-plugin": ^4.15.2
-    "@typescript-eslint/parser": ^4.15.2
-    chai: ^4.2.0
-    chalk: ^4.1.0
-    eslint: ^7.20.0
-    fs-extra: ^9.0.1
-    mocha: ^8.3.2
-    simple-git: ^2.40.0
-    tmp: ^0.2.1
-    ts-mocha: ^8.0.0
-    ts-node: ^9.0.0
-    typescript: ^4.2.4
-    yargs: ^17.0.1
-  bin:
-    sd: dist/src/index.js
-  languageName: unknown
-  linkType: soft
 
 "parent-module@npm:^1.0.0":
   version: 1.0.1
