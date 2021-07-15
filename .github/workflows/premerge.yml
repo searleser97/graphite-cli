@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: 15.14.0
       - name: Install
-        run: yarn install
+        run: yarn install --immutable
       - name: Lint
         run: yarn lint
       - name: Build
