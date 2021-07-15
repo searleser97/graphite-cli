@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import fs from "fs-extra";
 import tmp from "tmp";
 import GitRepo from "../utils/git_repo";
 import { execCliCommand } from "../utils/misc";
@@ -12,8 +13,8 @@ describe("Restack", function () {
     repo.createChangeAndCommit("1");
   });
   afterEach(() => {
-    // fs.emptyDirSync(tmpDir.name);
-    // tmpDir.removeCallback();
+    fs.emptyDirSync(tmpDir.name);
+    tmpDir.removeCallback();
   });
   this.timeout(5000);
 
@@ -39,7 +40,6 @@ describe("Restack", function () {
       "1.5, 1"
     );
 
-    console.log(tmpDir.name)
     execCliCommand("restack", { fromDir: tmpDir.name });
     // Expect restacking not to change the current checked out branch.
     expect(repo.currentBranchName()).to.equal("main");
