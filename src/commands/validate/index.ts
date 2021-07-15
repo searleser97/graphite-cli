@@ -17,48 +17,57 @@ type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 export default class ValidateCommand extends AbstractCommand<typeof args> {
   static args = args;
   public async _execute(argv: argsT) {
-    const currentBranch = await Branch.getCurrentBranch();
-    validateBranch(currentBranch, argv);
+    const baseBranch = (
+      await Branch.getCurrentBranch()
+    ).getTrunkBranchFromGit();
+    await validateBranch(baseBranch, argv);
     log(`Current stack is valid`, argv);
   }
 }
 
 async function validateBranch(branch: Branch, opts: argsT) {
-  const metaParent = branch.getParentFromMeta();
-  const gitParents = branch.getParentsFromGit();
-  const hasGitParent = gitParents && gitParents.length > 0;
-  if (hasGitParent && !metaParent) {
+  const metaChildren = await branch.getChildrenFromMeta();
+  const gitChildren = branch.getChildrenFromGit();
+  const hasGitChildren = gitChildren && gitChildren.length > 0;
+  const hasMetaChildren = metaChildren.length > 0;
+  if (hasGitChildren && !hasMetaChildren) {
     log(
-      chalk.yellow(`${branch.name} missing a parent in sd's meta graph`),
+      chalk.yellow(`${branch.name} missing a child in sd's meta graph`),
       opts
     );
-    process.exit(1);
+    throw new Error("fail 1");
+    // process.exit(1);
   }
-  if (!hasGitParent && metaParent) {
+  if (!hasGitChildren && hasMetaChildren) {
     log(
-      chalk.yellow(
-        `Unable to find children in git history for ${branch.name}`,
-        opts
-      )
+      chalk.yellow(`Unable to find children in git history for ${branch.name}`),
+      opts
     );
-    process.exit(1);
+    throw new Error("fail 2");
+    // process.exit(1);
   }
-  if (!hasGitParent && !metaParent) {
+  if (!hasGitChildren && !hasMetaChildren) {
     // Assume to be a trunk branch and implicately valid.
+    log(`✅ ${chalk.green(`(${branch.name}) validated`)}`, opts);
     return;
   }
-  const gitParentsMissingInMeta = gitParents!.filter(
-    (gitChild) => gitChild.name != metaParent!.name
+  const gitChildrenMissingInMeta = gitChildren!.filter(
+    (gitChild) => !metaChildren!.map((b) => b.name).includes(gitChild.name)
   );
-  if (gitParentsMissingInMeta.length > 0) {
+  if (gitChildrenMissingInMeta.length > 0) {
     log(
       chalk.yellow(
-        `Parent branches ${gitParentsMissingInMeta} not found in sd's meta graph.`
+        `Child branches [${gitChildrenMissingInMeta
+          .map((b) => `(${b.name})`)
+          .join(", ")}] not found in sd's meta graph.`
       ),
       opts
     );
-    process.exit(1);
+    throw new Error("fail 3");
+    // process.exit(1);
   }
   log(`✅ ${chalk.green(`(${branch.name}) validated`)}`, opts);
-  validateBranch(metaParent!, opts);
+  for (const child of metaChildren!) {
+    await validateBranch(child, opts);
+  }
 }

@@ -12,13 +12,13 @@ type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 export class NextCommand extends AbstractCommand<typeof args> {
   static args = args;
   public async _execute(argv: argsT) {
-    nextOrPrev("next");
+    await nextOrPrev("next");
   }
 }
 export class PrevCommand extends AbstractCommand<typeof args> {
   static args = args;
   public async _execute(argv: argsT) {
-    nextOrPrev("prev");
+    await nextOrPrev("prev");
   }
 }
 
@@ -51,9 +51,6 @@ async function nextOrPrev(nextOrPrev: "next" | "prev") {
     process.exit(1);
   }
 
-  var it = candidates.values();
-  var first = it.next();
-  var value = first.value;
-
-  execSync(`git checkout "${value.name}"`, { stdio: "ignore" });
+  const branchName = candidates.values().next().value.name;
+  execSync(`git checkout "${branchName}"`, { stdio: "ignore" });
 }

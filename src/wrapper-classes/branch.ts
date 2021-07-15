@@ -157,6 +157,20 @@ export default class Branch {
     this.writeMeta({ parentBranchName });
   }
 
+  public getTrunkBranchFromGit(): Branch {
+    const gitParents = this.getParentsFromGit();
+    if (gitParents && gitParents.length == 1) {
+      return gitParents[0].getTrunkBranchFromGit();
+    } else if (gitParents && gitParents.length > 1) {
+      console.log(
+        `Cannot derive trunk from git branch (${this.name}) with two parents`
+      );
+      process.exit(1);
+    } else {
+      return this;
+    }
+  }
+
   static async branchWithName(name: string): Promise<Branch> {
     const branchesSummary = await git.branch();
     const branch = Object.values(branchesSummary.branches).find(
@@ -173,6 +187,24 @@ export default class Branch {
     const currentBranchSummary =
       branchesSummary.branches[branchesSummary.current];
     return new Branch(currentBranchSummary.name);
+  }
+
+  static async getAllBranchesWithoutParents(): Promise<Branch[]> {
+    const branchesSummary = await git.branch();
+    const branches = Object.values(branchesSummary.branches).map(
+      (b) => new Branch(b.name)
+    );
+    return branches.filter((b) => {
+      const parents = b.getParentsFromGit();
+      return parents == undefined || parents.length > 0;
+    });
+  }
+
+  static async getAllBranches(): Promise<Branch[]> {
+    const branchesSummary = await git.branch();
+    return Object.values(branchesSummary.branches)
+      .filter((b) => !b.name.includes("remotes/origin/"))
+      .map((b) => new Branch(b.name));
   }
 
   static async getAllBranchesWithParents(): Promise<Branch[]> {

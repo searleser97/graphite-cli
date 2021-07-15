@@ -17,7 +17,7 @@ import { logError } from "./lib/telemetry";
 tmp.setGracefulCleanup();
 
 process.on("uncaughtException", async (err) => {
-  logError(err);
+  await logError(err);
   process.exit(1);
 });
 

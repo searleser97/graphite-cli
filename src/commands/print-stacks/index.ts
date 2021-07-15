@@ -9,43 +9,23 @@ type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 export default class PrintStacksCommand extends AbstractCommand<typeof args> {
   static args = args;
   public async _execute(argv: argsT) {
-    const branchesWithParents = await Branch.getAllBranchesWithParents();
-
     const dag: { [name: string]: string[] } = {};
 
-    const branchesWithSourceParent = branchesWithParents.filter(
-      (curB) =>
-        curB.getParentFromMeta()!.name &&
-        !branchesWithParents.find(
-          (b) => b.name === curB.getParentFromMeta()?.name
-        )
-    );
-    const sourceNodes: Set<string> = new Set();
-    branchesWithSourceParent.forEach((b) => {
-      const parentBranchName = b.getParentFromMeta()!.name;
-      sourceNodes.add(parentBranchName);
-    });
-
-    branchesWithParents.forEach((branch) => {
-      const parent = branch.getParentFromMeta()!.name;
-      if (!dag[parent]) {
-        dag[parent] = [branch.name];
-      } else if (!dag[parent].includes(branch.name)) {
-        dag[parent].push(branch.name);
-      }
-    });
+    const allBranches = await Branch.getAllBranches();
+    for (const branch of allBranches) {
+      const children = branch.getChildrenFromGit();
+      dag[branch.name] = children ? children.map((c) => c.name) : [];
+    }
 
     const currentBranch = await Branch.getCurrentBranch();
     if (currentBranch) {
       console.log(chalk.green(`Current branch: ${currentBranch.name}`));
     }
-    sourceNodes.forEach((sourceBranchName) => {
-      dfsPrintBranches({
-        currentBranchName: currentBranch.name,
-        branchName: sourceBranchName,
-        dag,
-        depthIndents: [],
-      });
+    dfsPrintBranches({
+      currentBranchName: currentBranch.name,
+      branchName: currentBranch.getTrunkBranchFromGit().name,
+      dag,
+      depthIndents: [],
     });
   }
 }

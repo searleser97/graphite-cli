@@ -18,66 +18,35 @@ describe("Restack", function () {
   });
   this.timeout(5000);
 
-  it("Can restack a branch", () => {
-    // Setup
-    repo.createChange("2.5");
-    execCliCommand("diff -b 'a' -m '2.5' -s", { fromDir: tmpDir.name });
-    expect(repo.listCurrentBranchCommitMessages().join(", ")).to.equal(
-      ["2.5", "1"].join(", ")
-    );
-    repo.checkoutBranch("main");
-    repo.createChangeAndCommit("2");
+  it("Can restack a stack of three branches", () => {
+    repo.createChange("2");
+    execCliCommand("diff -b 'a' -m '2' -s", { fromDir: tmpDir.name });
+    repo.createChangeAndCommit("2.5");
 
-    // Double check the state of main
-    expect(repo.listCurrentBranchCommitMessages().join(", ")).to.equal(
-      ["2", "1"].join(", ")
-    );
+    repo.createChange("3");
+    execCliCommand("diff -b 'b' -m '3' -s", { fromDir: tmpDir.name });
+    repo.createChangeAndCommit("3.5");
 
-    // Perform the restack
-    execCliCommand("restack -s", { fromDir: tmpDir.name });
-    // Expect restacking not to change the current checked out branch.
-    expect(repo.currentBranchName()).to.equal("main");
-    expect(repo.listCurrentBranchCommitMessages().join(", ")).to.equal(
-      ["2", "1"].join(", ")
-    );
-
-    // Verify the restacked branch
-    repo.checkoutBranch("a");
-    expect(repo.listCurrentBranchCommitMessages().join(", ")).to.equal(
-      ["2.5", "2", "1"].join(", ")
-    );
-  });
-
-  it("Can restack a stack of two branches", () => {
-    repo.createChange("2.5");
-    execCliCommand("diff -b 'a' -m '2.5' -s", { fromDir: tmpDir.name });
+    repo.createChange("4");
+    execCliCommand("diff -b 'c' -m '4' -s", { fromDir: tmpDir.name });
 
     expect(repo.listCurrentBranchCommitMessages().join(", ")).to.equal(
-      ["2.5", "1"].join(", ")
-    );
-
-    repo.createChange("3.5");
-    execCliCommand("diff -b 'b' -m '3.5' -s", { fromDir: tmpDir.name });
-
-    expect(repo.listCurrentBranchCommitMessages().join(", ")).to.equal(
-      ["3.5", "2.5", "1"].join(", ")
+      "4, 3.5, 3, 2.5, 2, 1"
     );
 
     repo.checkoutBranch("main");
-    repo.createChangeAndCommit("2");
-
+    repo.createChangeAndCommit("1.5");
     expect(repo.listCurrentBranchCommitMessages().join(", ")).to.equal(
-      ["2", "1"].join(", ")
+      "1.5, 1"
     );
 
-    expect(repo.currentBranchName()).to.equal("main");
-    execCliCommand("restack -s", { fromDir: tmpDir.name });
+    execCliCommand("restack", { fromDir: tmpDir.name });
     // Expect restacking not to change the current checked out branch.
     expect(repo.currentBranchName()).to.equal("main");
 
-    repo.checkoutBranch("b");
+    repo.checkoutBranch("c");
     expect(repo.listCurrentBranchCommitMessages().join(", ")).to.equal(
-      ["3.5", "2.5", "2", "1"].join(", ")
+      "4, 3.5, 3, 2.5, 2, 1.5, 1"
     );
   });
 
@@ -89,5 +58,26 @@ describe("Restack", function () {
     expect(() => {
       execCliCommand("restack -s", { fromDir: tmpDir.name });
     }).to.throw();
+  });
+
+  it("Can restack a stack onto another", () => {
+    repo.createChange("2");
+    execCliCommand("diff -b 'a' -m '2' -s", { fromDir: tmpDir.name });
+
+    repo.createChange("3");
+    execCliCommand("diff -b 'b' -m '3' -s", { fromDir: tmpDir.name });
+
+    repo.checkoutBranch("main");
+
+    repo.createChange("4");
+    execCliCommand("diff -b 'c' -m '4' -s", { fromDir: tmpDir.name });
+
+    expect(repo.listCurrentBranchCommitMessages().join(", ")).to.equal("4, 1");
+    execCliCommand("restack -s --onto b", { fromDir: tmpDir.name });
+    expect(repo.listCurrentBranchCommitMessages().join(", ")).to.equal(
+      "4, 3, 2, 1"
+    );
+    expect(() => execCliCommand("validate -s", { fromDir: tmpDir.name })).not.to
+      .throw;
   });
 });

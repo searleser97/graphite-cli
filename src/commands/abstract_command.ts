@@ -6,17 +6,17 @@ export default abstract class AbstractCommand<
 > {
   abstract _execute(
     argv: Omit<yargs.Arguments<yargs.InferredOptionTypes<T>>, "$0" | "_">
-  ): void;
+  ): Promise<void>;
 
   public async execute(argv: yargs.Arguments<yargs.InferredOptionTypes<T>>) {
-    await profile(async () => {
-      this._execute(argv);
+    await profile(this.constructor.name, async () => {
+      await this._execute(argv);
     });
   }
 
   public async executeUnprofiled(
     argv: Omit<yargs.Arguments<yargs.InferredOptionTypes<T>>, "$0" | "_">
   ) {
-    this._execute(argv);
+    await this._execute(argv);
   }
 }
