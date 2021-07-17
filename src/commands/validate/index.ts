@@ -34,7 +34,7 @@ async function validateBranch(branch: Branch, opts: argsT) {
     throw new Error(`${branch.name} missing a child in sd's meta graph`);
   }
   if (!hasGitChildren && hasMetaChildren) {
-    throw new Error(`Unable to find children in git history for ${branch.name}`);
+    throw new Error(`Unable to find child branches in git for ${branch.name}`);
   }
   if (!hasGitChildren && !hasMetaChildren) {
     // Assume to be a trunk branch and implicately valid.
@@ -45,9 +45,11 @@ async function validateBranch(branch: Branch, opts: argsT) {
     (gitChild) => !metaChildren!.map((b) => b.name).includes(gitChild.name)
   );
   if (gitChildrenMissingInMeta.length > 0) {
-    throw new Error(`Child branches [${gitChildrenMissingInMeta
-          .map((b) => `(${b.name})`)
-          .join(", ")}] not found in sd's meta graph.`);
+    throw new Error(
+      `Child branches [${gitChildrenMissingInMeta
+        .map((b) => `(${b.name})`)
+        .join(", ")}] not found in sd's meta graph.`
+    );
   }
   log(`✅ ${chalk.green(`(${branch.name}) validated`)}`, opts);
   for (const child of metaChildren!) {
