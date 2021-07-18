@@ -12,8 +12,8 @@ describe("Restack", function () {
     repo.createChangeAndCommit("1");
   });
   afterEach(() => {
-    // fs.emptyDirSync(tmpDir.name);
-    // tmpDir.removeCallback();
+    fs.emptyDirSync(tmpDir.name);
+    tmpDir.removeCallback();
   });
   this.timeout(5000);
 
@@ -39,7 +39,7 @@ describe("Restack", function () {
       "1.5, 1"
     );
 
-    execCliCommand("restack", { fromDir: tmpDir.name });
+    execCliCommand("restack -s", { fromDir: tmpDir.name });
     // Expect restacking not to change the current checked out branch.
     expect(repo.currentBranchName()).to.equal("main");
 
@@ -81,7 +81,5 @@ describe("Restack", function () {
     expect(repo.listCurrentBranchCommitMessages().join(", ")).to.equal("3, 1");
     expect(() => execCliCommand("validate -s", { fromDir: tmpDir.name })).not.to
       .throw;
-
-    console.log(tmpDir.name);
   });
 });

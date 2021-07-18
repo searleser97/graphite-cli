@@ -118,9 +118,6 @@ export async function restackBranch(
     const shaBeforeRebase = execSync(`git rev-parse ${childBranch.name}`)
       .toString()
       .trim();
-    console.log(
-      `git rebase --onto ${currentBranch.name} $(git merge-base ${childBranch.name} ${oldBranchHead}) ${childBranch.name} -Xtheirs`
-    );
     execSync(
       `git rebase --onto ${currentBranch.name} $(git merge-base ${childBranch.name} ${oldBranchHead}) ${childBranch.name} -Xtheirs`,
       { stdio: "ignore" }

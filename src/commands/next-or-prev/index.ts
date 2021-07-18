@@ -2,9 +2,7 @@
 import chalk from "chalk";
 import { execSync } from "child_process";
 import yargs from "yargs";
-import Branch, {
-  MAX_COMMITS_TO_TRAVERSE_FOR_NEXT_OR_PREV,
-} from "../../wrapper-classes/branch";
+import Branch from "../../wrapper-classes/branch";
 import AbstractCommand from "../abstract_command";
 
 const args = {} as const;
@@ -29,15 +27,6 @@ async function nextOrPrev(nextOrPrev: "next" | "prev") {
     nextOrPrev === "next"
       ? await currentBranch.getChildrenFromGit()
       : await currentBranch.getParentsFromGit();
-
-  if (!candidates) {
-    console.log(
-      chalk.yellow(
-        `Searched ${MAX_COMMITS_TO_TRAVERSE_FOR_NEXT_OR_PREV} and could not find ${nextOrPrev} branch`
-      )
-    );
-    process.exit(1);
-  }
 
   if (candidates.length === 0) {
     console.log(chalk.yellow(`Found no ${nextOrPrev} branch`));

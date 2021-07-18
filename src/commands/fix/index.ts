@@ -50,14 +50,6 @@ function printBranchNameStack(message: string, names: string[], opts: argsT) {
 
 async function recursiveFix(branch: Branch, opts: argsT) {
   const gitParents = branch.getParentsFromGit();
-
-  if (!gitParents) {
-    log(
-      `-> (${branch.name}) has no git parent branches and so is considered to be the base`,
-      opts
-    );
-    return;
-  }
   // Check if we're at a base branch
   if (gitParents.length === 0) {
     log(

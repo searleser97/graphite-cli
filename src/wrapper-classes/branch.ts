@@ -36,7 +36,7 @@ function traverseGitTreeFromCommitUntilBranch(
   gitTree: Record<string, string[]>,
   branchList: Record<string, string>,
   n: number
-): Set<string> | null {
+): Set<string> {
   // Skip the first iteration b/c that is the CURRENT branch
   if (n > 0 && commit in branchList) {
     return new Set([branchList[commit]]);
@@ -44,11 +44,11 @@ function traverseGitTreeFromCommitUntilBranch(
 
   // Limit the seach
   if (n > MAX_COMMITS_TO_TRAVERSE_FOR_NEXT_OR_PREV) {
-    return null;
+    return new Set();
   }
 
   if (!gitTree[commit] || gitTree[commit].length == 0) {
-    return null;
+    return new Set();
   }
 
   const commitsMatchingBranches = new Set<string>();
@@ -59,8 +59,8 @@ function traverseGitTreeFromCommitUntilBranch(
       branchList,
       n + 1
     );
-    if (discoveredMatches === null) {
-      return null;
+    if (discoveredMatches.size === 0) {
+      return discoveredMatches;
     } else {
       discoveredMatches.forEach((commit) => {
         commitsMatchingBranches.add(commit);
@@ -123,7 +123,7 @@ export default class Branch {
   stackByTracingGitParents(branch?: Branch): string[] {
     const curBranch = branch || this;
     const gitParents = curBranch.getParentsFromGit();
-    if (gitParents && gitParents.length === 1) {
+    if (gitParents.length === 1) {
       return this.stackByTracingMetaParents(gitParents[0]).concat([
         curBranch.name,
       ]);
@@ -161,9 +161,9 @@ export default class Branch {
 
   public getTrunkBranchFromGit(): Branch {
     const gitParents = this.getParentsFromGit();
-    if (gitParents && gitParents.length == 1) {
+    if (gitParents.length == 1) {
       return gitParents[0].getTrunkBranchFromGit();
-    } else if (gitParents && gitParents.length > 1) {
+    } else if (gitParents.length > 1) {
       console.log(
         `Cannot derive trunk from git branch (${this.name}) with two parents`
       );
@@ -188,17 +188,13 @@ export default class Branch {
   }
 
   static async getAllBranchesWithoutParents(): Promise<Branch[]> {
-    return Branch.allBranches().filter((b) => {
-      const parents = b.getParentsFromGit();
-      return parents == undefined || parents.length > 0;
-    });
+    return Branch.allBranches().filter(
+      (b) => b.getParentsFromGit().length === 0
+    );
   }
 
   static async getAllBranchesWithParents(): Promise<Branch[]> {
-    return Branch.allBranches().filter((b) => {
-      const parents = b.getParentsFromGit();
-      return parents != undefined && parents.length > 0;
-    });
+    return Branch.allBranches().filter((b) => b.getParentsFromGit().length > 0);
   }
 
   public head(): Commit {
@@ -217,17 +213,15 @@ export default class Branch {
     );
   }
 
-  public getChildrenFromGit(): Branch[] | undefined {
+  public getChildrenFromGit(): Branch[] {
     return this.getChildrenOrParents("CHILDREN");
   }
 
-  public getParentsFromGit(): Branch[] | undefined {
+  public getParentsFromGit(): Branch[] {
     return this.getChildrenOrParents("PARENTS");
   }
 
-  private getChildrenOrParents(
-    opt: "CHILDREN" | "PARENTS"
-  ): Branch[] | undefined {
+  private getChildrenOrParents(opt: "CHILDREN" | "PARENTS"): Branch[] {
     const revListOutput = execSync(
       `git rev-list ${opt === "CHILDREN" ? "--children" : "--parents"} --all`,
       {
@@ -245,17 +239,8 @@ export default class Branch {
 
     const headSha = execSync(`git rev-parse ${this.name}`).toString().trim();
 
-    const candidates = traverseGitTreeFromCommitUntilBranch(
-      headSha,
-      gitTree,
-      branchList,
-      0
-    );
-
-    if (candidates === null) {
-      return undefined;
-    }
-
-    return Array.from(candidates.values()).map((c) => new Branch(c));
+    return Array.from(
+      traverseGitTreeFromCommitUntilBranch(headSha, gitTree, branchList, 0)
+    ).map((name) => new Branch(name));
   }
 }

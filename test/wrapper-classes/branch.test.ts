@@ -18,7 +18,7 @@ describe("Branch tests", function () {
     execCliCommand(`diff -b "a" -s`, { fromDir: tmpDir.name });
 
     const branch = new Branch("a");
-    expect(branch.getParentsFromGit()![0].name).to.equal("main");
+    expect(branch.getParentsFromGit()[0].name).to.equal("main");
 
     process.chdir(oldDir);
     fs.emptyDirSync(tmpDir.name);
