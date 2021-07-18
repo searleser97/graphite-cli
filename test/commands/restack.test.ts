@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import fs from "fs-extra";
 import tmp from "tmp";
 import GitRepo from "../utils/git_repo";
 import { execCliCommand } from "../utils/misc";
