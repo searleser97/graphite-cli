@@ -76,22 +76,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@kwsites/file-exists@npm:^1.1.1":
-  version: 1.1.1
-  resolution: "@kwsites/file-exists@npm:1.1.1"
-  dependencies:
-    debug: ^4.1.1
-  checksum: 8e13130fb3bf4cb4889f9a594531260ea8e5892caa4b7989b22b1250ab10e6ccccabef88f69b59a6059a22e3a742763ee4f3af7037dad7d98b48095baf14a58f
-  languageName: node
-  linkType: hard
-
-"@kwsites/promise-deferred@npm:^1.1.1":
-  version: 1.1.1
-  resolution: "@kwsites/promise-deferred@npm:1.1.1"
-  checksum: 1f0c17684c88b5e17868058c781e6170d929e6c27a22bb7c84e384e92582afeb67ebe1f42db5a58177cc0aa567c7052bbed884c67e243587b0560f9e9e8d31a1
-  languageName: node
-  linkType: hard
-
 "@nodelib/fs.scandir@npm:2.1.5":
   version: 2.1.5
   resolution: "@nodelib/fs.scandir@npm:2.1.5"
@@ -1781,7 +1765,6 @@ fsevents@~2.3.1:
     eslint: ^7.20.0
     fs-extra: ^9.0.1
     mocha: ^8.3.2
-    simple-git: ^2.40.0
     tmp: ^0.2.1
     ts-mocha: ^8.0.0
     ts-node: ^9.0.0
@@ -3046,17 +3029,6 @@ fsevents@~2.3.1:
   version: 3.0.3
   resolution: "signal-exit@npm:3.0.3"
   checksum: f8f3fec95c8d1f9ad7e3cce07e1195f84e7a85cdcb4e825e8a2b76aa5406a039083d2bc9662b3cf40e6948262f41277047d20e6fbd58c77edced0b18fab647d8
-  languageName: node
-  linkType: hard
-
-"simple-git@npm:^2.40.0":
-  version: 2.41.1
-  resolution: "simple-git@npm:2.41.1"
-  dependencies:
-    "@kwsites/file-exists": ^1.1.1
-    "@kwsites/promise-deferred": ^1.1.1
-    debug: ^4.3.1
-  checksum: f86d7bc5f674ed23ede7f0a18bbf6bd4c6cb95c0585220185dee29c2fc04471141a1c2de602dadc1f12ed03e79d96fe61ada63c8254b6174828bab8d320fe657
   languageName: node
   linkType: hard
 
