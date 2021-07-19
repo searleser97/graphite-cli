@@ -1,4 +1,5 @@
 import { execSync } from "child_process";
+import { gpExecSync } from "../lib/utils";
 import Commit from "./commit";
 
 type TBranchDesc = {
@@ -181,10 +182,19 @@ export default class Branch {
     return new Branch(name);
   }
 
-  static getCurrentBranch(): Branch {
-    return new Branch(
-      execSync(`git rev-parse --abbrev-ref HEAD`).toString().trim()
-    );
+  static getCurrentBranch(): Branch | null {
+    const name = gpExecSync(
+      {
+        command: `git rev-parse --abbrev-ref HEAD`,
+      },
+      (e) => {
+        return Buffer.alloc(0);
+      }
+    )
+      .toString()
+      .trim();
+
+    return name.length > 0 ? new Branch(name) : null;
   }
 
   static async getAllBranchesWithoutParents(): Promise<Branch[]> {

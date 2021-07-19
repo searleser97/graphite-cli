@@ -18,6 +18,9 @@ export default class FixCommand extends AbstractCommand<typeof args> {
   static args = args;
   public async _execute(argv: argsT): Promise<void> {
     const branch = Branch.getCurrentBranch();
+    if (branch === null) {
+      return;
+    }
 
     printBranchNameStack(
       `(Original git derived stack)`,

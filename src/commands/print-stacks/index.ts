@@ -44,6 +44,8 @@ export default class PrintStacksCommand extends AbstractCommand<typeof args> {
     if (currentBranch) {
       console.log(`Current branch: ${chalk.green(`(${currentBranch.name})`)}`);
     }
+    const currentBranchName =
+      currentBranch !== null ? currentBranch.name : null;
 
     const dagsAreEqual =
       Object.keys(gitInfo.dag).length == Object.keys(metaInfo.dag).length &&
@@ -55,7 +57,7 @@ export default class PrintStacksCommand extends AbstractCommand<typeof args> {
     if (dagsAreEqual) {
       gitInfo.sourceBranches.forEach((sourceBranch) => {
         dfsPrintBranches({
-          currentBranchName: currentBranch.name,
+          currentBranchName: currentBranchName,
           branchName: sourceBranch,
           dag: gitInfo.dag,
           depthIndents: [],
@@ -76,7 +78,7 @@ export default class PrintStacksCommand extends AbstractCommand<typeof args> {
       console.log(`Git derived stacks:`);
       gitInfo.sourceBranches.forEach((sourceBranch) => {
         dfsPrintBranches({
-          currentBranchName: currentBranch.name,
+          currentBranchName: currentBranchName,
           branchName: sourceBranch,
           dag: gitInfo.dag,
           depthIndents: [],
@@ -86,7 +88,7 @@ export default class PrintStacksCommand extends AbstractCommand<typeof args> {
       console.log(`Meta derived stacks:`);
       metaInfo.sourceBranches.forEach((sourceBranch) => {
         dfsPrintBranches({
-          currentBranchName: currentBranch.name,
+          currentBranchName: currentBranchName,
           branchName: sourceBranch,
           dag: metaInfo.dag,
           depthIndents: [],
@@ -97,7 +99,7 @@ export default class PrintStacksCommand extends AbstractCommand<typeof args> {
 }
 
 function dfsPrintBranches(args: {
-  currentBranchName: string;
+  currentBranchName: string | null;
   branchName: string;
   parentName?: string;
   dag: { [name: string]: string[] };

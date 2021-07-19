@@ -1,6 +1,7 @@
 import { execSync } from "child_process";
 import yargs from "yargs";
 import { log } from "../../lib/log";
+import { logWarn } from "../../lib/utils";
 import Branch from "../../wrapper-classes/branch";
 import AbstractCommand from "../abstract_command";
 import FixCommand from "../fix";
@@ -30,7 +31,13 @@ export default class SyncCommand extends AbstractCommand<typeof args> {
 }
 
 async function sync(opts: argsT) {
-  const oldBranch = Branch.getCurrentBranch().name;
+  const oldBranch = Branch.getCurrentBranch();
+  if (oldBranch === null) {
+    logWarn("Not currently on a branch; no stack to sync.");
+    return;
+  }
+
+  const oldBranchName = oldBranch.name;
   execSync(`git checkout -q main`);
   const mainChildren: Branch[] = await new Branch("main").getChildrenFromMeta();
   do {
@@ -52,7 +59,7 @@ async function sync(opts: argsT) {
     deleteBranch(branch.name);
     await new FixCommand().executeUnprofiled({ silent: true });
   } while (mainChildren.length > 0);
-  execSync(`git checkout -q ${oldBranch}`);
+  execSync(`git checkout -q ${oldBranchName}`);
 }
 
 function shouldDeleteBranch(branchName: string): boolean {

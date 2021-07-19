@@ -2,7 +2,11 @@ import chalk from "chalk";
 import { execSync } from "child_process";
 import yargs from "yargs";
 import { log } from "../../lib/log";
-import { CURRENT_REPO_CONFIG_PATH, trunkBranches } from "../../lib/utils";
+import {
+  CURRENT_REPO_CONFIG_PATH,
+  logErrorAndExit,
+  trunkBranches,
+} from "../../lib/utils";
 import Branch from "../../wrapper-classes/branch";
 import AbstractCommand from "../abstract_command";
 import PrintStacksCommand from "../print-stacks";
@@ -47,6 +51,10 @@ export default class RestackCommand extends AbstractCommand<typeof args> {
     !argv.silent && (await new PrintStacksCommand().executeUnprofiled(args));
 
     const originalBranch = Branch.getCurrentBranch();
+    if (originalBranch === null) {
+      logErrorAndExit(`Not currently on a branch; no target to restack.`);
+    }
+
     if (argv.onto) {
       await restackOnto(originalBranch, argv.onto, argv);
     } else {

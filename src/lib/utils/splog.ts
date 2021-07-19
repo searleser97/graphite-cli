@@ -4,7 +4,7 @@ export function logError(msg: string): void {
   console.log(chalk.redBright(`ERROR: ${msg}`));
 }
 
-export function logErrorAndExit(msg: string): void {
+export function logErrorAndExit(msg: string): never {
   logError(msg);
   process.exit(1);
 }

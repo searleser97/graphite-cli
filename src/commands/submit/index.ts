@@ -56,9 +56,11 @@ export default class SubmitCommand extends AbstractCommand<typeof args> {
       throw new Error(`Validation failed before submitting.`);
     }
 
-    let currentBranch: Branch | undefined = Branch.getCurrentBranch();
+    let currentBranch: Branch | undefined | null = Branch.getCurrentBranch();
+
     const stackOfBranches: Branch[] = [];
     while (
+      currentBranch != null &&
       currentBranch != undefined &&
       currentBranch.getParentFromMeta() != undefined // dont put up pr for a base branch like "main"
     ) {

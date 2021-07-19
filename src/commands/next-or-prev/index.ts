@@ -2,6 +2,7 @@
 import chalk from "chalk";
 import { execSync } from "child_process";
 import yargs from "yargs";
+import { logErrorAndExit } from "../../lib/utils";
 import Branch from "../../wrapper-classes/branch";
 import AbstractCommand from "../abstract_command";
 
@@ -22,6 +23,9 @@ export class PrevCommand extends AbstractCommand<typeof args> {
 
 async function nextOrPrev(nextOrPrev: "next" | "prev") {
   const currentBranch = Branch.getCurrentBranch();
+  if (currentBranch === null) {
+    logErrorAndExit(`Not currently on branch, cannot find ${nextOrPrev}.`);
+  }
 
   const candidates =
     nextOrPrev === "next"

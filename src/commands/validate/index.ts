@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import yargs from "yargs";
 import { log } from "../../lib/log";
+import { logWarn } from "../../lib/utils";
 import Branch from "../../wrapper-classes/branch";
 import AbstractCommand from "../abstract_command";
 
@@ -17,7 +18,13 @@ type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 export default class ValidateCommand extends AbstractCommand<typeof args> {
   static args = args;
   public async _execute(argv: argsT): Promise<void> {
-    await validateBranch(Branch.getCurrentBranch(), argv);
+    const branch = Branch.getCurrentBranch();
+    if (branch === null) {
+      logWarn("Not currently on a branch; no stack to validate.");
+      return;
+    }
+
+    await validateBranch(branch, argv);
     log(`Current stack is valid`, argv);
   }
 }
