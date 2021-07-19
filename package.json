@@ -36,7 +36,8 @@
     "prepublishOnly": "yarn build",
     "cli": "ts-node ./src/index.ts",
     "test": "yarn ts-mocha \"test/**/*.test.ts\"",
-    "test-one": "yarn ts-mocha"
+    "test-one": "yarn ts-mocha",
+    "deploy": "ts-node ./scripts/deploy.ts"
   },
   "bin": {
     "gp": "dist/src/index.js"
