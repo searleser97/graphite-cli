@@ -9,13 +9,13 @@ const args = {} as const;
 type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 export class NextCommand extends AbstractCommand<typeof args> {
   static args = args;
-  public async _execute(argv: argsT) {
+  public async _execute(argv: argsT): Promise<void> {
     await nextOrPrev("next");
   }
 }
 export class PrevCommand extends AbstractCommand<typeof args> {
   static args = args;
-  public async _execute(argv: argsT) {
+  public async _execute(argv: argsT): Promise<void> {
     await nextOrPrev("prev");
   }
 }

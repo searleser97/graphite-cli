@@ -20,7 +20,7 @@ const args = {
 type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 export default class AmendCommand extends AbstractCommand<typeof args> {
   static args = args;
-  public async _execute(argv: argsT) {
+  public async _execute(argv: argsT): Promise<void> {
     execSync("git add --all");
     execSync(`git commit -m "${argv.message || "Updates"}"`);
     await new RestackCommand().executeUnprofiled(args);

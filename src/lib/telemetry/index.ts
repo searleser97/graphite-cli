@@ -16,7 +16,10 @@ export function userEmail(): string | undefined {
   }
 }
 
-export async function logCommand(command: string, message?: string) {
+export async function logCommand(
+  command: string,
+  message?: string
+): Promise<void> {
   if (shouldReportTelemetry()) {
     // TODO
   }
@@ -25,7 +28,7 @@ export async function logCommand(command: string, message?: string) {
 export async function profile<T>(
   command: string,
   handler: () => Promise<void>
-) {
+): Promise<void> {
   void logCommand(command);
   try {
     await handler();
@@ -35,7 +38,7 @@ export async function profile<T>(
   }
 }
 
-export async function logError(err: Error) {
+export async function logError(err: Error): Promise<void> {
   if (shouldReportTelemetry()) {
     // TODO
   }

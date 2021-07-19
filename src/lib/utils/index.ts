@@ -23,7 +23,7 @@ export const CURRENT_REPO_CONFIG_PATH: string | undefined = (() => {
   return path.join(repoRootPath, CONFIG_NAME);
 })();
 
-export function makeId(length: number) {
+export function makeId(length: number): string {
   let result = "";
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   const charactersLength = characters.length;

@@ -27,7 +27,7 @@ type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 
 export default class DiffCommand extends AbstractCommand<typeof args> {
   static args = args;
-  public async _execute(argv: argsT) {
+  public async _execute(argv: argsT): Promise<void> {
     const parentBranch = Branch.getCurrentBranch();
     execSync(
       `git checkout -b "${

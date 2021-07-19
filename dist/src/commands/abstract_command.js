@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const telemetry_1 = require("../lib/telemetry");
 class AbstractCommand {
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     execute(argv) {
         return __awaiter(this, void 0, void 0, function* () {
             yield telemetry_1.profile(this.constructor.name, () => __awaiter(this, void 0, void 0, function* () {
@@ -18,6 +19,7 @@ class AbstractCommand {
             }));
         });
     }
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     executeUnprofiled(argv) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this._execute(argv);

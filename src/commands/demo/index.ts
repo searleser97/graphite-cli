@@ -8,7 +8,7 @@ const args = {} as const;
 type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 export default class DemoCommand extends AbstractCommand<typeof args> {
   static args = args;
-  public async _execute(argv: argsT) {
+  public async _execute(argv: argsT): Promise<void> {
     const tmpDir = tmp.dirSync();
     console.log(tmpDir.name);
     const repo = new GitRepo(tmpDir.name);

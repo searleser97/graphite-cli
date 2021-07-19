@@ -36,7 +36,7 @@ function computeDag(truth: "GIT" | "META"): {
 }
 export default class PrintStacksCommand extends AbstractCommand<typeof args> {
   static args = args;
-  public async _execute(argv: argsT) {
+  public async _execute(argv: argsT): Promise<void> {
     const gitInfo = computeDag("GIT");
     const metaInfo = computeDag("META");
 

@@ -30,7 +30,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "lint": "eslint src --quiet --ext .ts",
+    "lint": "eslint src --quiet --ext .ts --cache",
     "prepublishOnly": "yarn build",
     "cli": "ts-node ./src/index.ts",
     "test": "yarn ts-mocha \"test/**/*.test.ts\"",

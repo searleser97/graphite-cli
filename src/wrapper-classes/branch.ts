@@ -155,7 +155,7 @@ export default class Branch {
     return children;
   }
 
-  public setParentBranchName(parentBranchName: string) {
+  public setParentBranchName(parentBranchName: string): void {
     this.writeMeta({ parentBranchName });
   }
 
