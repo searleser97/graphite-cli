@@ -21,7 +21,4 @@ export default class Commit {
       return [];
     }
   }
-  public setParent(commit: Commit): void {
-    // execSync(`git rebase --onto ${commit.sha} ${this.sha} -Xtheirs`);
-  }
 }
