@@ -49,6 +49,7 @@ export default class PrintStacksCommand extends AbstractCommand<typeof args> {
       Object.keys(gitInfo.dag).length == Object.keys(metaInfo.dag).length &&
       Object.keys(gitInfo.dag).every(
         (key) =>
+          metaInfo.dag[key] != undefined &&
           metaInfo.dag[key].sort().join() == gitInfo.dag[key].sort().join()
       );
     if (dagsAreEqual) {
