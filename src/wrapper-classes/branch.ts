@@ -60,9 +60,7 @@ function traverseGitTreeFromCommitUntilBranch(
       branchList,
       n + 1
     );
-    if (discoveredMatches.size === 0) {
-      return discoveredMatches;
-    } else {
+    if (discoveredMatches.size !== 0) {
       discoveredMatches.forEach((commit) => {
         commitsMatchingBranches.add(commit);
       });
