@@ -1,6 +1,6 @@
 import chalk from "chalk";
-import { execSync } from "child_process";
 import yargs from "yargs";
+import { gpExecSync, logInternalErrorAndExit } from "../../lib/utils";
 import Branch from "../../wrapper-classes/branch";
 import AbstractCommand from "../abstract_command";
 import PrintStacksCommand from "../print-stacks";
@@ -32,22 +32,29 @@ type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 export default class SubmitCommand extends AbstractCommand<typeof args> {
   static args = args;
   public async _execute(argv: argsT): Promise<void> {
-    try {
-      execSync(`gh --version`);
-    } catch {
-      console.log(chalk.red(`Could not find bash tool 'gh', please install`));
-      process.exit(1);
-    }
-    try {
-      execSync(`gh auth status`);
-    } catch (err) {
-      console.log(
-        chalk.red(
-          `"gh auth status" indicates that you are not currently authed to GitHub`
-        )
-      );
-      process.exit(1);
-    }
+    gpExecSync(
+      {
+        command: `gh --version`,
+      },
+      (_) => {
+        console.log(chalk.red(`Could not find bash tool 'gh', please install`));
+        process.exit(1);
+      }
+    );
+
+    gpExecSync(
+      {
+        command: `gh auth status`,
+      },
+      (_) => {
+        console.log(
+          chalk.red(
+            `"gh auth status" indicates that you are not currently authed to GitHub`
+          )
+        );
+        process.exit(1);
+      }
+    );
 
     try {
       await new ValidateCommand().executeUnprofiled({ silent: true });
@@ -80,14 +87,21 @@ export default class SubmitCommand extends AbstractCommand<typeof args> {
     stackOfBranches.forEach((branch, i) => {
       const parentBranch: undefined | Branch =
         i > 0 ? stackOfBranches[i - 1] : undefined;
-      execSync(
-        [
-          `gh pr create`,
-          `--head ${branch.name}`,
-          ...(parentBranch ? [`--base ${parentBranch.name}`] : []),
-          ...(argv.fill ? [`-f`] : []),
-        ].join(" "),
-        { stdio: "inherit" }
+      gpExecSync(
+        {
+          command: [
+            `gh pr create`,
+            `--head ${branch.name}`,
+            ...(parentBranch ? [`--base ${parentBranch.name}`] : []),
+            ...(argv.fill ? [`-f`] : []),
+          ].join(" "),
+          options: { stdio: "inherit" },
+        },
+        (_) => {
+          logInternalErrorAndExit(
+            `Failed to submit changes for ${branch.name}. Aborting...`
+          );
+        }
       );
     });
   }
