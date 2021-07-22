@@ -19,15 +19,19 @@ export async function checkForUpgrade(): Promise<void> {
       ].join("&")}`,
       { method: "GET" }
     );
+    const formatMessage = (message: string): string => {
+      return ["-".repeat(20), message, "-".repeat(20), "\n"].join("\n");
+    };
     if (response.status == 200) {
-      const prompt = JSON.parse(response.body.toString()).prompt as
+      const body = await response.json();
+      const prompt = body.prompt as
         | { message: string; blocking: boolean }
         | undefined;
       if (prompt) {
         if (!prompt.blocking) {
-          console.log(chalk.yellow(prompt.message));
+          console.log(chalk.yellow(formatMessage(prompt.message)));
         } else {
-          console.log(chalk.red(prompt.message));
+          console.log(chalk.red(formatMessage(prompt.message)));
           process.exit(1);
         }
       }
