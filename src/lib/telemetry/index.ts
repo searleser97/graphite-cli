@@ -31,7 +31,7 @@ export async function checkForUpgrade(): Promise<void> {
         if (!prompt.blocking) {
           console.log(chalk.yellow(formatMessage(prompt.message)));
         } else {
-          console.log(chalk.red(formatMessage(prompt.message)));
+          console.log(chalk.redBright(formatMessage(prompt.message)));
           process.exit(1);
         }
       }
