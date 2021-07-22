@@ -14,6 +14,7 @@ const args = {
     type: "string",
     describe: "The name of your trunk branch that stacks get merged into.",
     required: true,
+    alias: "t",
   },
   silent: {
     describe: `silence output from the command`,
