@@ -29,6 +29,7 @@ function deploy() {
   }
   execSync(`yarn install --immutable`);
   execSync(`yarn build`);
+  execSync(`rm -rf ./node_modules`);
   execSync(`git checkout -b ${VERSION_BRANCH}`);
   execSync(`git add -f ./dist`);
   execSync(`git commit -m "${VERSION_TAG}"`);

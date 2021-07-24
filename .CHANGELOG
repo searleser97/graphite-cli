@@ -1,3 +1,6 @@
+## 0.3.2 2020-07-24 Feature improvement
+- Slim down size of homebrew artifact.
+
 ## 0.3.1 2020-07-24 Feature improvement
 - Diff now only commits staged changes.
 
