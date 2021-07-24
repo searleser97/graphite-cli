@@ -32,7 +32,7 @@ function deploy() {
   execSync(`rm -rf ./node_modules`);
   execSync(`git checkout -b ${VERSION_BRANCH}`);
   execSync(`git add -f ./dist`);
-  execSync(`git commit -m "${VERSION_TAG}"`);
+  execSync(`git commit -m "${VERSION_TAG}" --no-verify`);
   execSync(`git push origin ${VERSION_BRANCH}`);
   execSync(`git tag -a ${VERSION_TAG} -m "${VERSION_TAG}"`);
   execSync(`git push origin ${VERSION_TAG}`);
