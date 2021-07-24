@@ -50,9 +50,14 @@ yargs
       await new AmendCommand().execute(argv);
     }
   )
-  .command("submit", false, SubmitCommand.args, async (argv) => {
-    await new SubmitCommand().execute(argv);
-  })
+  .command(
+    "submit",
+    "Experimental: Create PR's for each branch in the current stack",
+    SubmitCommand.args,
+    async (argv) => {
+      await new SubmitCommand().execute(argv);
+    }
+  )
   .command(
     "stacks",
     "Prints all current stacks.",
