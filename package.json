@@ -21,8 +21,7 @@
     "cli": "ts-node ./src/index.ts",
     "test": "yarn ts-mocha \"test/**/*.test.ts\"",
     "test-one": "yarn ts-mocha",
-    "deploy": "ts-node ./scripts/deploy.ts",
-    "postinstall": "husky install"
+    "deploy": "ts-node ./scripts/deploy.ts"
   },
   "files": [
     "dist"
