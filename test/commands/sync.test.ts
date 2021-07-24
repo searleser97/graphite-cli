@@ -54,7 +54,6 @@ describe("Sync tests", function () {
   });
   afterEach(() => {
     process.chdir(oldDir);
-    console.log(`Dir: ${repo.dir}`);
     fs.emptyDirSync(tmpDir.name);
     tmpDir.removeCallback();
   });
