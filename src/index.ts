@@ -103,8 +103,7 @@ yargs
   )
   .command(
     "sync",
-    false, // Unlisted for now
-    // "Delete any stacks that have been merged or squashed into your trunk branch.",
+    "Delete any stacks that have been merged or squashed into your trunk branch, and restack their children recursively.",
     SyncCommand.args,
     async (argv) => {
       await new SyncCommand().execute(argv);
