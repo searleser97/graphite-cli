@@ -1,0 +1,1 @@
+{"version":3,"file":"checkout_branch.js","sourceRoot":"","sources":["../../../../src/lib/utils/checkout_branch.ts"],"names":[],"mappings":";;;AAAA,mCAA8D;AAE9D,SAAgB,cAAc,CAAC,MAAc;IAC3C,kBAAU,CAAC,EAAE,OAAO,EAAE,oBAAoB,MAAM,GAAG,EAAE,EAAE,CAAC,CAAC,EAAE,EAAE;QAC3D,+BAAuB,CAAC,8BAA8B,MAAM,GAAG,CAAC,CAAC;IACnE,CAAC,CAAC,CAAC;AACL,CAAC;AAJD,wCAIC"}
