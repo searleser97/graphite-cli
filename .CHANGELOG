@@ -1,19 +1,19 @@
-## 0.3.3 2020-07-24 Feature improvement
+## 0.3.3 2020-07-25
 - Self heal if branch metadata parent somehow becomes self.
 - Diff rolls back changes if commit hook fails.
 - Fix bug in metadata stack traversal used by `fix` command.
 - Restack fails fast if there are uncommitted changes.
 
-## 0.3.2 2020-07-24 Feature improvement
+## 0.3.2 2020-07-24
 - Slim down size of homebrew artifact.
 
-## 0.3.1 2020-07-24 Feature improvement
+## 0.3.1 2020-07-24
 - Diff now only commits staged changes.
 
-## 0.3.0 2020-07-24 Feature improvement
+## 0.3.0 2020-07-24
 - Support resolving merge conflicts during a recursive restack.
 - Update `sync` command to be visable in `--help`.
 
-## 0.2.0 2020-07-22 Feature improvement
+## 0.2.0 2020-07-22
 - Update unlisted `gp sync` command to support trunk argument.
 - Update unlisted `gp sync` command to prompt before deleting branches.
