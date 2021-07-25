@@ -8,6 +8,7 @@ import {
   logErrorAndExit,
   rebaseInProgress,
   trunkBranches,
+  uncommittedChanges,
 } from "../../lib/utils";
 import Branch from "../../wrapper-classes/branch";
 import AbstractCommand from "../abstract_command";
@@ -48,6 +49,9 @@ function getParentForRebaseOnto(branch: Branch, argv: argsT): Branch {
 export default class RestackCommand extends AbstractCommand<typeof args> {
   static args = args;
   public async _execute(argv: argsT): Promise<void> {
+    if (uncommittedChanges()) {
+      logErrorAndExit("Cannot restack with uncommitted changes");
+    }
     // Print state before
     log(`Before restack:`, argv);
     !argv.silent && (await new PrintStacksCommand().executeUnprofiled(args));

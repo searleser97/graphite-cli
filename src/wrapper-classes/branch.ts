@@ -1,5 +1,5 @@
 import { execSync } from "child_process";
-import { gpExecSync } from "../lib/utils";
+import { gpExecSync, logErrorAndExit } from "../lib/utils";
 import Commit from "./commit";
 
 type TMeta = {
@@ -109,6 +109,7 @@ export default class Branch {
   }
 
   stackByTracingMetaParents(branch?: Branch): string[] {
+    console.log(`Tracing meta stack: (${branch?.name})`);
     const curBranch = branch || this;
     const metaParent = curBranch.getParentFromMeta();
     if (metaParent) {
@@ -124,7 +125,7 @@ export default class Branch {
     const curBranch = branch || this;
     const gitParents = curBranch.getParentsFromGit();
     if (gitParents.length === 1) {
-      return this.stackByTracingMetaParents(gitParents[0]).concat([
+      return this.stackByTracingGitParents(gitParents[0]).concat([
         curBranch.name,
       ]);
     } else {
@@ -135,6 +136,12 @@ export default class Branch {
   getParentFromMeta(): Branch | undefined {
     const parentName = this.getMeta()?.parentBranchName;
     if (parentName) {
+      if (parentName === this.name) {
+        this.clearParentMetadata();
+        logErrorAndExit(
+          `Branch (${this.name}) has itself listed as a parent in the meta. Deleting (${this.name}) parent metadata and exiting.`
+        );
+      }
       return new Branch(parentName);
     }
     return undefined;
@@ -195,6 +202,12 @@ export default class Branch {
 
   public getCurrentRef(): string {
     return execSync(`git rev-parse ${this.name}`).toString().trim();
+  }
+
+  public clearParentMetadata(): void {
+    const meta: TMeta = this.getMeta() || {};
+    delete meta.parentBranchName;
+    this.writeMeta(meta);
   }
 
   public setParentBranchName(parentBranchName: string): void {

@@ -52,6 +52,7 @@ function printBranchNameStack(message: string, names: string[], opts: argsT) {
 }
 
 function recursiveFix(branch: Branch, opts: argsT) {
+  console.log(`Recursively fixing ${branch.name}`);
   const gitChildren = branch.getChildrenFromGit();
   // Check if we're at a base branch
   gitChildren.forEach((child) => {
