@@ -17,6 +17,7 @@ import {
   logSuccess,
   logWarn,
 } from "./splog";
+import { uncommittedChanges } from "./uncommitted_changes";
 
 export {
   CURRENT_REPO_CONFIG_PATH,
@@ -34,4 +35,5 @@ export {
   checkoutBranch,
   rebaseInProgress,
   detectStagedChanges,
+  uncommittedChanges,
 };
