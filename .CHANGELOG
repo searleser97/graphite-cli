@@ -1,3 +1,6 @@
+## 0.3.4 2020-07-25
+- Fix bug in checking for uncommitted changes.
+
 ## 0.3.3 2020-07-25
 - Self heal if branch metadata parent somehow becomes self.
 - Diff rolls back changes if commit hook fails.
