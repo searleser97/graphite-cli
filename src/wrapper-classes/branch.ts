@@ -124,7 +124,7 @@ export default class Branch {
     const curBranch = branch || this;
     const gitParents = curBranch.getParentsFromGit();
     if (gitParents.length === 1) {
-      return this.stackByTracingMetaParents(gitParents[0]).concat([
+      return this.stackByTracingGitParents(gitParents[0]).concat([
         curBranch.name,
       ]);
     } else {
