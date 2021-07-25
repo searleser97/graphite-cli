@@ -4,7 +4,6 @@ export function uncommittedChanges(): boolean {
     gpExecSync(
       {
         command: `git status --porcelain=v1 2>/dev/null | wc -l`,
-        options: { stdio: "ignore" },
       },
       () => {
         logErrorAndExit(`Failed to check current dir for uncommitted changes.`);
