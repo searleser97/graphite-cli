@@ -103,7 +103,8 @@ function shouldDeleteBranch(branchName: string, trunk: string): boolean {
     return true;
   }
   const diffCheckProvesMerged =
-    execSync(`git diff ${branchName} ${trunk}`).toString().trim().length == 0;
+    execSync(`git diff ${branchName} ${trunk} | wc -l`).toString().trim() ===
+    "0";
   if (diffCheckProvesMerged) {
     return true;
   }
