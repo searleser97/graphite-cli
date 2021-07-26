@@ -7,7 +7,7 @@ Everything is still a little early, so please add comments if you have any quest
 
 ---
 
-<img src="./demo/full.svg">
+<img src="./demo/full.gif">
 
 ### **Getting started**
 

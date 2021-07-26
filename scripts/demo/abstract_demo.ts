@@ -24,6 +24,10 @@ export default abstract class AbstractDemo {
     return `${OUTPUT_DIR}/${this.name}.svg`;
   }
 
+  outputGifPath(): string {
+    return `${OUTPUT_DIR}/${this.name}.gif`;
+  }
+
   private record(demoDir: string): Promise<void> {
     const remainingCommands = [...this.commands].reverse();
     return new Promise<void>((resolve, reject) => {
@@ -107,6 +111,11 @@ export default abstract class AbstractDemo {
     console.log(`Creating SVG`);
     cp.execSync(
       `svg-term --in ${this.outputFilePath()} --out ${this.outputSvgPath()} --window`
+    );
+
+    console.log(`Creating Gif`);
+    cp.execSync(
+      `GIFSICLE_OPTS="-k 16 -O3" asciicast2gif -t solarized-dark ${this.outputFilePath()} ${this.outputGifPath()}`
     );
 
     console.log(`Cleaning up`);
