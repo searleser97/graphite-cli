@@ -1,7 +1,8 @@
 import chalk from "chalk";
 import { execSync } from "child_process";
 import yargs from "yargs";
-import { log } from "../../lib/log";
+import AbstractCommand from "../../../lib/abstract_command";
+import { log } from "../../../lib/log";
 import {
   checkoutBranch,
   CURRENT_REPO_CONFIG_PATH,
@@ -9,9 +10,8 @@ import {
   rebaseInProgress,
   trunkBranches,
   uncommittedChanges,
-} from "../../lib/utils";
-import Branch from "../../wrapper-classes/branch";
-import AbstractCommand from "../abstract_command";
+} from "../../../lib/utils";
+import Branch from "../../../wrapper-classes/branch";
 import PrintStacksCommand from "../print-stacks";
 import ValidateCommand from "../validate";
 

@@ -1,8 +1,8 @@
 import chalk from "chalk";
 import { execSync } from "child_process";
 import yargs from "yargs";
-import Branch from "../../wrapper-classes/branch";
-import AbstractCommand from "../abstract_command";
+import AbstractCommand from "../../../lib/abstract_command";
+import Branch from "../../../wrapper-classes/branch";
 
 const args = {} as const;
 type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;

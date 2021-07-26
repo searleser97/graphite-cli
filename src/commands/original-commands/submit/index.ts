@@ -1,8 +1,8 @@
 import chalk from "chalk";
 import yargs from "yargs";
-import { gpExecSync, logInternalErrorAndExit } from "../../lib/utils";
-import Branch from "../../wrapper-classes/branch";
-import AbstractCommand from "../abstract_command";
+import AbstractCommand from "../../../lib/abstract_command";
+import { gpExecSync, logInternalErrorAndExit } from "../../../lib/utils";
+import Branch from "../../../wrapper-classes/branch";
 import PrintStacksCommand from "../print-stacks";
 import ValidateCommand from "../validate";
 

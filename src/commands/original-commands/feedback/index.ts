@@ -1,8 +1,8 @@
 import chalk from "chalk";
 import fetch from "node-fetch";
 import yargs from "yargs";
-import { userEmail } from "../../lib/telemetry";
-import AbstractCommand from "../abstract_command";
+import AbstractCommand from "../../../lib/abstract_command";
+import { userEmail } from "../../../lib/telemetry";
 
 const args = {
   message: {

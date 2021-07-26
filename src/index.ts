@@ -1,23 +1,27 @@
 #!/usr/bin/env node
 import tmp from "tmp";
 import yargs from "yargs";
-import AmendCommand from "./commands/amend";
-import DemoCommand from "./commands/demo";
-import DiffCommand from "./commands/diff";
-import FeedbackCommand from "./commands/feedback";
-import FixCommand from "./commands/fix";
-import LogCommand from "./commands/log";
-import { NextCommand, PrevCommand } from "./commands/next-or-prev";
-import PrintStacksCommand from "./commands/print-stacks";
-import RestackCommand from "./commands/restack";
-import SubmitCommand from "./commands/submit";
-import SyncCommand from "./commands/sync";
-import ValidateCommand from "./commands/validate";
+import AmendCommand from "./commands/original-commands/amend";
+import DemoCommand from "./commands/original-commands/demo";
+import DiffCommand from "./commands/original-commands/diff";
+import FeedbackCommand from "./commands/original-commands/feedback";
+import FixCommand from "./commands/original-commands/fix";
+import LogCommand from "./commands/original-commands/log";
+import {
+  NextCommand,
+  PrevCommand,
+} from "./commands/original-commands/next-or-prev";
+import PrintStacksCommand from "./commands/original-commands/print-stacks";
+import RestackCommand from "./commands/original-commands/restack";
+import SubmitCommand from "./commands/original-commands/submit";
+import SyncCommand from "./commands/original-commands/sync";
+import ValidateCommand from "./commands/original-commands/validate";
 
 // https://www.npmjs.com/package/tmp#graceful-cleanup
 tmp.setGracefulCleanup();
 
 yargs
+  .commandDir("commands")
   .command(
     "next",
     "If you're in a stack: Branch A → Branch B (you are here) → Branch C. Takes you to the next branch (Branch C). If there are two descendent branches, errors out and tells you the various branches you could go to.",
@@ -117,6 +121,7 @@ yargs
   .command("demo", false, DemoCommand.args, async (argv) => {
     await new DemoCommand().execute(argv);
   })
+  .help()
   .usage(["This CLI helps you manage stacked diffs."].join("\n"))
   .strict()
   .demandCommand().argv;

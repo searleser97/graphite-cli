@@ -1,7 +1,11 @@
 import yargs from "yargs";
-import { workingTreeClean } from "../../lib/git-utils";
-import { gpExecSync, logInfo, logInternalErrorAndExit } from "../../lib/utils";
-import AbstractCommand from "../abstract_command";
+import AbstractCommand from "../../../lib/abstract_command";
+import { workingTreeClean } from "../../../lib/git-utils";
+import {
+  gpExecSync,
+  logInfo,
+  logInternalErrorAndExit,
+} from "../../../lib/utils";
 import RestackCommand from "../restack";
 
 const args = {

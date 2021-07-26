@@ -1,4 +1,5 @@
 import yargs from "yargs";
+import AbstractCommand from "../../../lib/abstract_command";
 import {
   checkoutBranch,
   detectStagedChanges,
@@ -7,9 +8,8 @@ import {
   logInternalErrorAndExit,
   makeId,
   userConfig,
-} from "../../lib/utils";
-import Branch from "../../wrapper-classes/branch";
-import AbstractCommand from "../abstract_command";
+} from "../../../lib/utils";
+import Branch from "../../../wrapper-classes/branch";
 
 const args = {
   "branch-name": {

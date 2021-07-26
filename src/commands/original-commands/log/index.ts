@@ -1,6 +1,6 @@
 import { execSync } from "child_process";
 import yargs from "yargs";
-import AbstractCommand from "../abstract_command";
+import AbstractCommand from "../../../lib/abstract_command";
 
 const args = {} as const;
 type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;

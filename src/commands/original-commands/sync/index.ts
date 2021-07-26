@@ -2,7 +2,8 @@ import chalk from "chalk";
 import { execSync } from "child_process";
 import prompts from "prompts";
 import yargs from "yargs";
-import { log } from "../../lib/log";
+import AbstractCommand from "../../../lib/abstract_command";
+import { log } from "../../../lib/log";
 import {
   checkoutBranch,
   gpExecSync,
@@ -10,9 +11,8 @@ import {
   logInternalErrorAndExit,
   logWarn,
   uncommittedChanges,
-} from "../../lib/utils";
-import Branch from "../../wrapper-classes/branch";
-import AbstractCommand from "../abstract_command";
+} from "../../../lib/utils";
+import Branch from "../../../wrapper-classes/branch";
 import FixCommand from "../fix";
 import RestackCommand from "../restack";
 

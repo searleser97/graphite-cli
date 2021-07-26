@@ -1,8 +1,8 @@
 import chalk from "chalk";
 import yargs from "yargs";
-import { log } from "../../lib/log";
-import Branch from "../../wrapper-classes/branch";
-import AbstractCommand from "../abstract_command";
+import AbstractCommand from "../../../lib/abstract_command";
+import { log } from "../../../lib/log";
+import Branch from "../../../wrapper-classes/branch";
 
 const args = {
   silent: {

@@ -1,5 +1,5 @@
 import yargs from "yargs";
-import { checkForUpgrade, profile } from "../lib/telemetry";
+import { checkForUpgrade, profile } from "./telemetry";
 
 export default abstract class AbstractCommand<
   T extends { [key: string]: yargs.Options }
