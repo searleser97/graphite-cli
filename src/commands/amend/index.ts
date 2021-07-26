@@ -44,6 +44,9 @@ export default class AmendCommand extends AbstractCommand<typeof args> {
         logInternalErrorAndExit("Failed to commit changes. Aborting...");
       }
     );
-    await new RestackCommand().executeUnprofiled(args);
+    // Only restack if working tree is now clean.
+    if (workingTreeClean()) {
+      await new RestackCommand().executeUnprofiled(args);
+    }
   }
 }
