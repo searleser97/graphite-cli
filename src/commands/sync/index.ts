@@ -6,8 +6,10 @@ import { log } from "../../lib/log";
 import {
   checkoutBranch,
   gpExecSync,
+  logErrorAndExit,
   logInternalErrorAndExit,
   logWarn,
+  uncommittedChanges,
 } from "../../lib/utils";
 import Branch from "../../wrapper-classes/branch";
 import AbstractCommand from "../abstract_command";
@@ -53,6 +55,9 @@ export default class SyncCommand extends AbstractCommand<typeof args> {
 }
 
 async function sync(opts: argsT) {
+  if (uncommittedChanges()) {
+    logErrorAndExit("Cannot restack with uncommitted changes");
+  }
   const oldBranch = Branch.getCurrentBranch();
   if (oldBranch === null) {
     logWarn("Not currently on a branch; no stack to sync.");
