@@ -11,7 +11,6 @@ import {
   PrevCommand,
 } from "./commands/original-commands/next-or-prev";
 import PrintStacksCommand from "./commands/original-commands/print-stacks";
-import RestackCommand from "./commands/original-commands/restack";
 import SubmitCommand from "./commands/original-commands/submit";
 import SyncCommand from "./commands/original-commands/sync";
 import ValidateCommand from "./commands/original-commands/validate";
@@ -75,14 +74,6 @@ yargs
     FixCommand.args,
     async (argv) => {
       await new FixCommand().execute(argv);
-    }
-  )
-  .command(
-    "restack",
-    "Restacks any dependent branches onto the latest commit in a branch.",
-    RestackCommand.args,
-    async (argv) => {
-      await new RestackCommand().execute(argv);
     }
   )
   .command(
