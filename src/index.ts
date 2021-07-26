@@ -6,10 +6,6 @@ import DemoCommand from "./commands/original-commands/demo";
 import DiffCommand from "./commands/original-commands/diff";
 import FeedbackCommand from "./commands/original-commands/feedback";
 import FixCommand from "./commands/original-commands/fix";
-import {
-  NextCommand,
-  PrevCommand,
-} from "./commands/original-commands/next-or-prev";
 import PrintStacksCommand from "./commands/original-commands/print-stacks";
 import SubmitCommand from "./commands/original-commands/submit";
 import SyncCommand from "./commands/original-commands/sync";
@@ -20,22 +16,6 @@ tmp.setGracefulCleanup();
 
 yargs
   .commandDir("commands")
-  .command(
-    "next",
-    "If you're in a stack: Branch A → Branch B (you are here) → Branch C. Takes you to the next branch (Branch C). If there are two descendent branches, errors out and tells you the various branches you could go to.",
-    NextCommand.args,
-    async (argv) => {
-      await new NextCommand().execute(argv);
-    }
-  )
-  .command(
-    "prev",
-    "If you're in a stack: Branch A → Branch B (you are here) → Branch C. Takes you to the previous branch (Branch A). If there are two parent branches, errors out and tells you the various branches you could go to.",
-    PrevCommand.args,
-    async (argv) => {
-      await new PrevCommand().execute(argv);
-    }
-  )
   .command(
     "diff",
     "Takes the current changes and creates a new branch off of whatever branch you were previously working on.",
