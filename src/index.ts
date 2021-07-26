@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import tmp from "tmp";
 import yargs from "yargs";
-import AmendCommand from "./commands/original-commands/amend";
 import DemoCommand from "./commands/original-commands/demo";
 import DiffCommand from "./commands/original-commands/diff";
 import FeedbackCommand from "./commands/original-commands/feedback";
@@ -22,14 +21,6 @@ yargs
     DiffCommand.args,
     async (argv) => {
       await new DiffCommand().execute(argv);
-    }
-  )
-  .command(
-    "amend",
-    "Given the current changes, adds it to the current branch (identical to git commit) and restacks anything upstream (see below).",
-    AmendCommand.args,
-    async (argv) => {
-      await new AmendCommand().execute(argv);
     }
   )
   .command(
