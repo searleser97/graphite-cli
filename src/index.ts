@@ -6,7 +6,6 @@ import DemoCommand from "./commands/original-commands/demo";
 import DiffCommand from "./commands/original-commands/diff";
 import FeedbackCommand from "./commands/original-commands/feedback";
 import FixCommand from "./commands/original-commands/fix";
-import LogCommand from "./commands/original-commands/log";
 import {
   NextCommand,
   PrevCommand,
@@ -68,14 +67,6 @@ yargs
     PrintStacksCommand.args,
     async (argv) => {
       await new PrintStacksCommand().execute(argv);
-    }
-  )
-  .command(
-    "log",
-    "Prints the current state of the world",
-    LogCommand.args,
-    async (argv) => {
-      await new LogCommand().execute(argv);
     }
   )
   .command(
