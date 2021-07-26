@@ -20,10 +20,10 @@ describe("stack onto", function () {
 
   it("Can fix a leaf stack onto main", () => {
     repo.createChange("2", "a");
-    execCliCommand("diff -b 'a' -m '2' -s", { fromDir: tmpDir.name });
+    execCliCommand("branch create 'a' -m '2' -s", { fromDir: tmpDir.name });
 
     repo.createChange("3", "b");
-    execCliCommand("diff -b 'b' -m '3' -s", { fromDir: tmpDir.name });
+    execCliCommand("branch create 'b' -m '3' -s", { fromDir: tmpDir.name });
 
     execCliCommand("stack onto main -s", { fromDir: tmpDir.name });
     expect(repo.listCurrentBranchCommitMessages().join(", ")).to.equal("3, 1");

@@ -15,7 +15,7 @@ describe("Branch tests", function () {
     repo.createChangeAndCommit("1");
     repo.createChange("2");
 
-    execCliCommand(`diff -b "a" -s`, { fromDir: tmpDir.name });
+    execCliCommand(`branch create "a" -s`, { fromDir: tmpDir.name });
 
     const branch = new Branch("a");
     expect(branch.getParentsFromGit()[0].name).to.equal("main");
@@ -34,7 +34,7 @@ describe("Branch tests", function () {
     repo.createChangeAndCommit("1");
     repo.createChange("2");
 
-    execCliCommand(`diff -b "a" -s`, { fromDir: tmpDir.name });
+    execCliCommand(`branch create "a" -s`, { fromDir: tmpDir.name });
 
     const branch = new Branch("a");
     expect(branch.getParentFromMeta()).is.not.undefined;

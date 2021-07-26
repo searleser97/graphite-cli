@@ -4,7 +4,7 @@ import tmp from "tmp";
 import { execCliCommand } from "../utils/exec_cli_command";
 import GitRepo from "../utils/git_repo";
 
-describe("Diff tests", function () {
+describe("branch create", function () {
   let tmpDir: tmp.DirResult;
   let repo: GitRepo;
   this.beforeEach(() => {
@@ -18,13 +18,13 @@ describe("Diff tests", function () {
   });
   this.timeout(5000);
 
-  it("Can create a diff", () => {
+  it("Can run branch create", () => {
     repo.createChange("2");
 
-    execCliCommand(`diff -b "a" -s`, { fromDir: tmpDir.name });
+    execCliCommand(`branch create "a" -s`, { fromDir: tmpDir.name });
     expect(repo.currentBranchName()).to.equal("a");
 
-    execCliCommand("prev", { fromDir: tmpDir.name });
+    execCliCommand("branch prev", { fromDir: tmpDir.name });
     expect(repo.currentBranchName()).to.equal("main");
   });
 
@@ -33,7 +33,7 @@ describe("Diff tests", function () {
     repo.createPrecommitHook("exit 1");
     repo.createChange("2");
     expect(() => {
-      execCliCommand(`diff -b "a" -s`, { fromDir: tmpDir.name });
+      execCliCommand(`branch create "a" -s`, { fromDir: tmpDir.name });
     }).to.throw;
     expect(repo.currentBranchName()).to.equal("main");
   });

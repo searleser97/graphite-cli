@@ -24,7 +24,7 @@ describe("Fix tests", function () {
 
   it("Can fix a stack", () => {
     repo.createChange("2");
-    execCliCommand(`diff -b "a" -s`, { fromDir: tmpDir.name });
+    execCliCommand(`branch create "a" -s`, { fromDir: tmpDir.name });
 
     repo.createChangeAndCommit("3");
     repo.createAndCheckoutBranch("b");

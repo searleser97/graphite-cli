@@ -61,7 +61,7 @@ describe("Sync tests", function () {
 
   it("Can delete a single merged branch", async () => {
     repo.createChange("2", "a");
-    execCliCommand(`diff -b "a" -s`, { fromDir: tmpDir.name });
+    execCliCommand(`branch create "a" -s`, { fromDir: tmpDir.name });
 
     expectBranches(repo, "a, main");
 
@@ -73,10 +73,10 @@ describe("Sync tests", function () {
 
   it("Can delete the foundation of a double stack", async () => {
     repo.createChange("2", "a");
-    execCliCommand(`diff -b "a" -m "a" -s`, { fromDir: tmpDir.name });
+    execCliCommand(`branch create "a" -m "a" -s`, { fromDir: tmpDir.name });
 
     repo.createChange("3", "b");
-    execCliCommand(`diff -b "b" -m "b" -s`, { fromDir: tmpDir.name });
+    execCliCommand(`branch create "b" -m "b" -s`, { fromDir: tmpDir.name });
 
     expectBranches(repo, "a, b, main");
 
@@ -92,13 +92,13 @@ describe("Sync tests", function () {
 
   it("Can delete two branches off a three-stack", async () => {
     repo.createChange("2", "a");
-    execCliCommand(`diff -b "a" -m "a" -s`, { fromDir: tmpDir.name });
+    execCliCommand(`branch create "a" -m "a" -s`, { fromDir: tmpDir.name });
 
     repo.createChange("3", "b");
-    execCliCommand(`diff -b "b" -m "b" -s`, { fromDir: tmpDir.name });
+    execCliCommand(`branch create "b" -m "b" -s`, { fromDir: tmpDir.name });
 
     repo.createChange("4", "c");
-    execCliCommand(`diff -b "c" -m "c" -s`, { fromDir: tmpDir.name });
+    execCliCommand(`branch create "c" -m "c" -s`, { fromDir: tmpDir.name });
 
     expectBranches(repo, "a, b, c, main");
 
@@ -112,13 +112,13 @@ describe("Sync tests", function () {
 
   it("Can delete two branches, while syncing inbetween, off a three-stack", async () => {
     repo.createChange("2", "a");
-    execCliCommand(`diff -b "a" -m "a" -s`, { fromDir: tmpDir.name });
+    execCliCommand(`branch create "a" -m "a" -s`, { fromDir: tmpDir.name });
 
     repo.createChange("3", "b");
-    execCliCommand(`diff -b "b" -m "b" -s`, { fromDir: tmpDir.name });
+    execCliCommand(`branch create "b" -m "b" -s`, { fromDir: tmpDir.name });
 
     repo.createChange("4", "c");
-    execCliCommand(`diff -b "c" -m "c" -s`, { fromDir: tmpDir.name });
+    execCliCommand(`branch create "c" -m "c" -s`, { fromDir: tmpDir.name });
 
     expectBranches(repo, "a, b, c, main");
 
@@ -133,23 +133,23 @@ describe("Sync tests", function () {
 
   xit("Can detect dead branches off multiple stacks", async () => {
     repo.createChange("2", "a");
-    execCliCommand(`diff -b "a" -m "a" -s`, { fromDir: tmpDir.name });
+    execCliCommand(`branch create "a" -m "a" -s`, { fromDir: tmpDir.name });
 
     repo.createChange("3", "b");
-    execCliCommand(`diff -b "b" -m "b" -s`, { fromDir: tmpDir.name });
+    execCliCommand(`branch create "b" -m "b" -s`, { fromDir: tmpDir.name });
 
     repo.createChange("4", "c");
-    execCliCommand(`diff -b "c" -m "c" -s`, { fromDir: tmpDir.name });
+    execCliCommand(`branch create "c" -m "c" -s`, { fromDir: tmpDir.name });
 
     expectBranches(repo, "a, b, c, main");
 
     repo.checkoutBranch("main");
 
     repo.createChange("5", "d");
-    execCliCommand(`diff -b "d" -m "d" -s`, { fromDir: tmpDir.name });
+    execCliCommand(`branch create "d" -m "d" -s`, { fromDir: tmpDir.name });
 
     repo.createChange("6", "e");
-    execCliCommand(`diff -b "e" -m "e" -s`, { fromDir: tmpDir.name });
+    execCliCommand(`branch create "e" -m "e" -s`, { fromDir: tmpDir.name });
 
     fakeGitSquashAndMerge(repo, "a", "squash_a");
     fakeGitSquashAndMerge(repo, "b", "squash_b");

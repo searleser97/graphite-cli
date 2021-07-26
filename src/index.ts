@@ -2,7 +2,6 @@
 import tmp from "tmp";
 import yargs from "yargs";
 import DemoCommand from "./commands/original-commands/demo";
-import DiffCommand from "./commands/original-commands/diff";
 import FeedbackCommand from "./commands/original-commands/feedback";
 import FixCommand from "./commands/original-commands/fix";
 import PrintStacksCommand from "./commands/original-commands/print-stacks";
@@ -15,14 +14,6 @@ tmp.setGracefulCleanup();
 
 yargs
   .commandDir("commands")
-  .command(
-    "diff",
-    "Takes the current changes and creates a new branch off of whatever branch you were previously working on.",
-    DiffCommand.args,
-    async (argv) => {
-      await new DiffCommand().execute(argv);
-    }
-  )
   .command(
     "submit",
     "Experimental: Create PR's for each branch in the current stack",

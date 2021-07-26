@@ -424,7 +424,7 @@
 [23.343112, "i", "\n"]
 [23.343342, "o", "\u001b[?1l\u001b>"]
 [23.343375, "o", "\u001b[?2004l\r\r\n"]
-[23.344318, "o", "\u001b]2;gp diff -b 'gr--frontend' -m \u0007\u001b]1;gp\u0007"]
+[23.344318, "o", "\u001b]2;gp branch create 'gr--frontend' -m \u0007\u001b]1;gp\u0007"]
 [24.19263, "o", "Switched to a new branch 'gr--frontend'\r\n"]
 [24.218275, "o", "[gr--frontend 45c5494] feat(frontend): add review queue filter frontend\r\n"]
 [24.218485, "o", " 1 file changed, 1 insertion(+)\r\n create mode 100644 frontend_change\r\n"]

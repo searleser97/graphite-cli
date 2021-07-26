@@ -20,9 +20,9 @@ describe("Validate tests", function () {
 
   it("Can pass validation", () => {
     repo.createChange("2");
-    execCliCommand(`diff -b "a" -s`, { fromDir: tmpDir.name });
+    execCliCommand(`branch create "a" -s`, { fromDir: tmpDir.name });
     repo.createChange("3");
-    execCliCommand(`diff -b "b" -s`, { fromDir: tmpDir.name });
+    execCliCommand(`branch create "b" -s`, { fromDir: tmpDir.name });
 
     // Expect this command not to fail.
     execCliCommand("validate -s", { fromDir: tmpDir.name });

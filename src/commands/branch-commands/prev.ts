@@ -21,7 +21,7 @@ export class PrevCommand extends AbstractCommand<typeof args> {
   }
 }
 
-export const command = "next";
+export const command = "prev";
 export const description =
   "If you're in a stack: Branch A → Branch B (you are here) → Branch C. Takes you to the previous branch (Branch A). If there are two parent branches, errors out and tells you the various branches you could go to.";
 export const builder = args;
