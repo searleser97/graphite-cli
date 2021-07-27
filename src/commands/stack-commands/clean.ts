@@ -1,13 +1,49 @@
 import yargs from "yargs";
-import SyncCommand from "../original-commands/sync";
+import { cleanAction } from "../../actions/clean";
+import { profiledHandler } from "../../lib/telemetry";
+
+const args = {
+  trunk: {
+    type: "string",
+    describe: "The name of your trunk branch that stacks get merged into.",
+    required: true,
+    alias: "t",
+  },
+  silent: {
+    describe: `silence output from the command`,
+    demandOption: false,
+    default: false,
+    type: "boolean",
+    alias: "s",
+  },
+  force: {
+    describe: `Don't prompt on each branch to confirm deletion.`,
+    demandOption: false,
+    default: false,
+    type: "boolean",
+    alias: "f",
+  },
+  pull: {
+    describe: `Pull the trunk branch before comparison.`,
+    demandOption: false,
+    default: false,
+    type: "boolean",
+    alias: "p",
+  },
+} as const;
+type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 
 export const command = "clean";
 export const description =
   "Delete any stacks that have been merged or squashed into your trunk branch, and restack their children recursively.";
-export const builder = SyncCommand.args;
-type argsT = yargs.Arguments<
-  yargs.InferredOptionTypes<typeof SyncCommand.args>
->;
+export const builder = args;
 export const handler = async (argv: argsT): Promise<void> => {
-  await new SyncCommand().execute(argv);
+  return profiledHandler(command, async () => {
+    await cleanAction({
+      silent: argv.silent,
+      pull: argv.pull,
+      force: argv.force,
+      trunk: argv.trunk,
+    });
+  });
 };

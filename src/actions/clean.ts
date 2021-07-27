@@ -1,11 +1,9 @@
 import chalk from "chalk";
 import { execSync } from "child_process";
 import prompts from "prompts";
-import yargs from "yargs";
-import { ontoAction } from "../../../actions/onto";
-import { regenAction } from "../../../actions/regen";
-import AbstractCommand from "../../../lib/abstract_command";
-import { log } from "../../../lib/log";
+import { ontoAction } from "../actions/onto";
+import { regenAction } from "../actions/regen";
+import { log } from "../lib/log";
 import {
   checkoutBranch,
   gpExecSync,
@@ -13,48 +11,15 @@ import {
   logInternalErrorAndExit,
   logWarn,
   uncommittedChanges,
-} from "../../../lib/utils";
-import Branch from "../../../wrapper-classes/branch";
+} from "../lib/utils";
+import Branch from "../wrapper-classes/branch";
 
-const args = {
-  trunk: {
-    type: "string",
-    describe: "The name of your trunk branch that stacks get merged into.",
-    required: true,
-    alias: "t",
-  },
-  silent: {
-    describe: `silence output from the command`,
-    demandOption: false,
-    default: false,
-    type: "boolean",
-    alias: "s",
-  },
-  force: {
-    describe: `Don't prompt on each branch to confirm deletion.`,
-    demandOption: false,
-    default: false,
-    type: "boolean",
-    alias: "f",
-  },
-  pull: {
-    describe: `Pull the trunk branch before comparison.`,
-    demandOption: false,
-    default: false,
-    type: "boolean",
-    alias: "p",
-  },
-} as const;
-type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
-
-export default class SyncCommand extends AbstractCommand<typeof args> {
-  static args = args;
-  public async _execute(argv: argsT): Promise<void> {
-    await sync(argv);
-  }
-}
-
-async function sync(opts: argsT) {
+export async function cleanAction(opts: {
+  trunk: string;
+  pull: boolean;
+  force: boolean;
+  silent: boolean;
+}): Promise<void> {
   if (uncommittedChanges()) {
     logErrorAndExit("Cannot restack with uncommitted changes");
   }
@@ -88,7 +53,7 @@ async function sync(opts: argsT) {
       trunkChildren.push(child);
     }
     checkoutBranch(opts.trunk);
-    await deleteBranch(branch.name, opts);
+    await deleteBranch({ branchName: branch.name, ...opts });
     await regenAction(true);
   } while (trunkChildren.length > 0);
   checkoutBranch(oldBranchName);
@@ -113,13 +78,18 @@ function shouldDeleteBranch(branchName: string, trunk: string): boolean {
   return false;
 }
 
-async function deleteBranch(branchName: string, opts: argsT) {
+async function deleteBranch(opts: {
+  branchName: string;
+  trunk: string;
+  force: boolean;
+  silent: boolean;
+}) {
   if (!opts.force) {
     const response = await prompts({
       type: "confirm",
       name: "value",
       message: `Delete (${chalk.green(
-        branchName
+        opts.branchName
       )}), which has been merged into (${opts.trunk})?`,
       initial: true,
     });
@@ -127,7 +97,7 @@ async function deleteBranch(branchName: string, opts: argsT) {
       process.exit(0);
     }
   } else {
-    log(`Deleting ${branchName}`, opts);
+    log(`Deleting ${opts.branchName}`, opts);
   }
-  execSync(`git branch -D ${branchName}`);
+  execSync(`git branch -D ${opts.branchName}`);
 }
