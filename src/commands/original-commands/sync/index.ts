@@ -3,6 +3,7 @@ import { execSync } from "child_process";
 import prompts from "prompts";
 import yargs from "yargs";
 import { ontoAction } from "../../../actions/onto";
+import { regenAction } from "../../../actions/regen";
 import AbstractCommand from "../../../lib/abstract_command";
 import { log } from "../../../lib/log";
 import {
@@ -14,7 +15,6 @@ import {
   uncommittedChanges,
 } from "../../../lib/utils";
 import Branch from "../../../wrapper-classes/branch";
-import FixCommand from "../fix";
 
 const args = {
   trunk: {
@@ -89,7 +89,7 @@ async function sync(opts: argsT) {
     }
     checkoutBranch(opts.trunk);
     await deleteBranch(branch.name, opts);
-    await new FixCommand().executeUnprofiled({ silent: true });
+    await regenAction(true);
   } while (trunkChildren.length > 0);
   checkoutBranch(oldBranchName);
 }
