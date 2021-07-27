@@ -3,7 +3,7 @@ import tmp from "tmp";
 import GitRepo from "../../test/utils/git_repo";
 import { profiledHandler } from "../lib/telemetry";
 
-export const command = "fix";
+export const command = "demo";
 export const description = false;
 
 const args = {} as const;
