@@ -1,4 +1,4 @@
-# Graphite user guide 1
+# Graphite user guide 2
 
 ---
 
