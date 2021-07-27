@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import { execSync } from "child_process";
 import yargs from "yargs";
+import { validate } from "../../../actions/validate";
 import AbstractCommand from "../../../lib/abstract_command";
 import { log } from "../../../lib/log";
 import {
@@ -13,7 +14,6 @@ import {
 } from "../../../lib/utils";
 import Branch from "../../../wrapper-classes/branch";
 import PrintStacksCommand from "../print-stacks";
-import ValidateCommand from "../validate";
 
 const args = {
   silent: {
@@ -88,9 +88,9 @@ function checkBranchCanBeMoved(branch: Branch, opts: argsT) {
   }
 }
 
-async function validate(argv: argsT) {
+async function validateStack(argv: argsT) {
   try {
-    await new ValidateCommand().executeUnprofiled({ silent: true });
+    await validate("UPSTACK", argv.silent);
   } catch {
     log(
       chalk.red(
@@ -105,7 +105,7 @@ async function validate(argv: argsT) {
 async function restackOnto(currentBranch: Branch, onto: string, argv: argsT) {
   // Check that the current branch has a parent to prevent moving main
   checkBranchCanBeMoved(currentBranch, argv);
-  await validate(argv);
+  await validateStack(argv);
   const parent = getParentForRebaseOnto(currentBranch, argv);
   // Save the old ref from before rebasing so that children can find their bases.
   currentBranch.setMetaPrevRef(currentBranch.getCurrentRef());

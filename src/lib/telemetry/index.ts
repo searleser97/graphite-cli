@@ -6,6 +6,16 @@ import { execSync } from "child_process";
 import fetch from "node-fetch";
 import { version } from "../../../package.json";
 
+export async function profiledHandler(
+  name: string,
+  handler: () => Promise<void>
+): Promise<void> {
+  await checkForUpgrade();
+  await profile(name, async () => {
+    await handler();
+  });
+}
+
 export async function checkForUpgrade(): Promise<void> {
   if (!shouldReportTelemetry()) {
     return;

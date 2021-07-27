@@ -1,10 +1,10 @@
 import chalk from "chalk";
 import yargs from "yargs";
+import { validate } from "../../../actions/validate";
 import AbstractCommand from "../../../lib/abstract_command";
 import { gpExecSync, logInternalErrorAndExit } from "../../../lib/utils";
 import Branch from "../../../wrapper-classes/branch";
 import PrintStacksCommand from "../print-stacks";
-import ValidateCommand from "../validate";
 
 const args = {
   silent: {
@@ -57,7 +57,7 @@ export default class SubmitCommand extends AbstractCommand<typeof args> {
     );
 
     try {
-      await new ValidateCommand().executeUnprofiled({ silent: true });
+      await validate("FULLSTACK", true);
     } catch {
       await new PrintStacksCommand().executeUnprofiled(argv);
       throw new Error(`Validation failed before submitting.`);
