@@ -9,12 +9,12 @@ export async function regenAction(silent: boolean): Promise<void> {
   }
 
   printBranchNameStack(
-    `(Original git derived stack)`,
+    `(Original git infered stack)`,
     branch.stackByTracingGitParents(),
     silent
   );
   printBranchNameStack(
-    `(Original meta derived stack)`,
+    `(Original graphite recorded stack)`,
     branch.stackByTracingMetaParents(),
     silent
   );
@@ -23,7 +23,7 @@ export async function regenAction(silent: boolean): Promise<void> {
   await recursiveFix(branch, silent);
 
   printBranchNameStack(
-    `(New meta stack)`,
+    `(New graphite stack)`,
     branch.stackByTracingMetaParents(),
     silent
   );
@@ -47,7 +47,7 @@ function recursiveFix(branch: Branch, silent: boolean) {
     const oldMetaParent = child.getParentFromMeta();
     if (!oldMetaParent || oldMetaParent.name !== branch.name) {
       log(
-        `Updating (${child.name}) meta parent from (${
+        `Updating (${child.name}) branch parent from (${
           oldMetaParent?.name
         }) to (${chalk.green(branch.name)})`,
         { silent }

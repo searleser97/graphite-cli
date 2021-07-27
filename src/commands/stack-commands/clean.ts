@@ -35,7 +35,7 @@ type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 
 export const command = "clean";
 export const description =
-  "Delete any stacks that have been merged or squashed into your trunk branch, and restack their children recursively.";
+  "Delete any branches that have been merged or squashed into the trunk branch, and restack their upstack branches recursively.";
 export const builder = args;
 export const handler = async (argv: argsT): Promise<void> => {
   return profiledHandler(command, async () => {

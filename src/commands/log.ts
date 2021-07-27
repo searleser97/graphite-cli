@@ -4,7 +4,7 @@ import { profiledHandler } from "../lib/telemetry";
 const args = {} as const;
 
 export const command = "log";
-export const description = "Log stack";
+export const description = "Log all stacks";
 export const builder = args;
 
 export const handler = async (): Promise<void> => {

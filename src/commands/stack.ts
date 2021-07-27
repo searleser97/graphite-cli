@@ -1,7 +1,7 @@
 import yargs from "yargs";
 
 export const command = "stack <command>";
-export const desc = "Stack commands";
+export const desc = "Commands that operate on your current stack of branches";
 export const aliases = ["s"];
 export const builder = function (yargs: yargs.Argv): yargs.Argv {
   return yargs

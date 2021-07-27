@@ -14,15 +14,15 @@ import Branch from "../wrapper-classes/branch";
 import { restackBranch } from "./fix";
 export async function ontoAction(onto: string, silent: boolean): Promise<void> {
   if (uncommittedChanges()) {
-    logErrorAndExit("Cannot restack with uncommitted changes");
+    logErrorAndExit("Cannot fix with uncommitted changes");
   }
   // Print state before
-  log(`Before restack:`, { silent });
+  log(`Before fix:`, { silent });
   !silent && (await new PrintStacksCommand().executeUnprofiled({ silent }));
 
   const originalBranch = Branch.getCurrentBranch();
   if (originalBranch === null) {
-    logErrorAndExit(`Not currently on a branch; no target to restack.`);
+    logErrorAndExit(`Not currently on a branch; no target to fix.`);
   }
 
   await restackOnto(originalBranch, onto, silent);
@@ -30,7 +30,7 @@ export async function ontoAction(onto: string, silent: boolean): Promise<void> {
   checkoutBranch(originalBranch.name);
 
   // Print state after
-  log(`After restack:`, { silent });
+  log(`After fix:`, { silent });
   !silent && (await new PrintStacksCommand().executeUnprofiled({ silent }));
 }
 
@@ -51,7 +51,7 @@ async function restackOnto(
   );
   // set current branch's parent only if the rebase succeeds.
   currentBranch.setParentBranchName(onto);
-  // Now perform a restack starting from the onto branch:
+  // Now perform a fix starting from the onto branch:
   for (const child of await currentBranch.getChildrenFromMeta()) {
     await restackBranch(child, silent);
   }
@@ -62,7 +62,7 @@ async function validateStack(silent: boolean) {
   } catch {
     log(
       chalk.red(
-        `Cannot "restack --onto", git derived stack must match meta defined stack. Consider running "restack" or "fix" first.`
+        `Cannot "fix --onto", git branches must match stack. Consider running "fix" or "regen" first.`
       ),
       { silent }
     );
@@ -74,7 +74,7 @@ function checkBranchCanBeMoved(branch: Branch, onto: string, silent: boolean) {
   if (trunkBranches && branch.name in trunkBranches) {
     log(
       chalk.red(
-        `Cannot restack (${branch.name}) onto ${onto}, (${branch.name}) is listed in (${CURRENT_REPO_CONFIG_PATH}) as a trunk branch.`
+        `Cannot fix (${branch.name}) onto ${onto}, (${branch.name}) is listed in (${CURRENT_REPO_CONFIG_PATH}) as a trunk branch.`
       ),
       { silent }
     );
@@ -87,7 +87,7 @@ function getParentForRebaseOnto(branch: Branch, silent: boolean): Branch {
   if (!parent) {
     log(
       chalk.red(
-        `Cannot "restack --onto", (${branch.name}) has no parent as defined by the meta.`
+        `Cannot "fix --onto", (${branch.name}) has no branch parent in the stack.`
       ),
       { silent }
     );

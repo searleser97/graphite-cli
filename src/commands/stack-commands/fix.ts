@@ -4,7 +4,7 @@ import { profiledHandler } from "../../lib/telemetry";
 
 export const command = "fix";
 export const description =
-  "Rebase any upstream branches onto the latest commit (HEAD) of the current branch.";
+  "Rebase any upstack branches onto the latest commit (HEAD) of the current branch.";
 
 const args = {
   silent: {

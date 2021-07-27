@@ -15,7 +15,7 @@ type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 
 export const command = "validate";
 export const description =
-  "Validates that the gp meta graph matches the current graph of git branches and commits.";
+  "Validates that the current upstack matches git's chain of branches.";
 export const builder = args;
 
 export const handler = async (argv: argsT): Promise<void> => {

@@ -21,11 +21,11 @@ export async function cleanAction(opts: {
   silent: boolean;
 }): Promise<void> {
   if (uncommittedChanges()) {
-    logErrorAndExit("Cannot restack with uncommitted changes");
+    logErrorAndExit("Cannot clean with uncommitted changes");
   }
   const oldBranch = Branch.getCurrentBranch();
   if (oldBranch === null) {
-    logWarn("Not currently on a branch; no stack to sync.");
+    logWarn("Not currently on a branch; no stack to clean.");
     return;
   }
 

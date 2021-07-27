@@ -15,7 +15,7 @@ type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 
 export const command = "regen";
 export const description =
-  "Trace the current branch through its parents, down to the base branch. Establish dependencies between each branch for later traversal and fixing.";
+  "Recreate the current stack by tracing git branches from trunk through to leave branches.";
 export const builder = args;
 export const handler = async (argv: argsT): Promise<void> => {
   return profiledHandler(command, async () => {

@@ -46,7 +46,7 @@ export async function createBranchAction(opts: {
         command: `git branch -d ${branchName}`,
         options: { stdio: "ignore" },
       });
-      logErrorAndExit("Failed to commit changes, aborting diff");
+      logErrorAndExit("Failed to commit changes, aborting");
     }
   );
 
@@ -65,7 +65,7 @@ function ensureSomeStagedChanges(silent: boolean): void {
     if (!silent) {
       gpExecSync({ command: `git status`, options: { stdio: "inherit" } });
     }
-    logErrorAndExit(`Cannot "diff", no staged changes detected.`);
+    logErrorAndExit(`Cannot "branch create", no staged changes detected.`);
   }
 }
 

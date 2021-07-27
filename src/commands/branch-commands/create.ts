@@ -8,7 +8,7 @@ const args = {
     positional: true,
     demandOption: false,
     optional: true,
-    describe: "The name of the target which builds your app for release",
+    describe: "The name of the new branch",
   },
   message: {
     type: "string",
@@ -27,7 +27,7 @@ type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 
 export const command = "create [name]";
 export const description =
-  "Takes the current changes and creates a new branch off of whatever branch you were previously working on.";
+  "Creates a new branch stacked off of the current branch and commit staged changes.";
 export const builder = args;
 export const handler = async (argv: argsT): Promise<void> => {
   return profiledHandler(command, async () => {

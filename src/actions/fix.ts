@@ -11,15 +11,15 @@ import Branch from "../wrapper-classes/branch";
 
 export async function fixAction(silent: boolean): Promise<void> {
   if (uncommittedChanges()) {
-    logErrorAndExit("Cannot restack with uncommitted changes");
+    logErrorAndExit("Cannot fix with uncommitted changes");
   }
   // Print state before
-  log(`Before restack:`, { silent });
+  log(`Before fix:`, { silent });
   !silent && (await new PrintStacksCommand().executeUnprofiled({ silent }));
 
   const originalBranch = Branch.getCurrentBranch();
   if (originalBranch === null) {
-    logErrorAndExit(`Not currently on a branch; no target to restack.`);
+    logErrorAndExit(`Not currently on a branch; no target to fix.`);
   }
 
   for (const child of await originalBranch.getChildrenFromMeta()) {
@@ -28,7 +28,7 @@ export async function fixAction(silent: boolean): Promise<void> {
   checkoutBranch(originalBranch.name);
 
   // Print state after
-  log(`After restack:`, { silent });
+  log(`After fix:`, { silent });
   !silent && (await new PrintStacksCommand().executeUnprofiled({ silent }));
 }
 
@@ -38,19 +38,19 @@ export async function restackBranch(
 ): Promise<void> {
   if (rebaseInProgress()) {
     logErrorAndExit(
-      `Interactive rebase in progress, cannot restack (${currentBranch.name}). Complete the rebase and re-run restack command.`
+      `Interactive rebase in progress, cannot fix (${currentBranch.name}). Complete the rebase and re-run fix command.`
     );
   }
   const parentBranch = currentBranch.getParentFromMeta();
   if (!parentBranch) {
     logErrorAndExit(
-      `Cannot find parent from meta defined stack for (${currentBranch.name}), stopping restack`
+      `Cannot find parent in stack for (${currentBranch.name}), stopping fix`
     );
   }
   const mergeBase = currentBranch.getMetaMergeBase();
   if (!mergeBase) {
     logErrorAndExit(
-      `Cannot find a merge base from meta defined stack for (${currentBranch.name}), stopping restack`
+      `Cannot find a merge base in the stack for (${currentBranch.name}), stopping fix`
     );
   }
 

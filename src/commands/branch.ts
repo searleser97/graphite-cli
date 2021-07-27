@@ -1,7 +1,7 @@
 import { Argv } from "yargs";
 
 export const command = "branch <command>";
-export const desc = "Branch commands";
+export const desc = "Commands that operate on your current branch";
 
 export const aliases = ["b"];
 export const builder = function (yargs: Argv): Argv {
