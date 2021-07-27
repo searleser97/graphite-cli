@@ -71,7 +71,7 @@ gp upstack validate # pull changes to pull request and store in stack metadata, 
 
 # gp downstack...
 gp downstack submit # create pr's / force pushes for full stack
-gp downupstack validate # pull changes to pull request and store in stack metadata, such as titles
+gp downstack validate # pull changes to pull request and store in stack metadata, such as titles
 gp downstack land # [TODO] attempt to land full stack
 
 # gp branch ...
