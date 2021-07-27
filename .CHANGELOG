@@ -1,3 +1,6 @@
+## 0.5.0 2020-07-27
+- Improved `stack submit` command and promoted command out of expermental status.
+
 ## 0.4.3 2020-07-27
 - Update all copy to match new termonology from the 4.0.0 refactor.
 
