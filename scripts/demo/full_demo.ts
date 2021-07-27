@@ -18,7 +18,7 @@ export default class FullDemo extends AbstractDemo {
         "gp stacks",
         "# Using graphite, we can create new changes on our stack using `diff`",
         'echo "second change" > ./api_change && git add .',
-        "gp diff -b 'gf--api' -m 'feat(api): improve it'",
+        "gp branch create 'gf--api' -m 'feat(api): improve it'",
         "# Let's visualize the extended stack",
         "gp stacks",
         "# What if our trunk branch moves forward?",

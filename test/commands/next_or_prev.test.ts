@@ -28,9 +28,9 @@ describe("Next or Prev tests", function () {
     repo.checkoutBranch("a");
 
     expect(repo.currentBranchName()).to.equal("a");
-    execCliCommand(`next`, { fromDir: tmpDir.name });
+    execCliCommand(`branch next`, { fromDir: tmpDir.name });
     expect(repo.currentBranchName()).to.equal("b");
-    execCliCommand(`prev`, { fromDir: tmpDir.name });
+    execCliCommand(`branch prev`, { fromDir: tmpDir.name });
     expect(repo.currentBranchName()).to.equal("a");
   });
 });

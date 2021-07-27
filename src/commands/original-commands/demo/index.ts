@@ -18,19 +18,19 @@ export default class DemoCommand extends AbstractCommand<typeof args> {
 
     repo.createChange("[Product] Add review queue filter api");
     execCliCommand(
-      "diff -b 'tr--review_queue_api' -m '[Product] Add review queue filter api'",
+      "branch create 'tr--review_queue_api' -m '[Product] Add review queue filter api'",
       { fromDir: tmpDir.name }
     );
 
     repo.createChange("[Product] Add review queue filter server");
     execCliCommand(
-      "diff -b 'tr--review_queue_server' -m '[Product] Add review queue filter server'",
+      "branch create 'tr--review_queue_server' -m '[Product] Add review queue filter server'",
       { fromDir: tmpDir.name }
     );
 
     repo.createChange("[Product] Add review queue filter frontend");
     execCliCommand(
-      "diff -b 'tr--review_queue_frontend' -m '[Product] Add review queue filter frontend'",
+      "branch create 'tr--review_queue_frontend' -m '[Product] Add review queue filter frontend'",
       { fromDir: tmpDir.name }
     );
 
@@ -38,7 +38,7 @@ export default class DemoCommand extends AbstractCommand<typeof args> {
 
     repo.createChange("[Bug Fix] Fix crashes on reload");
     execCliCommand(
-      "diff -b 'tr--fix_crash_on_reload' -m '[Bug Fix] Fix crashes on reload'",
+      "branch create 'tr--fix_crash_on_reload' -m '[Bug Fix] Fix crashes on reload'",
       { fromDir: tmpDir.name }
     );
 
@@ -46,7 +46,7 @@ export default class DemoCommand extends AbstractCommand<typeof args> {
 
     repo.createChange("[Bug Fix] Account for empty state");
     execCliCommand(
-      "diff -b 'tr--account_for_empty_state' -m '[Bug Fix] Account for empty state'",
+      "branch create 'tr--account_for_empty_state' -m '[Bug Fix] Account for empty state'",
       { fromDir: tmpDir.name }
     );
 

@@ -24,13 +24,13 @@ export default class RestackDemo extends AbstractDemo {
 
         repo.createChange("[Product] Add review queue filter api");
         execCliCommand(
-          "diff -b 'tr--api' -m '[Product] Add review queue filter api'",
+          "branch create 'tr--api' -m '[Product] Add review queue filter api'",
           { fromDir: demoDir }
         );
 
         repo.createChange("[Product] Add review queue filter server");
         execCliCommand(
-          "diff -b 'tr--server' -m '[Product] Add review queue filter server'",
+          "branch create 'tr--server' -m '[Product] Add review queue filter server'",
           { fromDir: demoDir }
         );
 
@@ -38,7 +38,7 @@ export default class RestackDemo extends AbstractDemo {
 
         repo.createChange("[Bug Fix] Fix crashes on reload");
         execCliCommand(
-          "diff -b 'tr--fix_crash' -m '[Bug Fix] Fix crashes on reload'",
+          "branch create 'tr--fix_crash' -m '[Bug Fix] Fix crashes on reload'",
           { fromDir: demoDir }
         );
 
@@ -46,7 +46,7 @@ export default class RestackDemo extends AbstractDemo {
 
         repo.createChange("[Bug Fix] Account for empty state");
         execCliCommand(
-          "diff -b 'tr--account_for_empty_state' -m '[Bug Fix] Account for empty state'",
+          "branch create 'tr--account_for_empty_state' -m '[Bug Fix] Account for empty state'",
           { fromDir: demoDir }
         );
 

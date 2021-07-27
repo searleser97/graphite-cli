@@ -1186,7 +1186,7 @@
 [60.73621, "i", "\n"]
 [60.736396, "o", "\u001b[?1l\u001b>"]
 [60.736426, "o", "\u001b[?2004l\r\r\n"]
-[60.737198, "o", "\u001b]2;gp diff -b 'gf--api' -m 'feat(api): improve it'\u0007\u001b]1;gp\u0007"]
+[60.737198, "o", "\u001b]2;gp branch create 'gf--api' -m 'feat(api): improve it'\u0007\u001b]1;gp\u0007"]
 [61.471675, "o", "Switched to a new branch 'gf--api'\r\n"]
 [61.496261, "o", "[gf--api aa87224] feat(api): improve it\r\n"]
 [61.496376, "o", " 1 file changed, 1 insertion(+)\r\n create mode 100644 api_change\r\n"]
