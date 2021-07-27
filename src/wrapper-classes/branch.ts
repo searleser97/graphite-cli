@@ -5,6 +5,10 @@ import Commit from "./commit";
 type TMeta = {
   parentBranchName?: string;
   prevRef?: string;
+  prInfo?: {
+    number: number;
+    url: string;
+  };
 };
 
 export const MAX_COMMITS_TO_TRAVERSE_FOR_NEXT_OR_PREV = 50;
@@ -316,5 +320,15 @@ export default class Branch {
     return Array.from(
       traverseGitTreeFromCommitUntilBranch(headSha, gitTree, branchList, 0)
     ).map((name) => new Branch(name));
+  }
+
+  public setPRInfo(prInfo: { number: number; url: string }): void {
+    const meta: TMeta = this.getMeta() || {};
+    meta.prInfo = prInfo;
+    this.writeMeta(meta);
+  }
+
+  public getPRInfo(): { number: number; url: string } | undefined {
+    return this.getMeta()?.prInfo;
   }
 }
