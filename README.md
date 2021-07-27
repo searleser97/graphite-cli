@@ -21,68 +21,31 @@ cd ~/my-project
 # Fix uses the current state of git branches
 # to infer parent-child relationships, and
 # stores that as metadata in your git repo.
-# This metadata is used for future restacks.
-git checkout main && gp fix
-```
-
----
-
-### Learn X in Y: Graphite
-
-```bash
-# Get your bearings using log:
-
-tomasreimers % gp log
-* f1af8f9 - Server changes - Tomas Reimers (HEAD -> **tr--server-changes**)
-* d8b1d19 - Second commit - Tomas Reimers (main)
-* 7463128 - First commit - Tomas Reimers
-
-# Create changes with diff:
-
-tomasreimers % gp diff -m "Frontend changes" -b **tr--frontend-changes**
-Switched to a new branch 'tr--frontend-changes'
-tomasreimers % gp log
-* 63a8061 - Frontend changes - Tomas Reimers (HEAD -> **tr--frontend-changes**)
-* f1af8f9 - Server changes - Tomas Reimers (**tr--server-changes**)
-* d8b1d19 - Second commit - Tomas Reimers (**main**)
-* 7463128 - First commit - Tomas Reimers
-
-# Update previous branches with amend:
-
-tomasreimers % gp prev
-tomasreimers % touch otherfiles
-tomasreimers % gp amend -m "Forgot some other files"
-tomasreimers % gp log
-* ebcfb23 - Frontend changes - Tomas Reimers (**tr--frontend-changes**)
-* 93b107a - Forgot some other files - Tomas Reimers (HEAD -> **tr--server-changes**)
-* f1af8f9 - Server changes - Tomas Reimers
-* d8b1d19 - Second commit - Tomas Reimers (**main**)
-* 7463128 - First commit - Tomas Reimers
+# This metadata is used for future fixes.
+git checkout main && gp stack fix
 ```
 
 ---
 
 ### CLI Concepts
 
-Graphite helps users create many small stacking changes which are easier and faster to review than big PRs. This speeds up the workflow for you and your reviewers. [The "stacked diffs" workflow is not new](https://jg.gg/2018/09/29/stacked-diffs-versus-pull-requests/) but is painful on native GitHub.
+Graphite helps you create many small stacking changes which are faster and easier to review than big PRs. This results in a better workflow for you and your code reviewers. [The "stacked diffs" workflow is not new](https://jg.gg/2018/09/29/stacked-diffs-versus-pull-requests/) but is painful on native GitHub.
 
 What is a stack? A stack is a sequence of code changes, each building off of its parent. Stacks enable users to continue coding new branches while peers code review dependent changes. A stack is represented by a sequence of git branches rather than commits because, on GitHub, branches are the smallest discrete unit of CI and code review.
 
-- Graphite works off two views of your stacks - those as described by the current git branch parent-child relations, and the other as described by our metadata parent-child relations.
-- The Graphite CLI provides commands to manipulate branches based on these two views.
+- Graphite extends Git's commits and branches with a third unit - stacks.
+- A Graphite stack is a chain (DAG) of dependent branches.
+- Graphite tracks stacks by recording parent relationships between branches through git refs.
 
-You can use the CLI alongside any other git tooling, by simply branching branches off of one another and calling `gp fix` to store the relationship as currently exists in your git repository (for example, if you branch B off of A and call fix, Graphite will store that B is a child of A).
+You can use the CLI alongside any other git tooling. If you create a series of dependent branches, simply call `gp stack fix` to regenerate Graphite's stack.
 
-Alternatively, creating branches and commits using graphite commands like `diff` and `amend` will ensure that metadata gets updated in step with your git repository.
+Alternatively, creating branches and commits using graphite commands like `gp branch` and `gp branch --amend` will ensure that your stacks are updated in step with your git repository.
 
-At any point, you may print out graphite's metadata using `gp stacks`. If there is a divergence between graphite's git-derived and metadata-derived stacks, it will print out both worlds side-by-side.
+At any point, you may print out graphite's metadata using `gp log`. If there is a divergence between your git branches and stacks, the output will highlight the discrepancy.
 
-_Note: All graphite commands except for `restack` operate based on the git-derived stacks. In the case of divergent stack views, you can run:_
+### Why track stacks using metadata stored in git refs?
 
-- _`restack` to adjust git branches to match the metadata-derived world or_
-- _`fix` to align the metadata to match the git-derived world._
-
-Why do we maintain metadata? Git alone cannot reliably track a stack of branches. Git branch can only derive its parent branch when its history contains a commit matching its parent's HEAD. If the parent branch continues forward one commit or is rebased, the child branch loses sight of its parent. In these moments, graphite uses the persisted metadata to remember the DAG of parents and rebase branches appropriately.
+Native git cannot reliably track a stack of branches. A branch can only derive its parent branch when its history contains a commit matching its parent's HEAD. If the parent branch continues forward one commit or is rebased, the child branch loses sight of its parent. In these moments, Graphite uses the persisted metadata to remember the DAG of branches and can rebase them appropriately.
 
 Where is the metadata stored? In your repo in the form of refs, visible at `.git/refs/branch-metadata/`. All information stays within git and can be synced to and from remote repositories.
 
@@ -90,45 +53,47 @@ Where is the metadata stored? In your repo in the form of refs, visible at `.git
 
 ### Current CLI Commands (`gp --help`)
 
-**`gp next`**
+### CLI Commands (`gp --help`)
 
-If you're in a stack: Branch A → Branch B (you are here) → Branch C. Takes you to the next branch (Branch C). If there are two descendent branches, errors out and tells you the various branches you could go to.
+```bash
+# gp stack ...
+gp stack fix # rebases git branches to match stack
+gp stack regen # create stacks based on the git branches.
+gp stack clean # delete branches in the stack which have been merged into stack trunk
+gp stack validate # pull changes to pull request and store in stack metadata, such as titles
+gp stack submit # [TODO] create pr's / force pushes for full stack
+gp stack land # [TODO] attempt to land full stack
+gp stack fetch # [TODO] pull changes to pull request and store in stack metadata, such as titles
 
-**`gp prev`**
+# gp upstack...
+gp upstack onto # move upstack inclusive onto some other branch
+gp upstack validate # pull changes to pull request and store in stack metadata, such as titles
 
-If you're in a stack: Branch A → Branch B (you are here) → Branch C. Takes you to the previous branch (Branch A). If there are two ancestral branches, errors out and tells you the various branches you could go to.
+# gp downstack...
+gp downstack submit # create pr's / force pushes for full stack
+gp downupstack validate # pull changes to pull request and store in stack metadata, such as titles
+gp downstack land # [TODO] attempt to land full stack
 
-**`gp diff`**
+# gp branch ...
+gp branch create <name> # Create new stacked branch, commit staged changes changes
+gp branch amend # Commit staged changes on top of current branch, fix upstack
+gp branch next # Traverse upstack by one branch
+gp branch prev # Traverse downstack by one branch
+gp branch land # [TODO] If possible, land branch, clean stack, and fix upstack
+gp branch submit # [TODO] Create PR / force push current branch
+gp branch top # [TODO] Traverse upstack fully
+gp branch bottom # [TODO] Traverse downstack fully
 
-Takes the current changes and creates a new branch off of whatever branch you were previously working on.
+# gp userconfig...
+gp userconfig auth # [TODO] Opens website, fetches token, prompts user to paste in token
 
-**`gp amend`**
-
-Given the current changes, adds it to the current branch (identical to git commit) and restacks anything upstream (see below).
-
-**`gp stacks`**
-
-Prints all current stacks.
-
-**`gp log`**
-
-Prints the current state of the world
-
-**`gp fix`**
-
-Trace the current branch through its parents, down to the base branch. Establish dependencies between each branch for later traversal and restacking.
-
-**`gp restack`**
-
-Restacks any dependent branches onto the latest commit in a branch.
-
-**`gp validate`**
-
-Validates that the meta graph matches the current graph of git branches and commits.
-
-**`gp feedback <message>`**
-
-Post a string directly to our Slack where we can factor in your feedback, laugh at your jokes, cry at your insults, or test the bounds of Slack injection attacks.
+# gp repoconfig...
+gp repoconfig # [TODO] print repo config
+gp repoconfig --get-owner # print key value # [TODO]
+gp repoconfig --set-owner=<value> # set key values # [TODO]
+gp repoconfig --set-trunk=<value> # [TODO]
+gp repoconfig --set-origin=<value> # [TODO]
+```
 
 ---
 
