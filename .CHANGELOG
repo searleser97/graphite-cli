@@ -1,3 +1,6 @@
+## 0.4.3 2020-07-27
+- Update all copy to match new termonology from the 4.0.0 refactor.
+
 ## 0.4.2 2020-07-27
 - Update `branch create` command to accept optional positional argument for branch name.
 
