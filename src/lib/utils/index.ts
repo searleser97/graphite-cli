@@ -3,6 +3,7 @@ import {
   CURRENT_REPO_CONFIG_PATH,
   makeId,
   repoConfig,
+  setUserAuthToken,
   trunkBranches,
   userConfig,
 } from "./config";
@@ -23,6 +24,7 @@ export {
   CURRENT_REPO_CONFIG_PATH,
   makeId,
   userConfig,
+  setUserAuthToken,
   repoConfig,
   trunkBranches,
   gpExecSync,
