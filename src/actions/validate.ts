@@ -11,11 +11,57 @@ export async function validate(scope: scopeT, silent: boolean): Promise<void> {
     return;
   }
 
-  await validateBranch(branch, scope, silent);
+  switch (scope) {
+    case "UPSTACK":
+      await validateBranchUpInclusive(branch, silent);
+      break;
+    case "DOWNSTACK":
+      await validateBranchDownInclusive(branch, silent);
+      break;
+    case "FULLSTACK":
+      await validateBranchDownInclusive(branch, silent);
+      await validateBranchUpInclusive(branch, silent);
+      break;
+  }
   log(`Current stack is valid`, { silent: silent });
 }
 
-async function validateBranch(branch: Branch, scope: scopeT, silent: boolean) {
+async function validateBranchDownInclusive(branch: Branch, silent: boolean) {
+  const metaParent = await branch.getParentFromMeta();
+  const gitParents = branch.getParentsFromGit();
+  if (gitParents.length === 0 && !metaParent) {
+    return;
+  }
+  if (gitParents.length === 0 && metaParent) {
+    throw new Error(
+      `(${branch.name}) has meta parent (${metaParent.name}), but no parent in the git graph.`
+    );
+  }
+  if (gitParents.length === 1 && !metaParent) {
+    throw new Error(
+      `(${branch.name}) has git parent (${gitParents[0].name}), but no parent in the meta graph.`
+    );
+  }
+  if (gitParents.length > 1) {
+    throw new Error(
+      `(${branch.name}) has more than one git parent (${gitParents.map(
+        (b) => b.name
+      )}).`
+    );
+  }
+  if (!metaParent) {
+    throw new Error("Unreachable");
+  }
+  if (gitParents[0].name !== metaParent.name) {
+    throw new Error(
+      `(${branch.name}) has git parent (${gitParents[0].name}) but meta parent (${metaParent.name})`
+    );
+  }
+  await validateBranchDownInclusive(metaParent, silent);
+  return;
+}
+
+async function validateBranchUpInclusive(branch: Branch, silent: boolean) {
   const metaChildren = await branch.getChildrenFromMeta();
   const gitChildren = branch.getChildrenFromGit();
   const hasGitChildren = gitChildren && gitChildren.length > 0;
@@ -43,6 +89,6 @@ async function validateBranch(branch: Branch, scope: scopeT, silent: boolean) {
   }
   log(`✅ ${chalk.green(`(${branch.name}) validated`)}`, { silent });
   for (const child of metaChildren!) {
-    await validateBranch(child, scope, silent);
+    await validateBranchUpInclusive(child, silent);
   }
 }
