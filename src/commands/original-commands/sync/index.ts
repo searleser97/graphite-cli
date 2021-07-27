@@ -2,6 +2,7 @@ import chalk from "chalk";
 import { execSync } from "child_process";
 import prompts from "prompts";
 import yargs from "yargs";
+import { ontoAction } from "../../../actions/onto";
 import AbstractCommand from "../../../lib/abstract_command";
 import { log } from "../../../lib/log";
 import {
@@ -14,7 +15,6 @@ import {
 } from "../../../lib/utils";
 import Branch from "../../../wrapper-classes/branch";
 import FixCommand from "../fix";
-import RestackCommand from "../restack";
 
 const args = {
   trunk: {
@@ -84,10 +84,7 @@ async function sync(opts: argsT) {
     for (const child of children) {
       checkoutBranch(child.name);
       log(`Restacking (${child.name}) onto (${opts.trunk})`);
-      await new RestackCommand().executeUnprofiled({
-        onto: opts.trunk,
-        silent: true,
-      });
+      await ontoAction(opts.trunk, true);
       trunkChildren.push(child);
     }
     checkoutBranch(opts.trunk);

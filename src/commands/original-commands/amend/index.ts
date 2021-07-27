@@ -1,4 +1,5 @@
 import yargs from "yargs";
+import { fixAction } from "../../../actions/fix";
 import AbstractCommand from "../../../lib/abstract_command";
 import { workingTreeClean } from "../../../lib/git-utils";
 import {
@@ -6,7 +7,6 @@ import {
   logInfo,
   logInternalErrorAndExit,
 } from "../../../lib/utils";
-import RestackCommand from "../restack";
 
 const args = {
   message: {
@@ -50,7 +50,7 @@ export default class AmendCommand extends AbstractCommand<typeof args> {
     );
     // Only restack if working tree is now clean.
     if (workingTreeClean()) {
-      await new RestackCommand().executeUnprofiled(args);
+      await fixAction(argv.silent);
     }
   }
 }
