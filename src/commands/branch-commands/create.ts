@@ -1,12 +1,13 @@
 import yargs from "yargs";
-import DiffCommand from "../original-commands/diff";
+import { createBranchAction } from "../../actions/create_branch";
+import { profiledHandler } from "../../lib/telemetry";
 
 const args = {
-  branch: {
+  name: {
     type: "string",
-    postitional: true,
-    demand: true,
-    describe: "The name of the new branch",
+    positional: true,
+    demandOption: true,
+    describe: "The name of the target which builds your app for release",
   },
   message: {
     type: "string",
@@ -21,18 +22,18 @@ const args = {
     alias: "s",
   },
 } as const;
+type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 
-export const command = "create <branch>";
+export const command = "create <name>";
 export const description =
   "Takes the current changes and creates a new branch off of whatever branch you were previously working on.";
 export const builder = args;
-type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 export const handler = async (argv: argsT): Promise<void> => {
-  await new DiffCommand().execute({
-    silent: argv.silent,
-    "branch-name": argv.branch,
-    message: argv.message,
-    _: [""], // filler until we split the restack command
-    $0: "", // moar filler
+  return profiledHandler(command, async () => {
+    await createBranchAction({
+      silent: argv.silent,
+      branchName: argv.name,
+      message: argv.message,
+    });
   });
 };
