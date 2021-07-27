@@ -1,8 +1,7 @@
 import chalk from "chalk";
 import fetch from "node-fetch";
 import yargs from "yargs";
-import AbstractCommand from "../../../lib/abstract_command";
-import { userEmail } from "../../../lib/telemetry";
+import { profiledHandler, userEmail } from "../lib/telemetry";
 
 const args = {
   message: {
@@ -13,9 +12,13 @@ const args = {
 } as const;
 type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 
-export default class FeedbackCommand extends AbstractCommand<typeof args> {
-  static args = args;
-  public async _execute(argv: argsT): Promise<void> {
+export const command = "feedback <message>";
+export const description =
+  "Post a string directly to the maintainers' Slack where they can factor in your feedback, laugh at your jokes, cry at your insults, or test the bounds of Slack injection attacks.";
+export const builder = args;
+
+export const handler = async (argv: argsT): Promise<void> => {
+  return profiledHandler(command, async () => {
     const user = userEmail();
     const response = await fetch(
       `https://api.graphite.dev/v1/graphite/feedback`,
@@ -41,5 +44,5 @@ export default class FeedbackCommand extends AbstractCommand<typeof args> {
       );
       process.exit(1);
     }
-  }
-}
+  });
+};
