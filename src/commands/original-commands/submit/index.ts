@@ -1,8 +1,23 @@
+import graphiteCLIRoutes from "@screenplaydev/graphite-cli-routes";
+import * as t from "@screenplaydev/retype";
+import { request } from "@screenplaydev/retyped-routes";
 import chalk from "chalk";
 import yargs from "yargs";
 import { validate } from "../../../actions/validate";
 import AbstractCommand from "../../../lib/abstract_command";
-import { gpExecSync, logInternalErrorAndExit } from "../../../lib/utils";
+import { API_SERVER } from "../../../lib/api";
+import {
+  gpExecSync,
+  logError,
+  logErrorAndExit,
+  logInfo,
+  logInternalErrorAndExit,
+  logNewline,
+  logSuccess,
+  logWarn,
+  repoConfig,
+  userConfig,
+} from "../../../lib/utils";
 import Branch from "../../../wrapper-classes/branch";
 import PrintStacksCommand from "../print-stacks";
 
@@ -29,32 +44,16 @@ const args = {
   },
 } as const;
 type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
+
+type TSubmittedPRInfo = t.UnwrapSchemaMap<
+  typeof graphiteCLIRoutes.submitPullRequests.response
+>;
+
 export default class SubmitCommand extends AbstractCommand<typeof args> {
   static args = args;
   public async _execute(argv: argsT): Promise<void> {
-    gpExecSync(
-      {
-        command: `gh --version`,
-      },
-      (_) => {
-        console.log(chalk.red(`Could not find bash tool 'gh', please install`));
-        process.exit(1);
-      }
-    );
-
-    gpExecSync(
-      {
-        command: `gh auth status`,
-      },
-      (_) => {
-        console.log(
-          chalk.red(
-            `"gh auth status" indicates that you are not currently authed to GitHub`
-          )
-        );
-        process.exit(1);
-      }
-    );
+    const cliAuthToken = this.getCLIAuthToken();
+    const { repoName, repoOwner } = this.getRepoNameAndOwner();
 
     try {
       await validate("FULLSTACK", true);
@@ -63,46 +62,181 @@ export default class SubmitCommand extends AbstractCommand<typeof args> {
       throw new Error(`Validation failed before submitting.`);
     }
 
-    let currentBranch: Branch | undefined | null = Branch.getCurrentBranch();
+    const currentBranch: Branch | undefined | null = Branch.getCurrentBranch();
+    if (currentBranch === undefined || currentBranch === null) {
+      logWarn("No current stack to submit.");
+      return;
+    }
 
-    const stackOfBranches: Branch[] = [];
+    const stackOfBranches = await this.getDownstackInclusive(currentBranch);
+
+    this.pushBranchesToRemote(stackOfBranches);
+
+    const submittedPRInfo = await this.submitPRsForBranches({
+      branches: stackOfBranches,
+      cliAuthToken: cliAuthToken,
+      repoOwner: repoOwner,
+      repoName: repoName,
+    });
+    if (submittedPRInfo === null) {
+      logErrorAndExit("Failed to submit commits. Please try again.");
+    }
+
+    this.printSubmittedPRInfo(submittedPRInfo.prs);
+  }
+
+  getCLIAuthToken(): string {
+    const token = userConfig.authToken;
+    if (!token || token.length === 0) {
+      logErrorAndExit(
+        "Please authenticate your Graphite CLI by visiting https://app.graphite.dev/activate."
+      );
+    }
+    return token;
+  }
+
+  getRepoNameAndOwner(): {
+    repoName: string;
+    repoOwner: string;
+  } {
+    const repoName = repoConfig.repoName;
+    const repoOwner = repoConfig.owner;
+    if (repoName === undefined || repoOwner === undefined) {
+      logErrorAndExit(
+        "Could not infer repoName and/or repo owner. Please fill out these fields in your repo's copy of .graphite_repo_config."
+      );
+    }
+    return {
+      repoName: repoName,
+      repoOwner: repoOwner,
+    };
+  }
+
+  async getDownstackInclusive(topOfStack: Branch): Promise<Branch[]> {
+    const downstack: Branch[] = [];
+
+    let currentBranch = topOfStack;
     while (
       currentBranch != null &&
       currentBranch != undefined &&
-      currentBranch.getParentFromMeta() != undefined // dont put up pr for a base branch like "main"
+      // don't include trunk as part of the stack
+      currentBranch.getParentFromMeta() != undefined
     ) {
-      stackOfBranches.push(currentBranch);
-      const parentBranchName: string | undefined =
-        currentBranch.getParentFromMeta()?.name;
-      if (parentBranchName) {
-        currentBranch = await Branch.branchWithName(parentBranchName);
-      } else {
-        currentBranch = undefined;
-      }
+      downstack.push(currentBranch);
+
+      const parentBranchName: string = currentBranch.getParentFromMeta()!.name;
+      currentBranch = await Branch.branchWithName(parentBranchName);
     }
 
-    // Create PR's for oldest branches first.
-    stackOfBranches.reverse();
+    downstack.reverse();
 
-    stackOfBranches.forEach((branch, i) => {
-      const parentBranch: undefined | Branch =
-        i > 0 ? stackOfBranches[i - 1] : undefined;
+    return downstack;
+  }
+
+  pushBranchesToRemote(branches: Branch[]): void {
+    logInfo("Pushing branches to remote...");
+    logNewline();
+
+    branches.forEach((branch) => {
+      logInfo(`Pushing ${branch.name}...`);
       gpExecSync(
         {
-          command: [
-            `gh pr create`,
-            `--head ${branch.name}`,
-            ...(parentBranch ? [`--base ${parentBranch.name}`] : []),
-            ...(argv.fill ? [`-f`] : []),
-          ].join(" "),
-          options: { stdio: "inherit" },
+          command: `git push origin -f ${branch.name}`,
         },
         (_) => {
           logInternalErrorAndExit(
-            `Failed to submit changes for ${branch.name}. Aborting...`
+            `Failed to push changes for ${branch.name} to origin. Aborting...`
           );
         }
       );
+      logNewline();
     });
   }
+
+  async submitPRsForBranches(args: {
+    branches: Branch[];
+    cliAuthToken: string;
+    repoOwner: string;
+    repoName: string;
+  }): Promise<TSubmittedPRInfo | null> {
+    const branchPRInfo: t.UnwrapSchemaMap<
+      typeof graphiteCLIRoutes.submitPullRequests.params
+    >["prs"] = [];
+    args.branches.forEach((branch) => {
+      // The branch here should always have a parent - above, the branches we've
+      // gathered should exclude trunk which ensures that every branch we're submitting
+      // a PR for has a valid parent.
+      const parentBranchName = branch.getParentFromMeta()!.name;
+
+      branchPRInfo.push({
+        action: "create",
+        head: branch.name,
+        base: parentBranchName,
+        // Default placeholder title.
+        // TODO (nicholasyan): improve this by using the commit message if the
+        // branch only has 1 commit.
+        title: `Merge ${branch.name} into ${parentBranchName}`,
+      });
+    });
+
+    try {
+      const response = await request.requestWithArgs(
+        API_SERVER,
+        graphiteCLIRoutes.submitPullRequests,
+        {
+          authToken: args.cliAuthToken,
+          repoOwner: args.repoOwner,
+          repoName: args.repoName,
+          prs: branchPRInfo,
+        }
+      );
+
+      if (
+        response._response.status !== 200 ||
+        response._response.body === null
+      ) {
+        return null;
+      }
+
+      return response;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  printSubmittedPRInfo(
+    prs: t.UnwrapSchemaMap<
+      typeof graphiteCLIRoutes.submitPullRequests.response
+    >["prs"]
+  ): void {
+    prs.forEach((pr) => {
+      logSuccess(pr.head);
+
+      let status: string = pr.status;
+      switch (pr.status) {
+        case "updated":
+          status = chalk.yellow(status);
+          break;
+        case "created":
+          status = chalk.green(status);
+          break;
+        case "error":
+          status = chalk.red(status);
+          break;
+        default:
+          this.assertUnreachable(pr);
+      }
+
+      if ("error" in pr) {
+        logError(pr.error);
+      } else {
+        console.log(`${pr.prURL} (${status})`);
+      }
+
+      logNewline();
+    });
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  assertUnreachable(arg: never): void {}
 }
