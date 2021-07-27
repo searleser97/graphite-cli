@@ -6,7 +6,6 @@ import FeedbackCommand from "./commands/original-commands/feedback";
 import FixCommand from "./commands/original-commands/fix";
 import PrintStacksCommand from "./commands/original-commands/print-stacks";
 import SubmitCommand from "./commands/original-commands/submit";
-import SyncCommand from "./commands/original-commands/sync";
 import ValidateCommand from "./commands/original-commands/validate";
 
 // https://www.npmjs.com/package/tmp#graceful-cleanup
@@ -54,14 +53,7 @@ yargs
       await new FeedbackCommand().execute(argv);
     }
   )
-  .command(
-    "sync",
-    "Delete any stacks that have been merged or squashed into your trunk branch, and restack their children recursively.",
-    SyncCommand.args,
-    async (argv) => {
-      await new SyncCommand().execute(argv);
-    }
-  )
+
   .command("demo", false, DemoCommand.args, async (argv) => {
     await new DemoCommand().execute(argv);
   })
