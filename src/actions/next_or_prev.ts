@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 import chalk from "chalk";
 import { execSync } from "child_process";
-import { logErrorAndExit } from "../../../lib/utils";
-import Branch from "../../../wrapper-classes/branch";
+import { logErrorAndExit } from "../lib/utils";
+import Branch from "../wrapper-classes/branch";
 
-export async function nextOrPrev(
+export async function nextOrPrevAction(
   nextOrPrev: "next" | "prev",
   silent: boolean
 ): Promise<void> {

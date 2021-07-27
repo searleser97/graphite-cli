@@ -1,6 +1,6 @@
 import yargs from "yargs";
-import AbstractCommand from "../../lib/abstract_command";
-import { nextOrPrev } from "../original-commands/next-or-prev";
+import { nextOrPrevAction } from "../../actions/next_or_prev";
+import { profiledHandler } from "../../lib/telemetry";
 
 const args = {
   silent: {
@@ -14,17 +14,12 @@ const args = {
 
 type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 
-export class PrevCommand extends AbstractCommand<typeof args> {
-  static args = args;
-  public async _execute(argv: argsT): Promise<void> {
-    await nextOrPrev("prev", argv.silent);
-  }
-}
-
 export const command = "prev";
 export const description =
   "If you're in a stack: Branch A → Branch B (you are here) → Branch C. Takes you to the previous branch (Branch A). If there are two parent branches, errors out and tells you the various branches you could go to.";
 export const builder = args;
 export const handler = async (argv: argsT): Promise<void> => {
-  await new PrevCommand().execute(argv);
+  return profiledHandler(command, async () => {
+    await nextOrPrevAction("prev", argv.silent);
+  });
 };
