@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import fs from "fs-extra";
 import tmp from "tmp";
-import Branch from "../../src/wrapper-classes/branch";
-import { execCliCommand } from "../utils/exec_cli_command";
-import GitRepo from "../utils/git_repo";
+import Branch from "../../../src/wrapper-classes/branch";
+import { execCliCommand } from "../../utils/exec_cli_command";
+import GitRepo from "../../utils/git_repo";
 
 describe("stack regen", function () {
   let tmpDir: tmp.DirResult;

@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { execSync } from "child_process";
 import fs from "fs-extra";
 import tmp from "tmp";
-import { execCliCommand } from "../utils/exec_cli_command";
-import GitRepo from "../utils/git_repo";
+import { execCliCommand } from "../../utils/exec_cli_command";
+import GitRepo from "../../utils/git_repo";
 
 function fakeGitSquashAndMerge(
   repo: GitRepo,
