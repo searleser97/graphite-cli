@@ -37,4 +37,10 @@ describe("branch create", function () {
     }).to.throw;
     expect(repo.currentBranchName()).to.equal("main");
   });
+
+  it("Can create a branch without providing a name", () => {
+    repo.createChange("2");
+    execCliCommand(`branch create -s`, { fromDir: tmpDir.name });
+    expect(repo.currentBranchName()).to.not.equal("main");
+  });
 });

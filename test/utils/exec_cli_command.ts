@@ -6,7 +6,7 @@ export function execCliCommand(
   execSync(
     `NODE_ENV=development node ${__dirname}/../../dist/src/index.js ${command}`,
     {
-      stdio: "ignore",
+      stdio: "inherit",
       cwd: opts.fromDir,
     }
   );

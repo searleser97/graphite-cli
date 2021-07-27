@@ -6,7 +6,8 @@ const args = {
   name: {
     type: "string",
     positional: true,
-    demandOption: true,
+    demandOption: false,
+    optional: true,
     describe: "The name of the target which builds your app for release",
   },
   message: {
@@ -24,7 +25,7 @@ const args = {
 } as const;
 type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 
-export const command = "create <name>";
+export const command = "create [name]";
 export const description =
   "Takes the current changes and creates a new branch off of whatever branch you were previously working on.";
 export const builder = args;
