@@ -1,3 +1,6 @@
+## 0.4.2 2020-07-27
+- Update `branch create` command to accept optional positional argument for branch name.
+
 ## 0.4.1 2020-07-27
 - Fix demo command and downstack string.
 
