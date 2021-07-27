@@ -4,7 +4,7 @@ import tmp from "tmp";
 import { execCliCommand } from "../utils/exec_cli_command";
 import GitRepo from "../utils/git_repo";
 
-describe("stack onto", function () {
+describe("upstack onto", function () {
   let tmpDir: tmp.DirResult;
   let repo: GitRepo;
   this.beforeEach(() => {
@@ -25,7 +25,7 @@ describe("stack onto", function () {
     repo.createChange("3", "b");
     execCliCommand("branch create 'b' -m '3' -s", { fromDir: tmpDir.name });
 
-    execCliCommand("stack onto main -s", { fromDir: tmpDir.name });
+    execCliCommand("upstack onto main -s", { fromDir: tmpDir.name });
     expect(repo.listCurrentBranchCommitMessages().join(", ")).to.equal("3, 1");
     expect(() => execCliCommand("validate -s", { fromDir: tmpDir.name })).not.to
       .throw;
