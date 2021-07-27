@@ -1,6 +1,6 @@
 import yargs from "yargs";
 
-export const command = "upstack <command>";
+export const command = "downstack <command>";
 export const desc =
   "Commands that operate upstack (inclusive) from your current branch";
 export const aliases = ["ds"];
