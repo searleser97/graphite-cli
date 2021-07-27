@@ -1,14 +1,16 @@
 import { execSync } from "child_process";
 import tmp from "tmp";
-import yargs from "yargs";
-import GitRepo from "../../../../test/utils/git_repo";
-import AbstractCommand from "../../../lib/abstract_command";
+import GitRepo from "../../test/utils/git_repo";
+import { profiledHandler } from "../lib/telemetry";
+
+export const command = "fix";
+export const description = false;
 
 const args = {} as const;
-type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
-export default class DemoCommand extends AbstractCommand<typeof args> {
-  static args = args;
-  public async _execute(argv: argsT): Promise<void> {
+export const builder = args;
+
+export const handler = async (): Promise<void> => {
+  return profiledHandler(command, async () => {
     const tmpDir = tmp.dirSync();
     console.log(tmpDir.name);
     const repo = new GitRepo(tmpDir.name);
@@ -51,8 +53,8 @@ export default class DemoCommand extends AbstractCommand<typeof args> {
     );
 
     repo.checkoutBranch("main");
-  }
-}
+  });
+};
 
 function execCliCommand(command: string, opts: { fromDir: string }) {
   execSync(`gp ${command}`, {
