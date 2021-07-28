@@ -30,4 +30,36 @@ describe("upstack onto", function () {
     expect(() => execCliCommand("validate -s", { fromDir: tmpDir.name })).not.to
       .throw;
   });
+
+  it("Can gracefully catch a merge conflict on first rebase", () => {
+    repo.createChange("2", "a");
+    execCliCommand("branch create 'a' -m '2' -s", { fromDir: tmpDir.name });
+
+    repo.checkoutBranch("main");
+    repo.createChangeAndCommit("3", "a");
+
+    repo.checkoutBranch("a");
+    expect(() => {
+      execCliCommand("upstack onto main -s", { fromDir: tmpDir.name });
+    }).to.not.throw();
+  });
+
+  it("Can recover a branch that has no git and meta parents", () => {
+    // Create our dangling branch
+    repo.createAndCheckoutBranch("a");
+    repo.createChangeAndCommit("a", "a");
+
+    // Move main forward
+    repo.checkoutBranch("main");
+    repo.createChangeAndCommit("b", "b");
+
+    // branch a is dangling now, but we should still be able to "upstack onto" main
+    repo.checkoutBranch("a");
+    expect(() => {
+      execCliCommand("upstack onto main", { fromDir: tmpDir.name });
+    }).to.not.throw();
+    expect(repo.listCurrentBranchCommitMessages().join(", ")).to.equal(
+      "a, b, 1"
+    );
+  });
 });
