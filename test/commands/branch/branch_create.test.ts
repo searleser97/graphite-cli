@@ -34,7 +34,7 @@ describe("branch create", function () {
     repo.createChange("2");
     expect(() => {
       execCliCommand(`branch create "a" -s`, { fromDir: tmpDir.name });
-    }).to.throw;
+    }).to.throw(Error);
     expect(repo.currentBranchName()).to.equal("main");
   });
 

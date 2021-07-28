@@ -36,10 +36,10 @@ describe("validate action", function () {
     execCliCommand(`branch create "d" -s`, { fromDir: tmpDir.name });
 
     repo.checkoutBranch("a");
-    expect(validate("UPSTACK", true)).to.throw;
+    expect(validate("UPSTACK", true)).to.throw(Error);
 
     repo.checkoutBranch("b");
-    expect(validate("UPSTACK", true)).to.throw;
+    expect(validate("UPSTACK", true)).to.throw(Error);
 
     repo.checkoutBranch("c");
     expect(validate("UPSTACK", true)).to.not.throw;
@@ -65,13 +65,13 @@ describe("validate action", function () {
     expect(validate("DOWNSTACK", true)).to.not.throw;
 
     repo.checkoutBranch("b");
-    expect(validate("DOWNSTACK", true)).to.throw;
+    expect(validate("DOWNSTACK", true)).to.throw(Error);
 
     repo.checkoutBranch("c");
-    expect(validate("DOWNSTACK", true)).to.throw;
+    expect(validate("DOWNSTACK", true)).to.throw(Error);
 
     repo.checkoutBranch("d");
-    expect(validate("DOWNSTACK", true)).to.throw;
+    expect(validate("DOWNSTACK", true)).to.throw(Error);
   });
 
   it("Can validate fullstack", () => {
@@ -85,6 +85,6 @@ describe("validate action", function () {
 
     repo.createAndCheckoutBranch("c");
     repo.createChangeAndCommit("c");
-    expect(validate("FULLSTACK", true)).to.throw;
+    expect(validate("FULLSTACK", true)).to.throw(Error);
   });
 });
