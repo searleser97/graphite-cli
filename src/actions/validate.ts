@@ -1,14 +1,13 @@
 import chalk from "chalk";
 import { log } from "../lib/log";
-import { logWarn } from "../lib/utils";
+import { logErrorAndExit } from "../lib/utils";
 import Branch from "../wrapper-classes/branch";
 
 type scopeT = "UPSTACK" | "DOWNSTACK" | "FULLSTACK";
 export async function validate(scope: scopeT, silent: boolean): Promise<void> {
   const branch = Branch.getCurrentBranch();
   if (branch === null) {
-    logWarn("Not currently on a branch; no stack to validate.");
-    return;
+    logErrorAndExit("Not currently on a branch; no stack to validate.");
   }
 
   switch (scope) {

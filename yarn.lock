@@ -360,7 +360,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/chai@npm:^4.2.14":
+"@types/chai-as-promised@npm:^7.1.4":
+  version: 7.1.4
+  resolution: "@types/chai-as-promised@npm:7.1.4"
+  dependencies:
+    "@types/chai": "*"
+  checksum: 8bfb9d8c79c85cf6061b64ead67bfe5534f2ef8c50ad80e804293dd06d688b3f57f99624cedbf80a6257a1abaa16949fbf7e9ab9590ed1baa1373a605af4d772
+  languageName: node
+  linkType: hard
+
+"@types/chai@npm:*, @types/chai@npm:^4.2.14":
   version: 4.2.21
   resolution: "@types/chai@npm:4.2.21"
   checksum: fc7d32fbae47ad6d3576bcb8cf24a243af03c93bb97cd9456a5415da888ab78a03800dcc4cc25a21ad1b493bcdaee7377f163bc4dd8db463c3530dafddea205c
@@ -1160,6 +1169,17 @@ __metadata:
   version: 6.2.0
   resolution: "camelcase@npm:6.2.0"
   checksum: 654700600a80cb1f06ab85b3e2fe80333f94b441884d40826becdac549774f51b0317c6dcb6040416df26241fa9481eb58d0c1659d4d6d5627dcd4259be61beb
+  languageName: node
+  linkType: hard
+
+"chai-as-promised@npm:^7.1.1":
+  version: 7.1.1
+  resolution: "chai-as-promised@npm:7.1.1"
+  dependencies:
+    check-error: ^1.0.2
+  peerDependencies:
+    chai: ">= 2.1.2 < 5"
+  checksum: 747b85b679f8decdbb83f249883519ea5d4de055f2502fb830db28175af1e4f02a6a8c505d6edce1f2cf28c5512d5e3666db92906b80e77fca30b37c3e5cd360
   languageName: node
   linkType: hard
 
@@ -2249,6 +2269,7 @@ fsevents@~2.3.1:
     "@screenplaydev/retype": ^0.2.0
     "@screenplaydev/retyped-routes": ^0.1.0
     "@types/chai": ^4.2.14
+    "@types/chai-as-promised": ^7.1.4
     "@types/chalk": ^2.2.0
     "@types/fs-extra": ^9.0.1
     "@types/mocha": ^8.2.3
@@ -2261,6 +2282,7 @@ fsevents@~2.3.1:
     "@typescript-eslint/parser": ^4.15.2
     "@yarnpkg/pnpify": ^3.0.0-rc.10
     chai: ^4.2.0
+    chai-as-promised: ^7.1.1
     chalk: ^4.1.0
     eslint: ^7.20.0
     fs-extra: ^9.0.1
