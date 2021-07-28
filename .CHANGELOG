@@ -1,3 +1,6 @@
+## 0.5.1 2020-07-28
+- Dont automatically create repo config file.
+
 ## 0.5.0 2020-07-27
 - Improved `stack submit` command and promoted command out of expermental status.
 
