@@ -32,17 +32,17 @@ async function validateBranchDownInclusive(branch: Branch, silent: boolean) {
     return;
   }
   if (gitParents.length === 0 && metaParent) {
-    throw new Error(
+    logErrorAndExit(
       `(${branch.name}) has stack parent (${metaParent.name}), but no parent in the git graph.`
     );
   }
   if (gitParents.length === 1 && !metaParent) {
-    throw new Error(
+    logErrorAndExit(
       `(${branch.name}) has git parent (${gitParents[0].name}), but no parent in the stack.`
     );
   }
   if (gitParents.length > 1) {
-    throw new Error(
+    logErrorAndExit(
       `(${branch.name}) has more than one git parent (${gitParents.map(
         (b) => b.name
       )}).`
@@ -52,7 +52,7 @@ async function validateBranchDownInclusive(branch: Branch, silent: boolean) {
     throw new Error("Unreachable");
   }
   if (gitParents[0].name !== metaParent.name) {
-    throw new Error(
+    logErrorAndExit(
       `(${branch.name}) has git parent (${gitParents[0].name}) but stack parent (${metaParent.name})`
     );
   }
@@ -66,7 +66,7 @@ async function validateBranchUpInclusive(branch: Branch, silent: boolean) {
   const hasGitChildren = gitChildren && gitChildren.length > 0;
   const hasMetaChildren = metaChildren.length > 0;
   if (hasGitChildren && !hasMetaChildren) {
-    throw new Error(`${branch.name} missing a child in the stack`);
+    logErrorAndExit(`${branch.name} missing a child in the stack`);
   }
   if (!hasGitChildren && hasMetaChildren) {
     throw new Error(`Unable to find child branches in git for ${branch.name}`);
@@ -80,7 +80,7 @@ async function validateBranchUpInclusive(branch: Branch, silent: boolean) {
     (gitChild) => !metaChildren!.map((b) => b.name).includes(gitChild.name)
   );
   if (gitChildrenMissingInMeta.length > 0) {
-    throw new Error(
+    logErrorAndExit(
       `Child branches [${gitChildrenMissingInMeta
         .map((b) => `(${b.name})`)
         .join(", ")}] not found in the stack.`
