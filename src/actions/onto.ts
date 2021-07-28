@@ -62,7 +62,7 @@ async function validateStack(silent: boolean) {
   } catch {
     log(
       chalk.red(
-        `Cannot "fix --onto", git branches must match stack. Consider running "fix" or "regen" first.`
+        `Cannot move stack "onto", git branches must match stack. Consider running "fix" or "regen" first.`
       ),
       { silent }
     );
