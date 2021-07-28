@@ -51,8 +51,6 @@ Where is the metadata stored? In your repo in the form of refs, visible at `.git
 
 ---
 
-### Current CLI Commands (`gp --help`)
-
 ### CLI Commands (`gp --help`)
 
 ```bash
@@ -110,9 +108,3 @@ Here's how to get started:
   - Others' pull requests
 - You can add additional filter views with "Add section", re-arrange existing sections by dragging and dropping them, and update or delete a section in "Settings"
 - Refresh the dashboard for an up-to-date view of your review queue
-
----
-
-### Public roadmap
-
-We'd love your feedback on our roadmap for Graphite - please feel free to add comments, share feedback, or send us a request for a new feature or bug fix!
