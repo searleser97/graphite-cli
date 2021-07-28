@@ -14,12 +14,6 @@ const args = {
     type: "boolean",
     alias: "s",
   },
-  onto: {
-    describe: `A branch to restack the current stack onto`,
-    demandOption: false,
-    optional: true,
-    type: "string",
-  },
 } as const;
 type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 export const builder = args;
