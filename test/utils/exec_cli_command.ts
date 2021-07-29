@@ -11,3 +11,17 @@ export function execCliCommand(
     }
   );
 }
+
+export function execCliCommandAndGetOutput(
+  command: string,
+  opts: { fromDir: string }
+): string {
+  return execSync(
+    `NODE_ENV=development node ${__dirname}/../../dist/src/index.js ${command}`,
+    {
+      cwd: opts.fromDir,
+    }
+  )
+    .toString()
+    .trim();
+}
