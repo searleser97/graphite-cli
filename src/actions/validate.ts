@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { log } from "../lib/log";
-import { logErrorAndExit } from "../lib/utils";
+import { logErrorAndExit, logInfo, logNewline } from "../lib/utils";
 import Branch from "../wrapper-classes/branch";
 
 type scopeT = "UPSTACK" | "DOWNSTACK" | "FULLSTACK";
@@ -12,14 +12,20 @@ export async function validate(scope: scopeT, silent: boolean): Promise<void> {
 
   switch (scope) {
     case "UPSTACK":
+      logInfo("Validating upstack (inclusive) branches...");
       await validateBranchUpInclusive(branch, silent);
       break;
     case "DOWNSTACK":
+      logInfo("Validating downstack (inclusive) branches...");
       await validateBranchDownInclusive(branch, silent);
       break;
     case "FULLSTACK":
+      logInfo("Validating downstack (inclusive) branches...");
       await validateBranchDownInclusive(branch, silent);
+      logNewline();
+      logInfo("Validating upstack (inclusive) branches...");
       await validateBranchUpInclusive(branch, silent);
+      logNewline();
       break;
   }
   log(`Current stack is valid`, { silent: silent });
@@ -32,6 +38,7 @@ async function validateBranchDownInclusive(branch: Branch, silent: boolean) {
     !!metaParent &&
     !!branch.branchesWithSameCommit().find((b) => b.name == metaParent.name);
   if (gitParents.length === 0 && !metaParent) {
+    log(`✅ ${chalk.green(`(${branch.name}) validated`)}`, { silent });
     return;
   }
   if (
@@ -66,6 +73,7 @@ async function validateBranchDownInclusive(branch: Branch, silent: boolean) {
       `(${branch.name}) has git parent (${gitParents[0].name}) but stack parent (${metaParent.name})`
     );
   }
+  log(`✅ ${chalk.green(`(${branch.name}) validated`)}`, { silent });
   await validateBranchDownInclusive(metaParent, silent);
   return;
 }
