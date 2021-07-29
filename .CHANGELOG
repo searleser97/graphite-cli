@@ -1,3 +1,7 @@
+## 0.5.3 2020-07-29
+- Begin infering trunk branch from .git config.
+- Ignore trunk parent branches during validation and other operations.
+
 ## 0.5.2 2020-07-28
 - `upstack onto` can now move branches with no parent branches.
 - `validate` now passes cases where branches point to the same commit.
