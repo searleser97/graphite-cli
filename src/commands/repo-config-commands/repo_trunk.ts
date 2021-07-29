@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { profiledHandler } from "../../lib/telemetry";
-import { getTrunk } from "../../lib/utils";
+import { trunk } from "../../lib/utils";
 
 const args = {} as const;
 
@@ -10,6 +10,6 @@ export const description =
 export const builder = args;
 export const handler = async (): Promise<void> => {
   return profiledHandler(command, async () => {
-    console.log(`Infered trunk branch = (${chalk.green(getTrunk())})`);
+    console.log(`Infered trunk branch = (${chalk.green(trunk)})`);
   });
 };

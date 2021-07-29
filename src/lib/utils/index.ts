@@ -12,7 +12,7 @@ import {
   logSuccess,
   logWarn,
 } from "./splog";
-import { getTrunk } from "./trunk";
+import { trunk } from "./trunk";
 import { uncommittedChanges } from "./uncommitted_changes";
 
 export {
@@ -31,5 +31,5 @@ export {
   rebaseInProgress,
   detectStagedChanges,
   uncommittedChanges,
-  getTrunk,
+  trunk,
 };

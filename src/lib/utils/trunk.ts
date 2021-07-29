@@ -43,10 +43,14 @@ function findCommonlyNamedTrunk(): Branch {
     );
   }
 }
-export function getTrunk(): Branch {
+function getTrunk(): Branch {
   const remoteOriginBranch = findRemoteOriginBranch();
   if (remoteOriginBranch) {
     return remoteOriginBranch;
   }
   return findCommonlyNamedTrunk();
 }
+
+const trunk = getTrunk();
+
+export default trunk;
