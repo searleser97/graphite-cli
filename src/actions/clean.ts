@@ -48,7 +48,7 @@ export async function cleanAction(opts: {
     }
     for (const child of children) {
       checkoutBranch(child.name);
-      log(`Restacking (${child.name}) onto (${opts.trunk})`);
+      log(`upstacking (${child.name}) onto (${opts.trunk})`);
       await ontoAction(opts.trunk, true);
       trunkChildren.push(child);
     }
