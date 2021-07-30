@@ -50,7 +50,7 @@ async function restackOnto(
   // Check that the current branch has a parent to prevent moving main
   checkBranchCanBeMoved(currentBranch, onto, silent);
   await validateStack(silent);
-  const parent = await getParentForRebaseOnto(currentBranch, onto, silent);
+  const parent = await getParentForRebaseOnto(currentBranch, onto);
   // Save the old ref from before rebasing so that children can find their bases.
   currentBranch.setMetaPrevRef(currentBranch.getCurrentRef());
 
@@ -106,21 +106,13 @@ function checkBranchCanBeMoved(branch: Branch, onto: string, silent: boolean) {
 
 async function getParentForRebaseOnto(
   branch: Branch,
-  onto: string,
-  silent: boolean
+  onto: string
 ): Promise<Branch> {
   const metaParent = branch.getParentFromMeta();
   if (metaParent) {
     return metaParent;
   }
-  // If no meta parent, consider one chance to recover automatically:
-  if (branch.getParentsFromGit().length == 0) {
-    // The branch has fallen behind main and has no metadata to recover it.
-    // Automatically recover the situation by setting the meta parent.
-    branch.setParentBranchName(onto);
-    return new Branch(onto);
-  }
-  logErrorAndExit(
-    `Cannot stack onto, (${branch.name}) has no parent branch in the stack.`
-  );
+  // If no meta parent, automatically recover:
+  branch.setParentBranchName(onto);
+  return new Branch(onto);
 }

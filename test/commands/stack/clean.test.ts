@@ -20,15 +20,6 @@ function fakeGitSquashAndMerge(
   execSync(`git -C ${repo.dir} branch -D temp`);
 }
 
-function expectCommits(repo: GitRepo, commitMessages: string) {
-  expect(
-    repo
-      .listCurrentBranchCommitMessages()
-      .slice(0, commitMessages.split(",").length)
-      .join(", ")
-  ).to.equal(commitMessages);
-}
-
 function expectBranches(repo: GitRepo, sortedBranches: string) {
   expect(
     execSync(
@@ -79,10 +70,10 @@ for (const scene of allScenes) {
       scene.repo.execCliCommand(`stack clean -sf --trunk main`);
 
       expectBranches(scene.repo, "b, main");
-      expectCommits(scene.repo, "squash, 1");
+      scene.repo.expectCommits("squash, 1");
 
       scene.repo.checkoutBranch("b");
-      expectCommits(scene.repo, "b, squash, 1");
+      scene.repo.expectCommits("b, squash, 1");
     });
 
     it("Can delete two branches off a three-stack", async () => {
@@ -102,7 +93,7 @@ for (const scene of allScenes) {
       scene.repo.execCliCommand(`stack clean -sf --trunk main`);
 
       expectBranches(scene.repo, "c, main");
-      expectCommits(scene.repo, "squash_b, squash_a, 1");
+      scene.repo.expectCommits("squash_b, squash_a, 1");
     });
 
     it("Can delete two branches, while syncing inbetween, off a three-stack", async () => {
@@ -123,7 +114,7 @@ for (const scene of allScenes) {
       scene.repo.execCliCommand(`stack clean -sf --trunk main`);
 
       expectBranches(scene.repo, "c, main");
-      expectCommits(scene.repo, "squash_b, squash_a, 1");
+      scene.repo.expectCommits("squash_b, squash_a, 1");
     });
 
     xit("Can detect dead branches off multiple stacks", async () => {
@@ -154,11 +145,11 @@ for (const scene of allScenes) {
 
       expectBranches(scene.repo, "c, e, main");
       scene.repo.checkoutBranch("main");
-      expectCommits(scene.repo, "squash_b, squash_a, 1");
+      scene.repo.expectCommits("squash_b, squash_a, 1");
       scene.repo.checkoutBranch("c");
-      expectCommits(scene.repo, "c, squash_d, squash_b, squash_a, 1");
+      scene.repo.expectCommits("c, squash_d, squash_b, squash_a, 1");
       scene.repo.checkoutBranch("e");
-      expectCommits(scene.repo, "e, squash_d, squash_b, squash_a, 1");
+      scene.repo.expectCommits("e, squash_d, squash_b, squash_a, 1");
     });
   });
 }
