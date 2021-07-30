@@ -4,7 +4,7 @@ import { allScenes } from "../scenes";
 import { configureTest } from "../utils";
 
 for (const scene of allScenes) {
-  describe("Branch tests", function () {
+  describe(`(${scene}): branch class`, function () {
     configureTest(this, scene);
 
     it("Can list git parent for a branch", () => {
