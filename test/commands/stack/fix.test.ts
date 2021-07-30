@@ -1,77 +1,71 @@
 import { expect } from "chai";
-import fs from "fs-extra";
-import tmp from "tmp";
-import { execCliCommand } from "../../utils/exec_cli_command";
-import GitRepo from "../../utils/git_repo";
+import { allScenes } from "../../scenes";
 
-describe("stack fix", function () {
-  let tmpDir: tmp.DirResult;
-  let repo: GitRepo;
-  this.beforeEach(() => {
-    tmpDir = tmp.dirSync();
-    repo = new GitRepo(tmpDir.name);
-    repo.createChangeAndCommit("1", "first");
+for (const scene of allScenes) {
+  describe(`(${scene}): stack fix`, function () {
+    this.beforeEach(() => {
+      scene.setup();
+    });
+    this.afterEach(() => {
+      scene.cleanup();
+    });
+    this.timeout(5000);
+
+    it("Can fix a stack of three branches", () => {
+      scene.repo.createChange("2", "a");
+      scene.repo.execCliCommand("branch create 'a' -m '2' -s");
+      scene.repo.createChangeAndCommit("2.5", "a.5");
+
+      scene.repo.createChange("3", "b");
+      scene.repo.execCliCommand("branch create 'b' -m '3' -s");
+      scene.repo.createChangeAndCommit("3.5", "b.5");
+
+      scene.repo.createChange("4", "c");
+      scene.repo.execCliCommand("branch create 'c' -m '4' -s");
+
+      expect(
+        scene.repo.listCurrentBranchCommitMessages().slice(0, 6).join(", ")
+      ).to.equal("4, 3.5, 3, 2.5, 2, 1");
+
+      scene.repo.checkoutBranch("main");
+      scene.repo.createChangeAndCommit("1.5", "main");
+      expect(
+        scene.repo.listCurrentBranchCommitMessages().slice(0, 2).join(", ")
+      ).to.equal("1.5, 1");
+
+      scene.repo.execCliCommand("stack fix -s");
+
+      expect(scene.repo.currentBranchName()).to.equal("main");
+
+      scene.repo.checkoutBranch("c");
+      expect(
+        scene.repo.listCurrentBranchCommitMessages().slice(0, 7).join(", ")
+      ).to.equal("4, 3.5, 3, 2.5, 2, 1.5, 1");
+    });
+
+    it("Can handle merge conflicts, leveraging prevRef metadata", () => {
+      scene.repo.createChange("2");
+      scene.repo.execCliCommand("branch create 'a' -m '2' -s");
+
+      scene.repo.createChange("3");
+      scene.repo.execCliCommand("branch create 'b' -m '3' -s");
+
+      scene.repo.checkoutBranch("main");
+      scene.repo.createChangeAndCommit("1.5");
+
+      scene.repo.execCliCommand("stack fix -s");
+      scene.repo.finishInteractiveRebase();
+
+      expect(scene.repo.rebaseInProgress()).to.eq(false);
+      expect(scene.repo.currentBranchName()).to.eq("a");
+
+      scene.repo.execCliCommand("stack fix -s");
+      scene.repo.finishInteractiveRebase();
+
+      expect(scene.repo.currentBranchName()).to.eq("b");
+      expect(
+        scene.repo.listCurrentBranchCommitMessages().slice(0, 4).join(", ")
+      ).to.equal("3, 2, 1.5, 1");
+    });
   });
-  afterEach(() => {
-    fs.emptyDirSync(tmpDir.name);
-    tmpDir.removeCallback();
-  });
-  this.timeout(5000);
-
-  it("Can fix a stack of three branches", () => {
-    repo.createChange("2", "a");
-    execCliCommand("branch create 'a' -m '2' -s", { fromDir: tmpDir.name });
-    repo.createChangeAndCommit("2.5", "a.5");
-
-    repo.createChange("3", "b");
-    execCliCommand("branch create 'b' -m '3' -s", { fromDir: tmpDir.name });
-    repo.createChangeAndCommit("3.5", "b.5");
-
-    repo.createChange("4", "c");
-    execCliCommand("branch create 'c' -m '4' -s", { fromDir: tmpDir.name });
-
-    expect(repo.listCurrentBranchCommitMessages().join(", ")).to.equal(
-      "4, 3.5, 3, 2.5, 2, 1"
-    );
-
-    repo.checkoutBranch("main");
-    repo.createChangeAndCommit("1.5", "main");
-    expect(repo.listCurrentBranchCommitMessages().join(", ")).to.equal(
-      "1.5, 1"
-    );
-
-    execCliCommand("stack fix -s", { fromDir: tmpDir.name });
-
-    expect(repo.currentBranchName()).to.equal("main");
-
-    repo.checkoutBranch("c");
-    expect(repo.listCurrentBranchCommitMessages().join(", ")).to.equal(
-      "4, 3.5, 3, 2.5, 2, 1.5, 1"
-    );
-  });
-
-  it("Can handle merge conflicts, leveraging prevRef metadata", () => {
-    repo.createChange("2");
-    execCliCommand("branch create 'a' -m '2' -s", { fromDir: tmpDir.name });
-
-    repo.createChange("3");
-    execCliCommand("branch create 'b' -m '3' -s", { fromDir: tmpDir.name });
-
-    repo.checkoutBranch("main");
-    repo.createChangeAndCommit("1.5");
-
-    execCliCommand("stack fix -s", { fromDir: repo.dir });
-    repo.finishInteractiveRebase();
-
-    expect(repo.rebaseInProgress()).to.eq(false);
-    expect(repo.currentBranchName()).to.eq("a");
-
-    execCliCommand("stack fix -s", { fromDir: repo.dir });
-    repo.finishInteractiveRebase();
-
-    expect(repo.currentBranchName()).to.eq("b");
-    expect(repo.listCurrentBranchCommitMessages().join(", ")).to.equal(
-      "3, 2, 1.5, 1"
-    );
-  });
-});
+}
