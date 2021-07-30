@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import { execSync } from "child_process";
 import { allScenes } from "../../scenes";
+import { configureTest } from "../../utils";
 import GitRepo from "../../utils/git_repo";
 
 function fakeGitSquashAndMerge(
@@ -37,13 +38,7 @@ function expectBranches(repo: GitRepo, sortedBranches: string) {
 for (const scene of allScenes) {
   // eslint-disable-next-line max-lines-per-function
   describe(`(${scene}): stack clean`, function () {
-    this.beforeEach(() => {
-      scene.setup();
-    });
-    this.afterEach(() => {
-      scene.cleanup();
-    });
-    this.timeout(10000);
+    configureTest(this, scene);
 
     it("Can delete a single merged branch", async () => {
       scene.repo.createChange("2", "a");
