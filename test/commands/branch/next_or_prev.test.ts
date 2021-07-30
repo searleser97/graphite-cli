@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { allScenes } from "../../scenes";
 
 for (const scene of allScenes) {
-  describe("next and prev", function () {
+  describe(`(${scene}): next and prev`, function () {
     this.beforeEach(() => {
       scene.setup();
     });
