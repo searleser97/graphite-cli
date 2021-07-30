@@ -1,58 +1,51 @@
 import { expect } from "chai";
-import fs from "fs-extra";
-import tmp from "tmp";
-import { execCliCommand } from "../../utils/exec_cli_command";
-import GitRepo from "../../utils/git_repo";
+import { allScenes } from "../../scenes";
 
-describe("stack validate", function () {
-  let tmpDir: tmp.DirResult;
-  let repo: GitRepo;
-  this.beforeEach(() => {
-    tmpDir = tmp.dirSync();
-    repo = new GitRepo(tmpDir.name);
-    repo.createChangeAndCommit("1", "first");
+for (const scene of allScenes) {
+  describe(`(${scene}): stack validate`, function () {
+    this.beforeEach(() => {
+      scene.setup();
+    });
+    this.afterEach(() => {
+      scene.cleanup();
+    });
+    this.timeout(5000);
+
+    it("Can pass validation", () => {
+      scene.repo.createChange("2");
+      scene.repo.execCliCommand(`branch create "a" -s`);
+      scene.repo.createChange("3");
+      scene.repo.execCliCommand(`branch create "b" -s`);
+
+      // Expect this command not to fail.
+      scene.repo.execCliCommand("stack validate -s");
+    });
+
+    it("Can fail validation", () => {
+      scene.repo.createAndCheckoutBranch("a");
+      scene.repo.createChangeAndCommit("2");
+      scene.repo.createAndCheckoutBranch("b");
+      scene.repo.createChangeAndCommit("3");
+
+      // Expect this command to fail for having no meta.
+      expect(() => {
+        scene.repo.execCliCommand("stack validate -s");
+      }).to.throw(Error);
+    });
+
+    it("Can pass validation if child branch points to same commit as parent", () => {
+      scene.repo.createAndCheckoutBranch("a");
+      scene.repo.execCliCommand("upstack onto main");
+
+      expect(() => {
+        scene.repo.execCliCommand("stack validate -s");
+      }).to.not.throw(Error);
+
+      scene.repo.checkoutBranch("main");
+
+      expect(() => {
+        scene.repo.execCliCommand("stack validate -s");
+      }).to.not.throw(Error);
+    });
   });
-  afterEach(() => {
-    fs.emptyDirSync(tmpDir.name);
-    tmpDir.removeCallback();
-  });
-  this.timeout(5000);
-
-  it("Can pass validation", () => {
-    repo.createChange("2");
-    execCliCommand(`branch create "a" -s`, { fromDir: tmpDir.name });
-    repo.createChange("3");
-    execCliCommand(`branch create "b" -s`, { fromDir: tmpDir.name });
-
-    // Expect this command not to fail.
-    execCliCommand("stack validate -s", { fromDir: tmpDir.name });
-  });
-
-  it("Can fail validation", () => {
-    repo.createAndCheckoutBranch("a");
-    repo.createChangeAndCommit("2");
-    repo.createAndCheckoutBranch("b");
-    repo.createChangeAndCommit("3");
-
-    // Expect this command to fail for having no meta.
-    expect(() => {
-      execCliCommand("stack validate -s", { fromDir: tmpDir.name });
-    }).to.throw(Error);
-  });
-
-  it("Can pass validation if child branch points to same commit as parent", () => {
-    repo.createAndCheckoutBranch("a");
-    repo.checkoutBranch("a");
-    execCliCommand("upstack onto main", { fromDir: tmpDir.name });
-
-    expect(() => {
-      execCliCommand("stack validate -s", { fromDir: tmpDir.name });
-    }).to.not.throw(Error);
-
-    repo.checkoutBranch("main");
-
-    expect(() => {
-      execCliCommand("stack validate -s", { fromDir: tmpDir.name });
-    }).to.not.throw(Error);
-  });
-});
+}
