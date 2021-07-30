@@ -3,7 +3,7 @@
 ---
 
 👋 **Welcome to the Graphite beta!**<br><br>
-Everything is still a little early, so please add comments if you have any questions, feedback, or suggestions!
+Everything is still a little early, so please add comments to our [user guide in Notion](https://screenplay.notion.site/Graphite-user-guide-66300dcb2d29453fb1d6ea013a8d4859) if you have any questions, feedback, or suggestions!
 
 ---
 
