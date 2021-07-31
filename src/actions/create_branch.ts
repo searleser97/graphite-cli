@@ -1,9 +1,8 @@
+import { ExitFailedError, PreconditionsFailedError } from "../lib/errors";
 import {
   checkoutBranch,
   detectStagedChanges,
   gpExecSync,
-  logErrorAndExit,
-  logInternalErrorAndExit,
   makeId,
   userConfig,
 } from "../lib/utils";
@@ -17,7 +16,7 @@ export async function createBranchAction(opts: {
 }): Promise<void> {
   const parentBranch = Branch.getCurrentBranch();
   if (parentBranch === null) {
-    logErrorAndExit(
+    throw new PreconditionsFailedError(
       `Cannot find current branch. Please ensure you're running this command atop a checked-out branch.`
     );
   }
@@ -49,13 +48,13 @@ export async function createBranchAction(opts: {
         command: `git branch -d ${branchName}`,
         options: { stdio: "ignore" },
       });
-      logErrorAndExit("Failed to commit changes, aborting");
+      throw new ExitFailedError("Failed to commit changes, aborting");
     }
   );
 
   const currentBranch = Branch.getCurrentBranch();
   if (currentBranch === null) {
-    logErrorAndExit(
+    throw new ExitFailedError(
       `Created but failed to checkout ${branchName}. Please try again.`
     );
   }
@@ -68,7 +67,10 @@ function ensureSomeStagedChanges(silent: boolean): void {
     if (!silent) {
       gpExecSync({ command: `git status`, options: { stdio: "inherit" } });
     }
-    logErrorAndExit(`Cannot "branch create", no staged changes detected.`);
+
+    throw new PreconditionsFailedError(
+      `Cannot "branch create", no staged changes detected.`
+    );
   }
 }
 
@@ -83,7 +85,7 @@ function checkoutNewBranch(branchName: string, silent: boolean): void {
       options: silent ? { stdio: "ignore" } : {},
     },
     (_) => {
-      logInternalErrorAndExit(`Failed to checkout new branch ${branchName}`);
+      throw new ExitFailedError(`Failed to checkout new branch ${branchName}`);
     }
   );
 }
