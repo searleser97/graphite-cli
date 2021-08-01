@@ -25,9 +25,6 @@ yargs
   .command("sync", false, {}, async () => {
     console.log("`gp sync` has been renamed to `gp stack clean`");
   })
-  .command("stack onto [name]", false, {}, async () => {
-    console.log("Did you mean `gp upstack onto <name>`?");
-  })
   .command("submit", false, {}, async () => {
     console.log("`gp submit` has been renamed to `gp stack submit`");
   })
