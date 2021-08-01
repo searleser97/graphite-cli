@@ -75,7 +75,7 @@ export async function restackBranch(
     () => {
       if (rebaseInProgress()) {
         throw new RebaseConflictError(
-          "Please resolve the rebase conflict and then continue with your `stack fix` command."
+          "Please resolve the rebase conflict (via `git rebase --continue`) and then rerun `stack fix` to fix the remainder of the stack."
         );
       }
     }
