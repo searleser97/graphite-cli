@@ -138,10 +138,7 @@ export default class Branch {
   }
 
   getParentFromMeta(): Branch | undefined {
-    if (
-      this.name === getTrunk().name ||
-      this.pointsToSameCommitAs(getTrunk())
-    ) {
+    if (this.name === getTrunk().name) {
       return undefined;
     }
     const parentName = this.getMeta()?.parentBranchName;
@@ -315,11 +312,12 @@ export default class Branch {
   public getParentsFromGit(): Branch[] {
     if (
       // Current branch is trunk
-      this.name === getTrunk().name ||
-      this.pointsToSameCommitAs(getTrunk())
+      this.name === getTrunk().name
       // Current branch shares
     ) {
       return [];
+    } else if (this.pointsToSameCommitAs(getTrunk())) {
+      return [getTrunk()];
     }
     return this.getChildrenOrParents("PARENTS");
   }

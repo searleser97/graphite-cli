@@ -31,5 +31,13 @@ for (const scene of allScenes) {
         branch.stackByTracingGitParents().join(",")
       );
     });
+
+    it("Can gen a stack where the branch matches main HEAD", () => {
+      scene.repo.createAndCheckoutBranch("a");
+      scene.repo.execCliCommand("stack regen -s");
+      expect(scene.repo.currentBranchName()).to.eq("a");
+      scene.repo.execCliCommand(`branch prev`);
+      expect(scene.repo.currentBranchName()).to.eq("main");
+    });
   });
 }

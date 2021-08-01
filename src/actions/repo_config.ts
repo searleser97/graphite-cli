@@ -8,7 +8,6 @@ const CONFIG_NAME = ".graphite_repo_config";
 type RepoConfigT = {
   owner?: string;
   name?: string;
-  trunkBranches?: string[];
 };
 
 export const CURRENT_REPO_CONFIG_PATH: string = (() => {
@@ -83,8 +82,6 @@ export function setRepoName(name: string): void {
 function persistRepoConfig(config: RepoConfigT): void {
   fs.writeFileSync(CURRENT_REPO_CONFIG_PATH, JSON.stringify(config));
 }
-
-export const trunkBranches: string[] | undefined = repoConfig.trunkBranches;
 
 function inferRepoGitHubInfo(): {
   repoOwner: string;

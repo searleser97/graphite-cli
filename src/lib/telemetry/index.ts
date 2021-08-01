@@ -12,6 +12,7 @@ import {
   ExitFailedError,
   PreconditionsFailedError,
   RebaseConflictError,
+  ValidationFailedError,
 } from "../errors";
 import { logError, logInfo } from "../utils";
 
@@ -109,10 +110,11 @@ export async function profile(
       logError(err.message);
     } else if (err instanceof PreconditionsFailedError) {
       logInfo(err.message);
-    }
-    if (err instanceof RebaseConflictError) {
+    } else if (err instanceof RebaseConflictError) {
       // eslint-disable-next-line no-restricted-syntax
       process.exit(0);
+    } else if (err instanceof ValidationFailedError) {
+      logError(`Validation: ${err.message}`);
     }
     // eslint-disable-next-line no-restricted-syntax
     process.exit(1);

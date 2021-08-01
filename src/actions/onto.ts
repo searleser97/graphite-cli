@@ -1,36 +1,32 @@
-import {
-  CURRENT_REPO_CONFIG_PATH,
-  trunkBranches,
-} from "../actions/repo_config";
 import { validate } from "../actions/validate";
 import PrintStacksCommand from "../commands/original-commands/print-stacks";
 import {
+  ExitFailedError,
   PreconditionsFailedError,
   RebaseConflictError,
   ValidationFailedError,
 } from "../lib/errors";
 import { log } from "../lib/log";
-import { currentBranchPrecondition } from "../lib/preconditions";
+import {
+  branchExistsPrecondition,
+  currentBranchPrecondition,
+  uncommittedChangesPrecondition,
+} from "../lib/preconditions";
 import {
   checkoutBranch,
+  getTrunk,
   gpExecSync,
   rebaseInProgress,
-  uncommittedChanges,
 } from "../lib/utils";
 import Branch from "../wrapper-classes/branch";
 import { restackBranch } from "./fix";
 export async function ontoAction(onto: string, silent: boolean): Promise<void> {
-  if (uncommittedChanges()) {
-    throw new PreconditionsFailedError("Cannot fix with uncommitted changes");
-  }
+  uncommittedChangesPrecondition();
+  const originalBranch = currentBranchPrecondition();
   // Print state before
   log(`Before fix:`, { silent });
   !silent && (await new PrintStacksCommand().executeUnprofiled({ silent }));
-
-  const originalBranch = currentBranchPrecondition();
-
-  await restackOnto(originalBranch, onto, silent);
-
+  await stackOnto(originalBranch, onto, silent);
   checkoutBranch(originalBranch.name);
 
   // Print state after
@@ -38,17 +34,8 @@ export async function ontoAction(onto: string, silent: boolean): Promise<void> {
   !silent && (await new PrintStacksCommand().executeUnprofiled({ silent }));
 }
 
-async function restackOnto(
-  currentBranch: Branch,
-  onto: string,
-  silent: boolean
-) {
-  if (!Branch.exists(onto)) {
-    throw new PreconditionsFailedError(
-      `Branch named "${onto}" does not exist in the current repo`
-    );
-  }
-  // Check that the current branch has a parent to prevent moving main
+async function stackOnto(currentBranch: Branch, onto: string, silent: boolean) {
+  branchExistsPrecondition(onto);
   checkBranchCanBeMoved(currentBranch, onto);
   await validateStack(silent);
   const parent = await getParentForRebaseOnto(currentBranch, onto);
@@ -66,6 +53,10 @@ async function restackOnto(
         throw new RebaseConflictError(
           "Please resolve the rebase conflict and then continue with your `stack onto` command."
         );
+      } else {
+        throw new ExitFailedError(
+          `Rebase failed when moving (${currentBranch.name}) onto (${onto}).`
+        );
       }
     }
   );
@@ -76,6 +67,17 @@ async function restackOnto(
     await restackBranch(child, silent);
   }
 }
+
+function getParentForRebaseOnto(branch: Branch, onto: string): Branch {
+  const metaParent = branch.getParentFromMeta();
+  if (metaParent) {
+    return metaParent;
+  }
+  // If no meta parent, automatically recover:
+  branch.setParentBranchName(onto);
+  return new Branch(onto);
+}
+
 async function validateStack(silent: boolean) {
   try {
     await validate("UPSTACK", silent);
@@ -87,22 +89,9 @@ async function validateStack(silent: boolean) {
 }
 
 function checkBranchCanBeMoved(branch: Branch, onto: string) {
-  if (trunkBranches && branch.name in trunkBranches) {
+  if (branch.name === getTrunk().name) {
     throw new PreconditionsFailedError(
-      `Cannot stack (${branch.name}) onto ${onto}, (${branch.name}) is listed in (${CURRENT_REPO_CONFIG_PATH}) as a trunk branch.`
+      `Cannot stack (${branch.name}) onto ${onto}, (${branch.name}) is currently set as trunk.`
     );
   }
-}
-
-async function getParentForRebaseOnto(
-  branch: Branch,
-  onto: string
-): Promise<Branch> {
-  const metaParent = branch.getParentFromMeta();
-  if (metaParent) {
-    return metaParent;
-  }
-  // If no meta parent, automatically recover:
-  branch.setParentBranchName(onto);
-  return new Branch(onto);
 }
