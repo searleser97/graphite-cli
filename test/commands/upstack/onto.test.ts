@@ -34,7 +34,9 @@ for (const scene of allScenes) {
     it("Can recover a branch that has no git and meta parents", () => {
       // Create our dangling branch
       scene.repo.createAndCheckoutBranch("a");
-      scene.repo.createChangeAndCommit("a", "a");
+      scene.repo.createChangeAndCommit("a1", "a1");
+      scene.repo.createChangeAndCommit("a2", "a2");
+      scene.repo.createChangeAndCommit("a3", "a3");
 
       // Move main forward
       scene.repo.checkoutBranch("main");
@@ -45,7 +47,12 @@ for (const scene of allScenes) {
       expect(() => {
         scene.repo.execCliCommand("upstack onto main");
       }).to.not.throw();
-      scene.repo.expectCommits("a, b, 1");
+      scene.repo.expectCommits("a3, a2, a1, b, 1");
+      scene.repo.checkoutBranch("a");
+
+      // Prove that we have meta now.
+      scene.repo.execCliCommand("branch prev");
+      expect(scene.repo.currentBranchName()).to.eq("main");
     });
   });
 }

@@ -7,7 +7,7 @@ for (const scene of allScenes) {
   describe(`(${scene}): stack regen`, function () {
     configureTest(this, scene);
 
-    it("Can fix a stack", () => {
+    it("Can regen a stack from scratch", () => {
       scene.repo.createChange("2", "2");
       scene.repo.execCliCommand(`branch create "a" -s`);
 
