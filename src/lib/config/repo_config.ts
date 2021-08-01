@@ -1,8 +1,8 @@
 import chalk from "chalk";
 import fs from "fs-extra";
 import path from "path";
-import { ExitFailedError, PreconditionsFailedError } from "../lib/errors";
-import { gpExecSync } from "../lib/utils";
+import { ExitFailedError, PreconditionsFailedError } from "../../lib/errors";
+import { gpExecSync } from "../../lib/utils";
 
 const CONFIG_NAME = ".graphite_repo_config";
 type RepoConfigT = {
@@ -29,19 +29,19 @@ export const CURRENT_REPO_CONFIG_PATH: string = (() => {
   return path.join(repoRootPath, CONFIG_NAME);
 })();
 
-let repoConfig: RepoConfigT = {};
+export let config: RepoConfigT = {};
 if (fs.existsSync(CURRENT_REPO_CONFIG_PATH)) {
   const repoConfigRaw = fs.readFileSync(CURRENT_REPO_CONFIG_PATH);
   try {
-    repoConfig = JSON.parse(repoConfigRaw.toString().trim()) as RepoConfigT;
+    config = JSON.parse(repoConfigRaw.toString().trim()) as RepoConfigT;
   } catch (e) {
     console.log(chalk.yellow(`Warning: Malformed ${CURRENT_REPO_CONFIG_PATH}`));
   }
 }
 
 export function getRepoOwner(): string {
-  if (repoConfig.owner) {
-    return repoConfig.owner;
+  if (config.owner) {
+    return config.owner;
   }
 
   const inferredInfo = inferRepoGitHubInfo();
@@ -55,13 +55,13 @@ export function getRepoOwner(): string {
 }
 
 export function setRepoOwner(owner: string): void {
-  repoConfig.owner = owner;
-  persistRepoConfig(repoConfig);
+  config.owner = owner;
+  persistRepoConfig(config);
 }
 
 export function getRepoName(): string {
-  if (repoConfig.name) {
-    return repoConfig.name;
+  if (config.name) {
+    return config.name;
   }
 
   const inferredInfo = inferRepoGitHubInfo();
@@ -75,8 +75,8 @@ export function getRepoName(): string {
 }
 
 export function setRepoName(name: string): void {
-  repoConfig.name = name;
-  persistRepoConfig(repoConfig);
+  config.name = name;
+  persistRepoConfig(config);
 }
 
 function persistRepoConfig(config: RepoConfigT): void {
