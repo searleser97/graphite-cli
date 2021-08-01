@@ -47,7 +47,7 @@ for (const scene of allScenes) {
       expectBranches(scene.repo, "a, main");
 
       fakeGitSquashAndMerge(scene.repo, "a", "squash");
-      scene.repo.execCliCommand(`stack clean -sf --trunk main`);
+      scene.repo.execCliCommand(`stack clean -sf`);
 
       expectBranches(scene.repo, "main");
     });
@@ -62,7 +62,7 @@ for (const scene of allScenes) {
       expectBranches(scene.repo, "a, b, main");
 
       fakeGitSquashAndMerge(scene.repo, "a", "squash");
-      scene.repo.execCliCommand(`stack clean -sf --trunk main`);
+      scene.repo.execCliCommand(`stack clean -sf`);
 
       expectBranches(scene.repo, "b, main");
       scene.repo.expectCommits("squash, 1");
@@ -85,7 +85,7 @@ for (const scene of allScenes) {
 
       fakeGitSquashAndMerge(scene.repo, "a", "squash_a");
       fakeGitSquashAndMerge(scene.repo, "b", "squash_b");
-      scene.repo.execCliCommand(`stack clean -sf --trunk main`);
+      scene.repo.execCliCommand(`stack clean -sf`);
 
       expectBranches(scene.repo, "c, main");
       scene.repo.expectCommits("squash_b, squash_a, 1");
@@ -104,9 +104,9 @@ for (const scene of allScenes) {
       expectBranches(scene.repo, "a, b, c, main");
 
       fakeGitSquashAndMerge(scene.repo, "a", "squash_a");
-      scene.repo.execCliCommand(`stack clean -sf --trunk main`);
+      scene.repo.execCliCommand(`stack clean -sf`);
       fakeGitSquashAndMerge(scene.repo, "b", "squash_b");
-      scene.repo.execCliCommand(`stack clean -sf --trunk main`);
+      scene.repo.execCliCommand(`stack clean -sf`);
 
       expectBranches(scene.repo, "c, main");
       scene.repo.expectCommits("squash_b, squash_a, 1");
@@ -136,7 +136,7 @@ for (const scene of allScenes) {
       fakeGitSquashAndMerge(scene.repo, "b", "squash_b");
       fakeGitSquashAndMerge(scene.repo, "d", "squash_d");
 
-      scene.repo.execCliCommand(`stack clean -sf --trunk main`);
+      scene.repo.execCliCommand(`stack clean -sf`);
 
       expectBranches(scene.repo, "c, e, main");
       scene.repo.checkoutBranch("main");

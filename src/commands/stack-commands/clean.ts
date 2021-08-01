@@ -3,12 +3,6 @@ import { cleanAction } from "../../actions/clean";
 import { profiledHandler } from "../../lib/telemetry";
 
 const args = {
-  trunk: {
-    type: "string",
-    describe: "The name of your trunk branch that stacks get merged into.",
-    required: true,
-    alias: "t",
-  },
   silent: {
     describe: `silence output from the command`,
     demandOption: false,
@@ -43,7 +37,6 @@ export const handler = async (argv: argsT): Promise<void> => {
       silent: argv.silent,
       pull: argv.pull,
       force: argv.force,
-      trunk: argv.trunk,
     });
   });
 };

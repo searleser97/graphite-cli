@@ -6,11 +6,15 @@ import { regenAction } from "../actions/regen";
 import { ExitFailedError, PreconditionsFailedError } from "../lib/errors";
 import { log } from "../lib/log";
 import { currentBranchPrecondition } from "../lib/preconditions";
-import { checkoutBranch, gpExecSync, uncommittedChanges } from "../lib/utils";
+import {
+  checkoutBranch,
+  getTrunk,
+  gpExecSync,
+  uncommittedChanges,
+} from "../lib/utils";
 import Branch from "../wrapper-classes/branch";
 
 export async function cleanAction(opts: {
-  trunk: string;
   pull: boolean;
   force: boolean;
   silent: boolean;
@@ -20,38 +24,38 @@ export async function cleanAction(opts: {
   }
 
   const oldBranch = currentBranchPrecondition();
+  const trunk = getTrunk().name;
 
   const oldBranchName = oldBranch.name;
-  checkoutBranch(opts.trunk);
+  checkoutBranch(trunk);
   if (opts.pull) {
     gpExecSync({ command: `git pull` }, () => {
       checkoutBranch(oldBranchName);
-      throw new ExitFailedError(`Failed to pull trunk ${opts.trunk}`);
+      throw new ExitFailedError(`Failed to pull trunk ${trunk}`);
     });
   }
-  const trunkChildren: Branch[] = await new Branch(
-    opts.trunk
-  ).getChildrenFromMeta();
+  const trunkChildren: Branch[] = await new Branch(trunk).getChildrenFromMeta();
   do {
     const branch = trunkChildren.pop()!;
     const children = await branch.getChildrenFromMeta();
-    if (!shouldDeleteBranch(branch.name, opts.trunk)) {
+    if (!shouldDeleteBranch(branch.name)) {
       continue;
     }
     for (const child of children) {
       checkoutBranch(child.name);
-      log(`upstacking (${child.name}) onto (${opts.trunk})`);
-      await ontoAction(opts.trunk, true);
+      log(`upstacking (${child.name}) onto (${trunk})`);
+      await ontoAction(trunk, true);
       trunkChildren.push(child);
     }
-    checkoutBranch(opts.trunk);
+    checkoutBranch(trunk);
     await deleteBranch({ branchName: branch.name, ...opts });
     await regenAction(true);
   } while (trunkChildren.length > 0);
   checkoutBranch(oldBranchName);
 }
 
-function shouldDeleteBranch(branchName: string, trunk: string): boolean {
+function shouldDeleteBranch(branchName: string): boolean {
+  const trunk = getTrunk().name;
   const cherryCheckProvesMerged = execSync(
     `mergeBase=$(git merge-base ${trunk} ${branchName}) && git cherry ${trunk} $(git commit-tree $(git rev-parse "${branchName}^{tree}") -p $mergeBase -m _)`
   )
@@ -72,7 +76,6 @@ function shouldDeleteBranch(branchName: string, trunk: string): boolean {
 
 async function deleteBranch(opts: {
   branchName: string;
-  trunk: string;
   force: boolean;
   silent: boolean;
 }) {
@@ -82,7 +85,7 @@ async function deleteBranch(opts: {
       name: "value",
       message: `Delete (${chalk.green(
         opts.branchName
-      )}), which has been merged into (${opts.trunk})?`,
+      )}), which has been merged into (${getTrunk().name})?`,
       initial: true,
     });
     if (response.value != true) {
