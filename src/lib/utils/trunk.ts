@@ -33,7 +33,7 @@ function findRemoteOriginBranch(): Branch | undefined {
 
 function findCommonlyNamedTrunk(): Branch {
   const potentialTrunks = Branch.allBranches().filter((b) =>
-    ["main", "master"].includes(b.name)
+    ["main", "master", "development", "develop"].includes(b.name)
   );
   if (potentialTrunks.length === 1) {
     return potentialTrunks[0];
