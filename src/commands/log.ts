@@ -6,6 +6,7 @@ const args = {} as const;
 export const command = "log";
 export const description = "Log all stacks";
 export const builder = args;
+export const aliases = ["l"];
 
 export const handler = async (): Promise<void> => {
   return profiledHandler(command, async () => {
