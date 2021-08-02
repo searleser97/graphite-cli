@@ -9,6 +9,7 @@ import fetch from "node-fetch";
 import { version } from "../../../package.json";
 import { API_SERVER } from "../api";
 import {
+  ConfigError,
   ExitFailedError,
   PreconditionsFailedError,
   RebaseConflictError,
@@ -115,6 +116,8 @@ export async function profile(
       process.exit(0);
     } else if (err instanceof ValidationFailedError) {
       logError(`Validation: ${err.message}`);
+    } else if (err instanceof ConfigError) {
+      logError(`Bad Config: ${err.message}`);
     }
     // eslint-disable-next-line no-restricted-syntax
     process.exit(1);

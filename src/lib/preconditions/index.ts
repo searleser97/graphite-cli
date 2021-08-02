@@ -1,6 +1,6 @@
 import Branch from "../../wrapper-classes/branch";
 import { PreconditionsFailedError } from "../errors";
-import { uncommittedChanges } from "../utils";
+import { gpExecSync, uncommittedChanges } from "../utils";
 
 function currentBranchPrecondition(): Branch {
   const branch = Branch.getCurrentBranch();
@@ -28,8 +28,26 @@ function uncommittedChangesPrecondition(): void {
   }
 }
 
+function currentGitRepoPrecondition(): string {
+  const repoRootPath = gpExecSync(
+    {
+      command: `git rev-parse --show-toplevel`,
+    },
+    () => {
+      return Buffer.alloc(0);
+    }
+  )
+    .toString()
+    .trim();
+  if (!repoRootPath || repoRootPath.length === 0) {
+    throw new PreconditionsFailedError("No .git repository found.");
+  }
+  return repoRootPath;
+}
+
 export {
   currentBranchPrecondition,
   branchExistsPrecondition,
   uncommittedChangesPrecondition,
+  currentGitRepoPrecondition,
 };

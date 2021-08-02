@@ -1,5 +1,5 @@
 import yargs from "yargs";
-import { RepoConfig } from "../../lib/config";
+import { repoConfig } from "../../lib/config";
 import { profiledHandler } from "../../lib/telemetry";
 import { logInfo } from "../../lib/utils";
 
@@ -23,9 +23,9 @@ export const builder = args;
 export const handler = async (argv: argsT): Promise<void> => {
   return profiledHandler(command, async () => {
     if (argv.set) {
-      RepoConfig.setRepoOwner(argv.set);
+      repoConfig.setRepoOwner(argv.set);
     } else {
-      logInfo(RepoConfig.getRepoOwner());
+      logInfo(repoConfig.getRepoOwner());
     }
   });
 };

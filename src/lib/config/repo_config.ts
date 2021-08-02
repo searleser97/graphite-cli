@@ -1,88 +1,99 @@
 import chalk from "chalk";
 import fs from "fs-extra";
 import path from "path";
-import { ExitFailedError, PreconditionsFailedError } from "../../lib/errors";
+import { ExitFailedError } from "../../lib/errors";
 import { gpExecSync } from "../../lib/utils";
+import { PreconditionsFailedError } from "../errors";
 
-const CONFIG_NAME = ".graphite_repo_config";
-type RepoConfigT = {
-  owner?: string;
-  name?: string;
-};
-
-export const CURRENT_REPO_CONFIG_PATH: string = (() => {
+const currentGitRepoPrecondition = (): string => {
   const repoRootPath = gpExecSync(
     {
       command: `git rev-parse --show-toplevel`,
     },
-    (e) => {
+    () => {
       return Buffer.alloc(0);
     }
   )
     .toString()
     .trim();
-
   if (!repoRootPath || repoRootPath.length === 0) {
     throw new PreconditionsFailedError("No .git repository found.");
   }
+  return repoRootPath;
+};
 
-  return path.join(repoRootPath, CONFIG_NAME);
-})();
+const CONFIG_NAME = ".graphite_repo_config";
+const CURRENT_REPO_CONFIG_PATH = path.join(
+  currentGitRepoPrecondition(),
+  CONFIG_NAME
+);
 
-export let config: RepoConfigT = {};
-if (fs.existsSync(CURRENT_REPO_CONFIG_PATH)) {
-  const repoConfigRaw = fs.readFileSync(CURRENT_REPO_CONFIG_PATH);
-  try {
-    config = JSON.parse(repoConfigRaw.toString().trim()) as RepoConfigT;
-  } catch (e) {
-    console.log(chalk.yellow(`Warning: Malformed ${CURRENT_REPO_CONFIG_PATH}`));
-  }
-}
+type RepoConfigT = {
+  owner?: string;
+  name?: string;
+  trunk?: string;
+};
 
-export function getRepoOwner(): string {
-  if (config.owner) {
-    return config.owner;
-  }
+class RepoConfig {
+  _data: RepoConfigT;
 
-  const inferredInfo = inferRepoGitHubInfo();
-  if (inferredInfo?.repoOwner) {
-    return inferredInfo.repoOwner;
+  constructor(data: RepoConfigT) {
+    this._data = data;
   }
 
-  throw new ExitFailedError(
-    "Could not determine the owner of this repo (e.g. 'screenplaydev' in the repo 'screenplaydev/graphite-cli'). Please run `gp repo-config owner --set <owner>` to manually set the repo owner."
-  );
-}
-
-export function setRepoOwner(owner: string): void {
-  config.owner = owner;
-  persistRepoConfig(config);
-}
-
-export function getRepoName(): string {
-  if (config.name) {
-    return config.name;
+  private save(): void {
+    fs.writeFileSync(CURRENT_REPO_CONFIG_PATH, JSON.stringify(this._data));
   }
 
-  const inferredInfo = inferRepoGitHubInfo();
-  if (inferredInfo?.repoName) {
-    return inferredInfo.repoName;
+  public getRepoOwner(): string {
+    const configOwner = this._data.owner;
+    if (configOwner) {
+      return configOwner;
+    }
+
+    const inferredInfo = inferRepoGitHubInfo();
+    if (inferredInfo?.repoOwner) {
+      return inferredInfo.repoOwner;
+    }
+
+    throw new ExitFailedError(
+      "Could not determine the owner of this repo (e.g. 'screenplaydev' in the repo 'screenplaydev/graphite-cli'). Please run `gp repo-config owner --set <owner>` to manually set the repo owner."
+    );
   }
 
-  throw new ExitFailedError(
-    "Could not determine the name of this repo (e.g. 'graphite-cli' in the repo 'screenplaydev/graphite-cli'). Please run `gp repo-config name --set <owner>` to manually set the repo name."
-  );
-}
+  public setTrunk(trunkName: string): void {
+    this._data.trunk = trunkName;
+    this.save();
+  }
 
-export function setRepoName(name: string): void {
-  config.name = name;
-  persistRepoConfig(config);
-}
+  public getTrunk(): string | undefined {
+    return this._data.trunk;
+  }
 
-function persistRepoConfig(config: RepoConfigT): void {
-  fs.writeFileSync(CURRENT_REPO_CONFIG_PATH, JSON.stringify(config));
-}
+  public setRepoOwner(owner: string): void {
+    this._data.owner = owner;
+    this.save();
+  }
 
+  public getRepoName(): string {
+    if (this._data.name) {
+      return this._data.name;
+    }
+
+    const inferredInfo = inferRepoGitHubInfo();
+    if (inferredInfo?.repoName) {
+      return inferredInfo.repoName;
+    }
+
+    throw new ExitFailedError(
+      "Could not determine the name of this repo (e.g. 'graphite-cli' in the repo 'screenplaydev/graphite-cli'). Please run `gp repo-config name --set <owner>` to manually set the repo name."
+    );
+  }
+  public setRepoName(name: string): void {
+    this._data.name = name;
+    this.save();
+  }
+}
 function inferRepoGitHubInfo(): {
   repoOwner: string;
   repoName: string;
@@ -130,3 +141,23 @@ function inferRepoGitHubInfo(): {
     repoName: name,
   };
 }
+
+function readRepoConfig(): RepoConfig {
+  if (fs.existsSync(CURRENT_REPO_CONFIG_PATH)) {
+    const repoConfigRaw = fs.readFileSync(CURRENT_REPO_CONFIG_PATH);
+    try {
+      const parsedConfig = JSON.parse(
+        repoConfigRaw.toString().trim()
+      ) as RepoConfigT;
+      return new RepoConfig(parsedConfig);
+    } catch (e) {
+      console.log(
+        chalk.yellow(`Warning: Malformed ${CURRENT_REPO_CONFIG_PATH}`)
+      );
+    }
+  }
+  return new RepoConfig({});
+}
+
+const repoConfigSingleton = readRepoConfig();
+export default repoConfigSingleton;

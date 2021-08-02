@@ -2,6 +2,8 @@ import { execSync } from "child_process";
 import fs from "fs-extra";
 import path from "path";
 import Branch from "../../wrapper-classes/branch";
+import { repoConfig } from "../config";
+import { ConfigError, ExitFailedError } from "../errors";
 
 function findRemoteOriginBranch(): Branch | undefined {
   let config;
@@ -31,33 +33,42 @@ function findRemoteOriginBranch(): Branch | undefined {
   return undefined;
 }
 
-function findCommonlyNamedTrunk(): Branch {
+function findCommonlyNamedTrunk(): Branch | undefined {
   const potentialTrunks = Branch.allBranches().filter((b) =>
     ["main", "master", "development", "develop"].includes(b.name)
   );
   if (potentialTrunks.length === 1) {
     return potentialTrunks[0];
-  } else if (potentialTrunks.length === 0) {
-    throw new Error(
-      `Failed to find either "main" or "master" branch, cannot infer repo trunk.`
-    );
-  } else {
-    throw new Error(
-      `Detected both a "main" and "master" branch, cannot infer repo trunk.`
-    );
   }
+  return undefined;
 }
 
 let memoizedTrunk: Branch;
+export function inferTrunk(): Branch | undefined {
+  return findRemoteOriginBranch() || findCommonlyNamedTrunk();
+}
 export function getTrunk(): Branch {
   if (memoizedTrunk) {
     return memoizedTrunk;
   }
-  const remoteOriginBranch = findRemoteOriginBranch();
-  if (remoteOriginBranch) {
-    memoizedTrunk = remoteOriginBranch;
+  const configTrunkName = repoConfig.getTrunk();
+  if (configTrunkName) {
+    if (!Branch.exists(configTrunkName)) {
+      throw new ExitFailedError(
+        `Configured trunk branch (${configTrunkName}) not found in the current repo. Consider updating the trunk name by running "gp repo init".`
+      );
+    }
+    memoizedTrunk = new Branch(configTrunkName);
     return memoizedTrunk;
   }
-  memoizedTrunk = findCommonlyNamedTrunk();
-  return memoizedTrunk;
+
+  // No configured trunk, infer
+  const inferredTrunk = inferTrunk();
+  if (inferredTrunk) {
+    memoizedTrunk = inferredTrunk;
+    return memoizedTrunk;
+  }
+  throw new ConfigError(
+    `No configured trunk branch, and unable to infer. Consider setting the trunk name by running "gp repo init".`
+  );
 }

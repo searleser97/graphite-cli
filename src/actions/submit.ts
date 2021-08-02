@@ -4,7 +4,7 @@ import { request } from "@screenplaydev/retyped-routes";
 import chalk from "chalk";
 import PrintStacksCommand from "../commands/original-commands/print-stacks";
 import { API_SERVER } from "../lib/api";
-import { RepoConfig, UserConfig } from "../lib/config";
+import { repoConfig, UserConfig } from "../lib/config";
 import { ExitFailedError, PreconditionsFailedError } from "../lib/errors";
 import { currentBranchPrecondition } from "../lib/preconditions";
 import {
@@ -29,8 +29,8 @@ export async function submitAction(
   args: Record<string, unknown>
 ): Promise<void> {
   const cliAuthToken = getCLIAuthToken();
-  const repoName = RepoConfig.getRepoName();
-  const repoOwner = RepoConfig.getRepoOwner();
+  const repoName = repoConfig.getRepoName();
+  const repoOwner = repoConfig.getRepoOwner();
 
   try {
     await validate(scope, true);

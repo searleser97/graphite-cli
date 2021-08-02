@@ -28,10 +28,18 @@ class PreconditionsFailedError extends ExitError {
   }
 }
 
+class ConfigError extends ExitError {
+  constructor(message: string) {
+    super(message);
+    this.name = "Config";
+  }
+}
+
 export {
   ExitError,
   ExitFailedError,
   PreconditionsFailedError,
   RebaseConflictError,
   ValidationFailedError,
+  ConfigError,
 };
