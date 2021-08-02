@@ -8,7 +8,7 @@ import { PreconditionsFailedError } from "../errors";
 const currentGitRepoPrecondition = (): string => {
   const repoRootPath = gpExecSync(
     {
-      command: `git rev-parse --show-toplevel`,
+      command: `git rev-parse --git-dir`,
     },
     () => {
       return Buffer.alloc(0);
@@ -59,6 +59,10 @@ class RepoConfig {
     throw new ExitFailedError(
       "Could not determine the owner of this repo (e.g. 'screenplaydev' in the repo 'screenplaydev/graphite-cli'). Please run `gp repo-config owner --set <owner>` to manually set the repo owner."
     );
+  }
+
+  public path(): string {
+    return CURRENT_REPO_CONFIG_PATH;
   }
 
   public setTrunk(trunkName: string): void {

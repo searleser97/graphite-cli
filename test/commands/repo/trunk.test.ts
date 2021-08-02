@@ -3,7 +3,7 @@ import { allScenes } from "../../scenes";
 import { configureTest } from "../../utils";
 
 for (const scene of allScenes) {
-  describe(`(${scene}): repo-config trunk`, function () {
+  describe(`(${scene}): repo trunk`, function () {
     configureTest(this, scene);
 
     it("Can infer main trunk", () => {
