@@ -12,7 +12,7 @@ function fakeGitSquashAndMerge(
   // Fake github squash and merge
   execSync(`git -C ${repo.dir} switch -q -c temp ${branchName}`);
   repo.checkoutBranch("temp");
-  execSync(`git -C ${repo.dir} rebase main -Xtheirs`);
+  execSync(`git -C ${repo.dir} rebase main -Xtheirs`, { stdio: "ignore" });
   execSync(
     `git -C ${repo.dir} reset --soft $(git -C ${repo.dir} merge-base HEAD main)`
   );

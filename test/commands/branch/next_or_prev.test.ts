@@ -7,19 +7,15 @@ for (const scene of allScenes) {
     configureTest(this, scene);
 
     it("Can move to the next and prev branch", () => {
-      scene.repo.createAndCheckoutBranch("a");
-      scene.repo.createChangeAndCommit("2");
-      scene.repo.createChangeAndCommit("3");
-      scene.repo.createAndCheckoutBranch("b");
-      scene.repo.createChangeAndCommit("4");
-      scene.repo.createChangeAndCommit("5");
-      scene.repo.checkoutBranch("a");
+      scene.repo.createChange("a", "a");
+      scene.repo.execCliCommand(`branch create "a" -s`);
+      scene.repo.checkoutBranch("main");
 
-      expect(scene.repo.currentBranchName()).to.equal("a");
       scene.repo.execCliCommand(`branch next`);
-      expect(scene.repo.currentBranchName()).to.equal("b");
-      scene.repo.execCliCommand(`branch prev`);
       expect(scene.repo.currentBranchName()).to.equal("a");
+      scene.repo.execCliCommand(`branch prev`);
+      expect(scene.repo.currentBranchName()).to.equal("main");
+      expect(() => scene.repo.execCliCommand(`branch prev`)).to.throw(Error);
     });
   });
 }

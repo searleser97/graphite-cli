@@ -1,4 +1,5 @@
 import { execSync } from "child_process";
+import { repoConfig } from "../lib/config";
 import { ExitFailedError } from "../lib/errors";
 import { getTrunk, gpExecSync } from "../lib/utils";
 import Commit from "./commit";
@@ -28,10 +29,15 @@ function gitTreeFromRevListOutput(output: string): Record<string, string[]> {
 
 function branchListFromShowRefOutput(output: string): Record<string, string> {
   const ret: Record<string, string> = {};
+  const ignorebranches = repoConfig.getIgnoreBranches();
+
   for (const line of output.split("\n")) {
     if (line.length > 0) {
       const parts = line.split(" ");
-      ret[parts[0]] = parts[1].slice("refs/heads/".length);
+      const branchName = parts[1].slice("refs/heads/".length);
+      if (!ignorebranches.includes(branchName)) {
+        ret[parts[0]] = branchName;
+      }
     }
   }
 
@@ -167,6 +173,22 @@ export default class Branch {
       (b) => b.getMeta()?.parentBranchName === this.name
     );
     return children;
+  }
+
+  public isUpstreamOf(commitRef: string): boolean {
+    const downstreamRef = gpExecSync({
+      command: `git merge-base ${this.name} ${commitRef}`,
+    })
+      .toString()
+      .trim();
+
+    return downstreamRef !== this.ref();
+  }
+
+  public ref(): string {
+    return execSync(`git show-ref refs/heads/${this.name} -s`)
+      .toString()
+      .trim();
   }
 
   public getMetaMergeBase(): string | undefined {

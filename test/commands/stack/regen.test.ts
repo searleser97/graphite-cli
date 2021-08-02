@@ -21,7 +21,7 @@ for (const scene of allScenes) {
         branch.stackByTracingGitParents().join(",")
       );
 
-      scene.repo.checkoutBranch("main");
+      scene.repo.checkoutBranch("a");
 
       scene.repo.execCliCommand("stack regen -s");
 
@@ -36,6 +36,19 @@ for (const scene of allScenes) {
       scene.repo.createAndCheckoutBranch("a");
       scene.repo.execCliCommand("stack regen -s");
       expect(scene.repo.currentBranchName()).to.eq("a");
+      scene.repo.execCliCommand(`branch prev`);
+      expect(scene.repo.currentBranchName()).to.eq("main");
+    });
+
+    it("Can gen a stack branch head is behind main", () => {
+      scene.repo.createAndCheckoutBranch("a");
+
+      scene.repo.checkoutBranch("main");
+      scene.repo.createChangeAndCommit("2");
+
+      scene.repo.checkoutBranch("a");
+      scene.repo.execCliCommand("stack regen -s");
+
       scene.repo.execCliCommand(`branch prev`);
       expect(scene.repo.currentBranchName()).to.eq("main");
     });

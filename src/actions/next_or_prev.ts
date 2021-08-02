@@ -13,22 +13,33 @@ export async function nextOrPrevAction(
 
   const candidates =
     nextOrPrev === "next"
-      ? await currentBranch.getChildrenFromGit()
-      : await currentBranch.getParentsFromGit();
+      ? await currentBranch.getChildrenFromMeta()
+      : currentBranch.getParentFromMeta();
 
-  if (candidates.length === 0) {
+  let branch;
+
+  if (candidates instanceof Array) {
+    if (candidates.length === 0) {
+      throw new ExitFailedError(`Found no ${nextOrPrev} branch`);
+    }
+    if (candidates.length > 1) {
+      throw new PreconditionsFailedError(
+        [
+          chalk.yellow(`Found multiple possibilities:`),
+          ...candidates.map((candidate) =>
+            chalk.yellow(` - ${candidate.name}`)
+          ),
+        ].join("\n")
+      );
+    }
+    branch = candidates[0];
+  } else if (!candidates) {
     throw new ExitFailedError(`Found no ${nextOrPrev} branch`);
-  }
-  if (candidates.length > 1) {
-    throw new PreconditionsFailedError(
-      [
-        chalk.yellow(`Found multiple possibilities:`),
-        ...candidates.map((candidate) => chalk.yellow(` - ${candidate.name}`)),
-      ].join("\n")
-    );
+  } else {
+    branch = candidates;
   }
 
-  const branchName = candidates.values().next().value.name;
-  execSync(`git checkout "${branchName}"`, { stdio: "ignore" });
-  logInfo(branchName);
+  const branchName = branch;
+  execSync(`git checkout "${branchName.name}"`, { stdio: "ignore" });
+  logInfo(branchName.name);
 }
