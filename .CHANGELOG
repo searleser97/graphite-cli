@@ -1,3 +1,14 @@
+## 0.6.0 2020-08-02
+- Support `--no-verify` flag when running `branch create` to skip precommit hooks.
+- Validation passes when a branch points to the same commit as trunk HEAD.
+- Add `repo init` command.
+- Self heal `.graphite_repo_init` file.
+- Always track trunk branch and ignored branches.
+- Update `stack regen` to always set stack foundations to trunk.
+- Update `stack regen` such that, when from from trunk, regenerates all stacks.
+- `branch next/prev` now traverses based on Graphite's stack metadata.
+- Refactor `gp stacks` print output.
+
 ## 0.5.4 2020-07-30
 - Update `stack regen` to operate across entire stack rather than just upstack.
 - `stack submit` infers PR title from single-commit branches.
