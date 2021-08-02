@@ -17,7 +17,7 @@ import {
   RebaseConflictError,
   ValidationFailedError,
 } from "../errors";
-import { logError, logInfo } from "../utils";
+import { logError, logInfo, logWarn } from "../utils";
 
 export async function profiledHandler(
   name: string,
@@ -122,6 +122,7 @@ export async function profile(
     } else if (err instanceof PreconditionsFailedError) {
       logInfo(err.message);
     } else if (err instanceof RebaseConflictError) {
+      logWarn(`Rebase conflict: ${err.message}`);
       // eslint-disable-next-line no-restricted-syntax
       process.exit(0);
     } else if (err instanceof ValidationFailedError) {
