@@ -32,6 +32,37 @@ for (const scene of allScenes) {
       );
     });
 
+    it("Can regen from trunk branch", () => {
+      // Make sure to ignore prod branch
+      scene.repo.execCliCommand(
+        "repo init --trunk main --ignore-branches prod"
+      );
+
+      scene.repo.createChange("a");
+      scene.repo.execCliCommand(`branch create "a" -s`);
+      scene.repo.createAndCheckoutBranch("b");
+      scene.repo.createChangeAndCommit("b");
+
+      scene.repo.checkoutBranch("main");
+      scene.repo.createChangeAndCommit("2");
+
+      scene.repo.createAndCheckoutBranch("c");
+      scene.repo.createChangeAndCommit("c");
+
+      scene.repo.checkoutBranch("main");
+      scene.repo.execCliCommand("stack regen");
+
+      scene.repo.checkoutBranch("b");
+      scene.repo.execCliCommand(`branch prev`);
+      expect(scene.repo.currentBranchName()).to.eq("a");
+      scene.repo.execCliCommand(`branch prev`);
+      expect(scene.repo.currentBranchName()).to.eq("main");
+
+      scene.repo.checkoutBranch("c");
+      scene.repo.execCliCommand(`branch prev`);
+      expect(scene.repo.currentBranchName()).to.eq("main");
+    });
+
     it("Can gen a stack where the branch matches main HEAD", () => {
       scene.repo.createAndCheckoutBranch("a");
       scene.repo.execCliCommand("stack regen -s");

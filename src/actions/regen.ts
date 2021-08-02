@@ -1,8 +1,8 @@
 import chalk from "chalk";
+import { repoConfig } from "../lib/config";
 import { log } from "../lib/log";
 import { currentBranchPrecondition } from "../lib/preconditions";
 import { gpExecSync } from "../lib/utils";
-import { logWarn } from "../lib/utils/splog";
 import { getTrunk } from "../lib/utils/trunk";
 import Branch from "../wrapper-classes/branch";
 
@@ -10,16 +10,12 @@ export async function regenAction(silent: boolean): Promise<void> {
   const branch = currentBranchPrecondition();
   const trunk = getTrunk();
   if (trunk.name == branch.name) {
-    if (!silent) {
-      logWarn(
-        `Current branch matches trunk (${getTrunk()}). No stack to regen.`
-      );
-    }
+    // special case regen all stacks
+    regenAllStacks(silent);
     return;
   }
 
-  const baseBranch = getStackBaseBranch(branch, trunk);
-  console.log(`stack base = ${baseBranch}`);
+  const baseBranch = getStackBaseBranch(branch);
 
   printBranchNameStack(
     `(Original git infered stack)`,
@@ -43,9 +39,26 @@ export async function regenAction(silent: boolean): Promise<void> {
   );
 }
 
+function regenAllStacks(silent: boolean): void {
+  const allBranches = Branch.allBranches();
+  log(`Computing stacks from ${allBranches.length} branches...`);
+  const allStackBaseNames = allBranches
+    .filter(
+      (b) =>
+        !repoConfig.getIgnoreBranches().includes(b.name) &&
+        b.name != getTrunk().name
+    )
+    .map((b) => getStackBaseBranch(b).name);
+  const uniqueStackBaseNames = [...new Set(allStackBaseNames)];
+  uniqueStackBaseNames.forEach((branchName) => {
+    log(`Regenerating stack for (${branchName})`);
+    recursiveRegen(new Branch(branchName), getTrunk(), silent);
+  });
+}
+
 // Returns the first non-trunk base branch. If there is no non-trunk branch
 // - the current branch is trunk - we return null.
-function getStackBaseBranch(currentBranch: Branch, trunk: Branch): Branch {
+function getStackBaseBranch(currentBranch: Branch): Branch {
   const trunkMergeBase = gpExecSync({
     command: `git merge-base ${getTrunk()} ${currentBranch.name}`,
   })
@@ -57,7 +70,7 @@ function getStackBaseBranch(currentBranch: Branch, trunk: Branch): Branch {
 
   while (
     baseBranchParent !== undefined &&
-    baseBranchParent.name !== trunk.name &&
+    baseBranchParent.name !== getTrunk().name &&
     baseBranchParent.isUpstreamOf(trunkMergeBase)
   ) {
     baseBranch = baseBranchParent;
@@ -76,13 +89,20 @@ function recursiveRegen(
 
   // The only time we expect newParent to be undefined is if we're fixing
   // the base branch which is behind trunk.
-  log(
-    `Updating (${currentBranch.name}) branch parent from (${
-      oldMetaParent?.name
-    }) to (${chalk.green(newParent.name)})`,
-    { silent }
-  );
-  currentBranch.setParentBranchName(newParent.name);
+  if (oldMetaParent && oldMetaParent.name === newParent.name) {
+    log(
+      `-> No change for (${currentBranch.name}) with branch parent (${oldMetaParent.name})`,
+      { silent }
+    );
+  } else {
+    log(
+      `-> Updating (${currentBranch.name}) branch parent from (${
+        oldMetaParent?.name
+      }) to (${chalk.green(newParent.name)})`,
+      { silent }
+    );
+    currentBranch.setParentBranchName(newParent.name);
+  }
 
   const gitChildren = currentBranch.getChildrenFromGit();
   gitChildren.forEach((child) => {
