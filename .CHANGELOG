@@ -1,3 +1,6 @@
+## 0.6.2 2020-08-02
+- `stack fix` now works for a individual stack. (Upstack inclusive for now)
+
 ## 0.6.1 2020-08-02
 - Fix homebrew release to not include a dev dependency on "chai".
 
