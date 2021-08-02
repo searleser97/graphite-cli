@@ -24,7 +24,7 @@ cd ~/my-project
 # to infer parent-child relationships, and
 # stores that as metadata in your git repo.
 # This metadata is used for future fixes.
-git checkout main && gp stack fix
+git checkout main && gp stack regen
 ```
 
 <br>
@@ -65,6 +65,7 @@ gp user auth # [TODO] Opens website, fetches token, prompts user to paste in tok
 
 # gp repo...
 gp repo # [TODO] print repo config
+gp repo init # regenerate a config file tracking the repo trunk branch and branches to ignore
 gp repo --get-owner # print key value # [TODO]
 gp repo --set-owner=<value> # set key values # [TODO]
 gp repo --set-trunk=<value> # [TODO]
