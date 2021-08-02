@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { execSync } from "child_process";
+import { GitRepo } from "../../../src/lib/utils";
 import { allScenes } from "../../scenes";
 import { configureTest } from "../../utils";
-import GitRepo from "../../utils/git_repo";
 
 function fakeGitSquashAndMerge(
   repo: GitRepo,

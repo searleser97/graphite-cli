@@ -1,7 +1,7 @@
 import { execSync } from "child_process";
 import tmp from "tmp";
-import GitRepo from "../../test/utils/git_repo";
 import { profiledHandler } from "../lib/telemetry";
+import { GitRepo } from "../lib/utils";
 
 export const command = "demo";
 export const description = false;

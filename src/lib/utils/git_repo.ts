@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { execSync } from "child_process";
 import fs from "fs-extra";
-import { rebaseInProgress } from "../../src/lib/utils";
+import { rebaseInProgress } from "./";
 
 const TEXT_FILE_NAME = "test.txt";
 export default class GitRepo {
@@ -13,7 +13,7 @@ export default class GitRepo {
 
   execCliCommand(command: string): void {
     execSync(
-      `NODE_ENV=development node ${__dirname}/../../dist/src/index.js ${command}`,
+      `NODE_ENV=development node ${__dirname}/../../../dist/src/index.js ${command}`,
       {
         stdio: process.env.DEBUG ? "inherit" : "ignore",
         cwd: this.dir,
@@ -23,7 +23,7 @@ export default class GitRepo {
 
   execCliCommandAndGetOutput(command: string): string {
     return execSync(
-      `NODE_ENV=development node ${__dirname}/../../dist/src/index.js ${command}`,
+      `NODE_ENV=development node ${__dirname}/../../../dist/src/index.js ${command}`,
       {
         cwd: this.dir,
       }
