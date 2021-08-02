@@ -27,7 +27,12 @@ export async function fixAction(silent: boolean): Promise<void> {
   }
   checkoutBranch(originalBranch.name);
 
-  log(`Fixed:`, { silent });
+  if (Object.keys(childrenRestackedByBranchName).length > 0) {
+    log(`Fixed:`, { silent });
+  } else {
+    log(`No branches fixed.`, { silent });
+    return;
+  }
   for (const branchName of Object.keys(childrenRestackedByBranchName)) {
     const childrenRestacked = childrenRestackedByBranchName[branchName] - 1; // subtracting 1 for branch
     log(
