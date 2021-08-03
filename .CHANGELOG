@@ -1,3 +1,7 @@
+## 0.6.3 2020-08-02
+- Better telemetry for measuring cli performance.
+- `gp l` alias for log command.
+
 ## 0.6.2 2020-08-02
 - `stack fix` now works for a individual stack. (Upstack inclusive for now)
 
