@@ -8,6 +8,8 @@ on:
         synchronize,
         reopened,
       ]
+  push:
+    branches: [main]
 
 jobs:
   lint_build_test:
