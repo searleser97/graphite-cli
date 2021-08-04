@@ -1,10 +1,9 @@
 import chalk from "chalk";
+import yargs from "yargs";
 import { printStack } from "../actions/print_stack";
 import { profile } from "../lib/telemetry";
 import { getTrunk } from "../lib/utils/trunk";
 import Branch from "../wrapper-classes/branch";
-import { execSync } from "child_process";
-import yargs from "yargs";
 
 const args = {} as const;
 
