@@ -25,7 +25,7 @@ const args = {
   verify: {
     describe: `Run commit hooks`,
     demandOption: false,
-    default: false,
+    default: true,
     type: "boolean",
   },
 } as const;
