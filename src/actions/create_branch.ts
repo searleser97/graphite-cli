@@ -1,4 +1,4 @@
-import { UserConfig } from "../lib/config";
+import { userConfig } from "../lib/config";
 import { ExitFailedError, PreconditionsFailedError } from "../lib/errors";
 import { currentBranchPrecondition } from "../lib/preconditions";
 import {
@@ -71,7 +71,7 @@ function ensureSomeStagedChanges(silent: boolean): void {
 }
 
 function newBranchName(branchName?: string): string {
-  return branchName || `${UserConfig.config.branchPrefix || ""}${makeId(6)}`;
+  return branchName || `${userConfig.getBranchPrefix() || ""}${makeId(6)}`;
 }
 
 function checkoutNewBranch(branchName: string, silent: boolean): void {

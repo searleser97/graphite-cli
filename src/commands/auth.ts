@@ -1,5 +1,5 @@
 import yargs from "yargs";
-import { UserConfig } from "../lib/config";
+import { userConfig } from "../lib/config";
 import { profile } from "../lib/telemetry";
 import { logSuccess } from "../lib/utils";
 
@@ -20,7 +20,7 @@ export const builder = args;
 
 export const handler = async (argv: argsT): Promise<void> => {
   return profile(argv, async () => {
-    UserConfig.setUserAuthToken(argv.token);
+    userConfig.setAuthToken(argv.token);
     logSuccess("🔐 Successfully authenticated!");
   });
 };

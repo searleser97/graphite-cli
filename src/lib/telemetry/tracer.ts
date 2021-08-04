@@ -155,7 +155,6 @@ class Tracer {
 
     // Set the parent id to the command if any are unset
     const rootSpanId = trace.find((span) => span.name == "command");
-    console.log(`root = ${rootSpanId?.span_id}`);
     if (rootSpanId) {
       trace = trace.map((s) => {
         return {
