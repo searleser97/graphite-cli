@@ -22,7 +22,7 @@ if (fs.existsSync(DEPRECATED_USER_CONFIG_PATH)) {
 type UserConfigT = {
   branchPrefix?: string;
   authToken?: string;
-  minCliVersion?: string;
+  message?: string;
 };
 
 class UserConfig {
@@ -50,13 +50,13 @@ class UserConfig {
     return this._data.branchPrefix;
   }
 
-  public setMinCliVersion(minCliVersion: string): void {
-    this._data.minCliVersion = minCliVersion;
+  public setMessage(message: string | undefined): void {
+    this._data.message = message;
     this.save();
   }
 
-  public getMinCliVersion(): string | undefined {
-    return this._data.minCliVersion;
+  public getMessage(): string | undefined {
+    return this._data.message;
   }
 
   private save(): void {

@@ -116,7 +116,6 @@ class Tracer {
     let result;
     try {
       result = handler();
-      console.log(opts.resource);
     } catch (err) {
       span.end(err);
       throw err;
@@ -148,7 +147,7 @@ class Tracer {
     return result;
   }
 
-  public async flush(): Promise<void> {
+  public flushJson(): string {
     let trace: spanT[] = this.allSpans
       .map((s) => s.endedSpan)
       .filter(notUndefined);
@@ -168,11 +167,14 @@ class Tracer {
 
     const traces = [trace];
     this.allSpans = this.allSpans.filter((s) => !s.endedSpan);
+    return JSON.stringify(traces);
+  }
 
+  public async flush(): Promise<void> {
     if (process.env.NODE_ENV !== "development") {
       await request.requestWithArgs(API_SERVER, graphiteCLIRoutes.traces, {
         cliVersion: version,
-        jsonTraces: JSON.stringify(traces),
+        jsonTraces: this.flushJson(),
       });
     }
   }
