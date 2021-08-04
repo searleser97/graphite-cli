@@ -76,5 +76,7 @@ function getBranchInfo(branch: Branch, config: TPrintStackConfig): string[] {
   const pr = prInfo !== undefined ? chalk.yellow(`PR #${prInfo.number}`) : "";
   branchInfo.push(`${dot} ${branchName} ${pr}`);
 
+  branchInfo.push(`│ ${chalk.dim(branch.lastUpdatedReadable())}`);
+
   return branchInfo;
 }
