@@ -73,15 +73,10 @@ async function postTelemetry(): Promise<void> {
   if (tracesPath && fs.existsSync(tracesPath)) {
     // Failed to find traces file, exit
     try {
-      const res = await request.requestWithArgs(
-        API_SERVER,
-        graphiteCLIRoutes.traces,
-        {
-          jsonTraces: fs.readFileSync(tracesPath).toString(),
-          cliVersion: version,
-        }
-      );
-      console.log(res);
+      await request.requestWithArgs(API_SERVER, graphiteCLIRoutes.traces, {
+        jsonTraces: fs.readFileSync(tracesPath).toString(),
+        cliVersion: version,
+      });
     } catch (err) {
       return;
     }
