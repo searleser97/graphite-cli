@@ -27,7 +27,6 @@ const args = {
     demandOption: false,
     default: false,
     type: "boolean",
-    alias: "s",
   },
 } as const;
 type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
