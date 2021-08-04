@@ -103,50 +103,70 @@ class Tracer {
     return span;
   }
 
-  public spanSync(
+  public spanSync<T>(
     opts: {
       resource: string;
       name?: string;
       meta?: Record<string, string>;
     },
-    handler: () => void
+    handler: () => T
   ) {
     const span = this.startSpan(opts);
     this.currentSpanId = span.spanId;
+    let result;
     try {
-      handler();
+      result = handler();
+      console.log(opts.resource);
     } catch (err) {
       span.end(err);
       throw err;
     }
     span.end();
     this.currentSpanId = span.parentId;
+    return result;
   }
 
-  public async span(
+  public async span<T>(
     opts: {
       resource: string;
       name?: string;
       meta?: Record<string, string>;
     },
-    handler: () => Promise<void>
+    handler: () => Promise<T>
   ) {
     const span = this.startSpan(opts);
     this.currentSpanId = span.spanId;
+    let result;
     try {
-      await handler();
+      result = await handler();
     } catch (err) {
       span.end(err);
       throw err;
     }
     span.end();
     this.currentSpanId = span.parentId;
+    return result;
   }
 
   public async flush(): Promise<void> {
-    const trace: spanT[] = this.allSpans
+    let trace: spanT[] = this.allSpans
       .map((s) => s.endedSpan)
       .filter(notUndefined);
+
+    // Set the parent id to the command if any are unset
+    const rootSpanId = trace.find((span) => span.name == "command");
+    console.log(`root = ${rootSpanId?.span_id}`);
+    if (rootSpanId) {
+      trace = trace.map((s) => {
+        return {
+          ...s,
+          ...(s.parent_id != undefined
+            ? { parent_id: s.parent_id }
+            : { parent_id: rootSpanId.span_id }),
+        };
+      });
+    }
+
     const traces = [trace];
     this.allSpans = this.allSpans.filter((s) => !s.endedSpan);
 
