@@ -34,8 +34,8 @@ export function postTelemetryInBackground(oldDetails: oldTelemetryT): void {
   const tracesPath = saveTracesToTmpFile();
   const oldTelemetryPath = saveOldTelemetryToFile(oldDetails);
   cp.spawn("/usr/bin/env", ["node", __filename, tracesPath, oldTelemetryPath], {
-    detached: false,
-    stdio: "inherit",
+    detached: true,
+    stdio: "ignore",
   });
 }
 
