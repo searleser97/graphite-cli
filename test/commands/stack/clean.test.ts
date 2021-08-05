@@ -52,6 +52,12 @@ for (const scene of allScenes) {
       expectBranches(scene.repo, "main");
     });
 
+    it("Can noop clean if there are no stacks", () => {
+      expect(() => scene.repo.execCliCommand(`stack clean -sf`)).to.not.throw(
+        Error
+      );
+    });
+
     it("Can delete the foundation of a double stack", async () => {
       scene.repo.createChange("2", "a");
       scene.repo.execCliCommand(`branch create "a" -m "a" -s`);

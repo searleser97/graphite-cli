@@ -36,7 +36,10 @@ export async function cleanAction(opts: {
   }
   const trunkChildren: Branch[] = await new Branch(trunk).getChildrenFromMeta();
   do {
-    const branch = trunkChildren.pop()!;
+    const branch = trunkChildren.pop();
+    if (!branch) {
+      break;
+    }
     const children = await branch.getChildrenFromMeta();
     if (!shouldDeleteBranch(branch.name)) {
       continue;
