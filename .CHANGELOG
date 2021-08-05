@@ -1,3 +1,15 @@
+## 0.7.0 2020-08-05
+- Refactor `gp log` command, while supporting old behavior with `gp log --commits/-c`
+- Check for updates in orphaned child process, making all commands faster.
+- More helpful validation error messaging.
+- `gp branch next/prev` now support interactive choices and stepping multiple branches.
+- `gp branch create [-m]` now doesn't commit by default. It can also autogenerate branch names from commit messages.
+- Added `gp commit create -m` for creating commits and fixing upstack.
+- Added `gp commit amend -m` for amending commits and fixing upstack.
+- Added `gp user branch-prefix [--set]` reading and setting your branch prefix.
+- Added `gp branch parent [--set]` plumbing command for reading and setting a branch parent.
+- Added `gp branch children` plumbing command for reading the children of a branch.
+
 ## 0.6.3 2020-08-02
 - Better telemetry for measuring cli performance.
 - `gp l` alias for log command.
