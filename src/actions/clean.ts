@@ -92,7 +92,7 @@ async function deleteBranch(opts: {
       return;
     }
   } else {
-    log(`Deleting ${opts.branchName}`, opts);
+    log(`Deleting (${chalk.red(opts.branchName)})`, opts);
   }
   execSync(`git branch -D ${opts.branchName}`);
 }

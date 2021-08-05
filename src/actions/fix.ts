@@ -1,3 +1,4 @@
+import chalk from "chalk";
 import {
   ExitFailedError,
   PreconditionsFailedError,
@@ -57,7 +58,9 @@ export async function restackBranch(
       `No fix needed for (${currentBranch.name}) on (${parentBranch.name})`
     );
   } else {
-    logInfo(`Fixing (${currentBranch.name}) on (${parentBranch.name})`);
+    logInfo(
+      `Fixing (${chalk.green(currentBranch.name)}) on (${parentBranch.name})`
+    );
     checkoutBranch(currentBranch.name);
     currentBranch.setMetaPrevRef(currentBranch.getCurrentRef());
     gpExecSync(
