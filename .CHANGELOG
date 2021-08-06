@@ -1,3 +1,8 @@
+## 0.7.1 2020-08-06
+- Dont zero count months when generating branch names.
+- Improve help text for amend.
+- Improve help auth print out.
+
 ## 0.7.0 2020-08-05
 - Refactor `gp log` command, while supporting old behavior with `gp log --commits/-c`
 - Check for updates in orphaned child process, making all commands faster.
