@@ -29,6 +29,6 @@ process.on("uncaughtException", (err) => {
 yargs
   .commandDir("commands")
   .help()
-  .usage(["This CLI helps you manage stacked diffs."].join("\n"))
+  .usage(["This CLI helps you manage stacked branches."].join("\n"))
   .strict()
   .demandCommand().argv;
