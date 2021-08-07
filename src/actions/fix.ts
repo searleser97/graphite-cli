@@ -1,71 +1,128 @@
 import chalk from "chalk";
+import prompts from "prompts";
+import { regenAction } from "../actions/regen";
+import { ExitFailedError, RebaseConflictError } from "../lib/errors";
 import {
-  ExitFailedError,
-  PreconditionsFailedError,
-  RebaseConflictError,
-} from "../lib/errors";
-import { currentBranchPrecondition } from "../lib/preconditions";
+  currentBranchPrecondition,
+  uncommittedChangesPrecondition,
+} from "../lib/preconditions";
 import {
   checkoutBranch,
-  getTrunk,
   gpExecSync,
   logInfo,
   rebaseInProgress,
-  uncommittedChanges,
 } from "../lib/utils";
-import Branch from "../wrapper-classes/branch";
+import {
+  Branch,
+  GitStackBuilder,
+  MetaStackBuilder,
+  Stack,
+  stackNodeT,
+} from "../wrapper-classes";
 
-export async function fixAction(silent: boolean): Promise<void> {
-  if (uncommittedChanges()) {
-    throw new PreconditionsFailedError("Cannot fix with uncommitted changes");
-  }
+async function promptStacks(opts: {
+  gitStack: Stack;
+  metaStack: Stack;
+}): Promise<"regen" | "rebase"> {
+  const response = await prompts({
+    type: "select",
+    name: "value",
+    message: `Pick a source of truth for stacks`,
+    choices: ["rebase", "regen"].map((r) => {
+      return {
+        title:
+          r === "rebase"
+            ? "Graphite stacks\n" +
+              opts.metaStack
+                .toString()
+                .split("\n")
+                .map((l) => "    " + l)
+                .join("\n") +
+              "\n"
+            : "Git commit tree\n" +
+              opts.gitStack
+                .toString()
+                .split("\n")
+                .map((l) => "    " + l)
+                .join("\n") +
+              "\n",
+        value: r,
+      };
+    }),
+  });
+
+  return response.value;
+}
+
+export async function fixAction(opts: {
+  action: "regen" | "rebase" | undefined;
+  silent: boolean;
+}): Promise<void> {
   const currentBranch = currentBranchPrecondition();
-  if (currentBranch.name == getTrunk().name) {
-    // Dont rebase main
-    for (const child of currentBranch.getChildrenFromMeta()) {
-      await restackBranch(child, silent);
-    }
+  uncommittedChangesPrecondition();
+
+  const metaStack = new MetaStackBuilder().fullStackFromBranch(currentBranch);
+  const gitStack = new GitStackBuilder().fullStackFromBranch(currentBranch);
+
+  // Consider noop
+  if (metaStack.equals(gitStack)) {
+    logInfo(`No fix needed`);
+    return;
+  }
+
+  const action = opts.action || (await promptStacks({ gitStack, metaStack }));
+
+  if (action === "regen") {
+    await regenAction(opts.silent);
   } else {
-    await restackBranch(currentBranch, silent);
+    for (const child of metaStack.source.children) {
+      await restackNode(child, opts.silent);
+    }
   }
   checkoutBranch(currentBranch.name);
 }
 
 export async function restackBranch(
-  currentBranch: Branch,
+  branch: Branch,
   silent: boolean
 ): Promise<void> {
+  const metaStack =
+    new MetaStackBuilder().upstackInclusiveFromBranchWithParents(branch);
+  await restackNode(metaStack.source, silent);
+}
+
+async function restackNode(node: stackNodeT, silent: boolean): Promise<void> {
   if (rebaseInProgress()) {
     throw new RebaseConflictError(
-      `Interactive rebase in progress, cannot fix (${currentBranch.name}). Complete the rebase and re-run fix command.`
+      `Interactive rebase in progress, cannot fix (${node.branch.name}). Complete the rebase and re-run fix command.`
     );
   }
-  const parentBranch = currentBranch.getParentFromMeta();
+  const parentBranch = node.parents[0].branch;
   if (!parentBranch) {
     throw new ExitFailedError(
-      `Cannot find parent in stack for (${currentBranch.name}), stopping fix`
+      `Cannot find parent in stack for (${node.branch.name}), stopping fix`
     );
   }
-  const mergeBase = currentBranch.getMetaMergeBase();
+  const mergeBase = node.branch.getMetaMergeBase();
   if (!mergeBase) {
     throw new ExitFailedError(
-      `Cannot find a merge base in the stack for (${currentBranch.name}), stopping fix`
+      `Cannot find a merge base in the stack for (${node.branch.name}), stopping fix`
     );
   }
 
   if (parentBranch.ref() === mergeBase) {
     logInfo(
-      `No fix needed for (${currentBranch.name}) on (${parentBranch.name})`
+      `No fix needed for (${node.branch.name}) on (${parentBranch.name})`
     );
   } else {
     logInfo(
-      `Fixing (${chalk.green(currentBranch.name)}) on (${parentBranch.name})`
+      `Fixing (${chalk.green(node.branch.name)}) on (${parentBranch.name})`
     );
-    checkoutBranch(currentBranch.name);
-    currentBranch.setMetaPrevRef(currentBranch.getCurrentRef());
+    checkoutBranch(node.branch.name);
+    node.branch.setMetaPrevRef(node.branch.getCurrentRef());
     gpExecSync(
       {
-        command: `git rebase --onto ${parentBranch.name} ${mergeBase} ${currentBranch.name}`,
+        command: `git rebase --onto ${parentBranch.name} ${mergeBase} ${node.branch.name}`,
         options: { stdio: "ignore" },
       },
       () => {
@@ -78,7 +135,7 @@ export async function restackBranch(
     );
   }
 
-  for (const child of currentBranch.getChildrenFromMeta()) {
-    await restackBranch(child, silent);
+  for (const child of node.children) {
+    await restackNode(child, silent);
   }
 }
