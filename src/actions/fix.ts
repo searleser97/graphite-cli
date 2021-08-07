@@ -32,14 +32,14 @@ async function promptStacks(opts: {
       return {
         title:
           r === "rebase"
-            ? "Graphite stacks\n" +
+            ? `Graphite stacks (${chalk.green("common choice")})\n` +
               opts.metaStack
                 .toString()
                 .split("\n")
                 .map((l) => "    " + l)
                 .join("\n") +
               "\n"
-            : "Git commit tree\n" +
+            : `Git commit tree\n` +
               opts.gitStack
                 .toString()
                 .split("\n")

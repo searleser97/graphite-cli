@@ -5,7 +5,7 @@ import { profile } from "../../lib/telemetry";
 
 export const command = "fix";
 export const description =
-  "Rebase any upstack branches onto the latest commit (HEAD) of the current branch.";
+  "Fix stack by recursively rebasing branches onto their parents, or by regenerate Graphite stack metadata by walking the Git commit tree and finding branch parents.";
 
 const args = {
   rebase: {
