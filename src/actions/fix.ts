@@ -169,10 +169,7 @@ function recursiveRegen(node: stackNodeT) {
   // Set parents if not trunk
   if (branch.name !== getTrunk().name) {
     const oldParent = branch.getParentFromMeta();
-    const newParent = node.parents[0]?.branch; // TODO: Deal with regen if there are multi parents
-    if (!newParent) {
-      throw new ExitFailedError(`Fresh meta stack shouldnt have empty parent`);
-    }
+    const newParent = node.parents[0]?.branch || getTrunk(); // TODO: Deal with regen if there are multi parents
     if (oldParent && oldParent.name === newParent.name) {
       log(
         `-> No change for (${branch.name}) with branch parent (${oldParent.name})`,
