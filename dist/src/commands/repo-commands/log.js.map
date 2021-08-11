@@ -1,0 +1,1 @@
+{"version":3,"file":"log.js","sourceRoot":"","sources":["../../../../src/commands/repo-commands/log.ts"],"names":[],"mappings":";;;AAEa,QAAA,OAAO,GAAG,eAAe,CAAC;AAC1B,QAAA,IAAI,GAAG,sDAAsD,CAAC;AAEpE,MAAM,OAAO,GAAG,UAAU,KAAW;IAC1C,OAAO,KAAK;SACT,UAAU,CAAC,cAAc,EAAE;QAC1B,UAAU,EAAE,CAAC,IAAI,CAAC;KACnB,CAAC;SACD,MAAM,EAAE;SACR,aAAa,EAAE,CAAC;AACrB,CAAC,CAAC;AAPW,QAAA,OAAO,WAOlB"}
