@@ -27,6 +27,10 @@ class MessageConfig {
     return this._data.message;
   }
 
+  public path(): string {
+    return MESSAGE_CONFIG_PATH;
+  }
+
   private save(): void {
     if (this._data.message !== undefined) {
       fs.writeFileSync(MESSAGE_CONFIG_PATH, JSON.stringify(this._data));
@@ -51,6 +55,10 @@ function readMessageConfig(): MessageConfig {
     }
   }
   return new MessageConfig({});
+}
+
+export function readMessageConfigForTestingOnly(): MessageConfig {
+  return readMessageConfig();
 }
 
 const messageConfigSingleton = readMessageConfig();
