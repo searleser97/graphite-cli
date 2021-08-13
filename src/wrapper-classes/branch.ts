@@ -371,7 +371,7 @@ export default class Branch {
     return name.length > 0 && name !== "HEAD" ? new Branch(name) : null;
   }
 
-  static allBranches(opts?: { sort?: "-committerdate" }): Branch[] {
+  private static allBranchesImpl(opts?: { sort?: "-committerdate" }): Branch[] {
     const sortString = opts?.sort === undefined ? "" : `--sort='${opts?.sort}'`;
     return execSync(
       `git for-each-ref --format='%(refname:short)' ${sortString} refs/heads/`
@@ -382,20 +382,29 @@ export default class Branch {
       .map((name) => new Branch(name));
   }
 
-  static allBranchesWithPredicate(
-    predicate: (branch: Branch) => boolean,
-    opts?: TBranchFilters
-  ): Branch[] {
-    let branches = Branch.allBranches({
+  static allBranches(opts?: TBranchFilters): Branch[] {
+    return Branch.allBranchesWithFilter({
+      filter: () => true,
+      opts: opts,
+    });
+  }
+
+  static allBranchesWithFilter(args: {
+    filter: (branch: Branch) => boolean;
+    opts?: TBranchFilters;
+  }): Branch[] {
+    let branches = Branch.allBranchesImpl({
       sort:
-        opts?.maxDaysBehindTrunk !== undefined ? "-committerdate" : opts?.sort,
+        args.opts?.maxDaysBehindTrunk !== undefined
+          ? "-committerdate"
+          : args.opts?.sort,
     });
 
-    if (opts?.useMemoizedResults) {
+    if (args.opts?.useMemoizedResults) {
       branches = branches.map((branch) => branch.useMemoizedResults());
     }
 
-    const maxDaysBehindTrunk = opts?.maxDaysBehindTrunk;
+    const maxDaysBehindTrunk = args.opts?.maxDaysBehindTrunk;
     let minUnixTimestamp = undefined;
     if (maxDaysBehindTrunk) {
       const trunkUnixTimestamp = parseInt(
@@ -407,7 +416,7 @@ export default class Branch {
       const secondsInDay = 24 * 60 * 60;
       minUnixTimestamp = trunkUnixTimestamp - maxDaysBehindTrunk * secondsInDay;
     }
-    const maxBranches = opts?.maxBranches;
+    const maxBranches = args.opts?.maxBranches;
 
     const filteredBranches = [];
     for (let i = 0; i < branches.length; i++) {
@@ -415,21 +424,22 @@ export default class Branch {
         break;
       }
 
-      const committed = parseInt(
-        getCommitterDate({
-          revision: branches[i].name,
-          timeFormat: "UNIX_TIMESTAMP",
-        })
-      );
-
       // If the current branch is older than the minimum time, we can
       // short-circuit the rest of the search as well - we gathered the
       // branches in descending chronological order.
-      if (minUnixTimestamp !== undefined && committed < minUnixTimestamp) {
-        break;
+      if (minUnixTimestamp !== undefined) {
+        const committed = parseInt(
+          getCommitterDate({
+            revision: branches[i].name,
+            timeFormat: "UNIX_TIMESTAMP",
+          })
+        );
+        if (committed < minUnixTimestamp) {
+          break;
+        }
       }
 
-      if (predicate(branches[i])) {
+      if (args.filter(branches[i])) {
         filteredBranches.push(branches[i]);
       }
     }
@@ -442,21 +452,24 @@ export default class Branch {
       excludeTrunk?: boolean;
     }
   ): Promise<Branch[]> {
-    return this.allBranchesWithPredicate((branch) => {
-      if (opts?.excludeTrunk && branch.name === getTrunk().name) {
-        return false;
-      }
-      return branch.getParentsFromGit().length === 0;
-    }, opts);
+    return this.allBranchesWithFilter({
+      filter: (branch) => {
+        if (opts?.excludeTrunk && branch.name === getTrunk().name) {
+          return false;
+        }
+        return branch.getParentsFromGit().length === 0;
+      },
+      opts: opts,
+    });
   }
 
   static async getAllBranchesWithParents(
     opts?: TBranchFilters
   ): Promise<Branch[]> {
-    return this.allBranchesWithPredicate(
-      (branch) => branch.getParentsFromGit().length > 0,
-      opts
-    );
+    return this.allBranchesWithFilter({
+      filter: (branch) => branch.getParentsFromGit().length > 0,
+      opts: opts,
+    });
   }
 
   public head(): Commit {
