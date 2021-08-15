@@ -35,7 +35,7 @@ function deprecatedGpWarning(argv: yargs.Arguments) {
   if (argv["$0"] == "gp") {
     console.log(
       chalk.yellow(
-        `Warning: Based on feedback, we've update the Graphite CLI name to "gt". The name "gp" has been deprecated.`
+        `Warning: Based on feedback, we've update the Graphite CLI alias to "gt". The alias "gp" has been deprecated.`
       )
     );
   }

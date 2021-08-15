@@ -1,3 +1,6 @@
+# 0.9.0 2020-08-15
+- Rename graphite CLI alias to "gt" from "gp" per feedback.
+
 # 0.8.2 2020-08-13
 - Improved performance of `gp stacks` command, particularly in repos with a large number of stale branches.
 - Changed search-space limiting settings to live at the top level and apply to both stacks and log. (`gp repo max-stacks-behind-trunk`, `gp repo max-days-behind-trunk`).
