@@ -1,3 +1,8 @@
+# 0.10.1 2020-08-17
+- Allow max branch length to be configured (from the default of 50).
+- Fix a crash in logging that happened in a edge case involving trailing trunk branches.
+- Hide remote branches in "log long" output.
+
 # 0.10.0 2020-08-17
 - Fix case where commands fail if a branch's stack parent had been deleted.
 - Fix copy across CLI to use "gt" rather than the old "gp".
