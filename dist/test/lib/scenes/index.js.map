@@ -1,0 +1,1 @@
+{"version":3,"file":"index.js","sourceRoot":"","sources":["../../../../test/lib/scenes/index.ts"],"names":[],"mappings":";;;AAAA,+CAA2C;AAQf,2FARnB,wBAAU,OAQmB;AAPtC,+DAA0D;AAOjD,kGAPA,uCAAiB,OAOA;AAL1B,MAAM,SAAS,GAAG;IAChB,GAAG,CAAC,OAAO,CAAC,GAAG,CAAC,IAAI,CAAC,CAAC,CAAC,EAAE,CAAC,CAAC,CAAC,CAAC,IAAI,wBAAU,EAAE,CAAC,CAAC;IAC/C,IAAI,uCAAiB,EAAE;CACxB,CAAC;AAEsC,8BAAS"}
