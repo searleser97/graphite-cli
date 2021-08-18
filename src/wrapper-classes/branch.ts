@@ -221,6 +221,10 @@ export default class Branch {
     });
   }
 
+  static resetMemoization(): void {
+    memoizedParents = {};
+  }
+
   stackByTracingMetaParents(branch?: Branch): string[] {
     const curBranch = branch || this;
     const metaParent = curBranch.getParentFromMeta();
