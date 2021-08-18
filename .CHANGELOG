@@ -1,4 +1,7 @@
-# 0.10.1 2020-08-17
+# 0.11.0 2020-08-18
+- Support PR templates in "stack submit" command.
+- Update "stack submit" to support interactive title and description setting.
+- Update "stack submit" to support creating draft PRs.
 - Allow max branch length to be configured (from the default of 50).
 - Fix a crash in logging that happened in a edge case involving trailing trunk branches.
 - Hide remote branches in "log long" output.
