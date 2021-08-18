@@ -157,6 +157,8 @@ for (const scene of allScenes) {
       scene.repo.checkoutBranch("a");
       scene.repo.execCliCommand("stack fix --regen -q");
 
+      scene.repo.execCliCommand(`ls`);
+
       scene.repo.execCliCommand(`branch prev --no-interactive`);
       expect(scene.repo.currentBranchName()).to.eq("main");
     });

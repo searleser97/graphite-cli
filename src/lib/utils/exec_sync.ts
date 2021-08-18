@@ -29,6 +29,7 @@ export function gpExecSync(
       });
     }
   } catch (e) {
+    console.log(e);
     onError?.(e);
     return Buffer.alloc(0);
   }

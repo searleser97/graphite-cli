@@ -131,6 +131,8 @@ for (const scene of allScenes) {
         new Branch("a")
       );
 
+      console.log(gitStack.toString());
+      console.log(metaStack.toString());
       expect(metaStack.equals(Stack.fromMap({ main: { a: {} } }))).to.be.true;
       expect(gitStack.equals(Stack.fromMap({ a: {} }))).to.be.true;
     });

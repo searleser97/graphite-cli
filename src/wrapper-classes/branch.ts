@@ -1,8 +1,7 @@
 import { execSync } from "child_process";
 import { repoConfig } from "../lib/config";
 import { ExitFailedError } from "../lib/errors";
-import { tracer } from "../lib/telemetry";
-import { getCommitterDate, getTrunk, gpExecSync, logWarn } from "../lib/utils";
+import { getCommitterDate, getTrunk, gpExecSync } from "../lib/utils";
 import Commit from "./commit";
 
 type TMeta = {
@@ -14,144 +13,7 @@ type TMeta = {
   };
 };
 
-function gitTreeFromRevListOutput(output: string): Record<string, string[]> {
-  const ret: Record<string, string[]> = {};
-  for (const line of output.split("\n")) {
-    if (line.length > 0) {
-      const shas = line.split(" ");
-      ret[shas[0]] = shas.slice(1);
-    }
-  }
-
-  return ret;
-}
-
-let memoizedChildrenRevListGitTree: Record<string, string[]>;
-function getChildrenRevListGitTree(opts: {
-  useMemoizedResult?: boolean;
-}): Record<string, string[]> {
-  if (opts.useMemoizedResult && memoizedChildrenRevListGitTree !== undefined) {
-    return memoizedChildrenRevListGitTree;
-  }
-
-  memoizedChildrenRevListGitTree = gitTreeFromRevListOutput(
-    execSync(`git rev-list --children --all`, {
-      maxBuffer: 1024 * 1024 * 1024,
-    })
-      .toString()
-      .trim()
-  );
-
-  return memoizedChildrenRevListGitTree;
-}
-
-let memoizedParentRevListGitTree: Record<string, string[]>;
-function getParentRevListGitTree(opts: {
-  useMemoizedResult?: boolean;
-}): Record<string, string[]> {
-  if (opts.useMemoizedResult && memoizedParentRevListGitTree !== undefined) {
-    return memoizedParentRevListGitTree;
-  }
-
-  memoizedParentRevListGitTree = gitTreeFromRevListOutput(
-    execSync(`git rev-list --parents --all`, {
-      maxBuffer: 1024 * 1024 * 1024,
-    })
-      .toString()
-      .trim()
-  );
-
-  return memoizedParentRevListGitTree;
-}
-
-function branchListFromShowRefOutput(output: string): Record<string, string[]> {
-  const ret: Record<string, string[]> = {};
-  const ignorebranches = repoConfig.getIgnoreBranches();
-
-  for (const line of output.split("\n")) {
-    if (line.length > 0) {
-      const parts = line.split(" ");
-      const branchName = parts[1].slice("refs/heads/".length);
-      const branchRef = parts[0];
-      if (!ignorebranches.includes(branchName)) {
-        if (branchRef in ret) {
-          ret[branchRef].push(branchName);
-        } else {
-          ret[branchRef] = [branchName];
-        }
-      }
-    }
-  }
-
-  return ret;
-}
-
-let memoizedBranchList: Record<string, string[]>;
-function getBranchList(opts: {
-  useMemoizedResult?: boolean;
-}): Record<string, string[]> {
-  if (opts.useMemoizedResult && memoizedBranchList !== undefined) {
-    return memoizedBranchList;
-  }
-
-  memoizedBranchList = branchListFromShowRefOutput(
-    execSync("git show-ref --heads", {
-      maxBuffer: 1024 * 1024 * 1024,
-    })
-      .toString()
-      .trim()
-  );
-
-  return memoizedBranchList;
-}
-
-function traverseGitTreeFromCommitUntilBranch(
-  commit: string,
-  gitTree: Record<string, string[]>,
-  branchList: Record<string, string[]>,
-  n: number,
-  debugInfo: {
-    branchName: string;
-    direction: "CHILDREN" | "PARENTS";
-  }
-): Set<string> {
-  // Skip the first iteration b/c that is the CURRENT branch
-  if (n > 0 && commit in branchList) {
-    return new Set(branchList[commit]);
-  }
-
-  // Limit the seach
-  const maxBranchLength = repoConfig.getMaxBranchLength();
-  if (n > maxBranchLength) {
-    const branchName = debugInfo.branchName;
-    const searchItems = debugInfo.direction.toLowerCase();
-    logWarn(
-      `Searched ${maxBranchLength} commits from the tip of ${branchName} but could not find ${branchName}'s ${searchItems}. If this is correct (i.e. ${branchName}'s ${searchItems} are more than ${maxBranchLength} commits away from ${branchName}'s branch tip), please increase Graphite's max branch length to search via \`gt repo max-branch-length\`.`
-    );
-    return new Set();
-  }
-
-  if (!gitTree[commit] || gitTree[commit].length == 0) {
-    return new Set();
-  }
-
-  const commitsMatchingBranches = new Set<string>();
-  for (const neighborCommit of gitTree[commit]) {
-    const discoveredMatches = traverseGitTreeFromCommitUntilBranch(
-      neighborCommit,
-      gitTree,
-      branchList,
-      n + 1,
-      debugInfo
-    );
-    if (discoveredMatches.size !== 0) {
-      discoveredMatches.forEach((commit) => {
-        commitsMatchingBranches.add(commit);
-      });
-    }
-  }
-  return commitsMatchingBranches;
-}
+let memoizedParents: Record<string, Branch[]> = {};
 
 type TBranchFilters = {
   useMemoizedResults?: boolean;
@@ -208,6 +70,10 @@ export default class Branch {
     execSync(`git update-ref refs/branch-metadata/${this.name} ${metaSha}`, {
       stdio: "ignore",
     });
+  }
+
+  static resetMemoization(): void {
+    memoizedParents = {};
   }
 
   stackByTracingMetaParents(branch?: Branch): string[] {
@@ -513,78 +379,111 @@ export default class Branch {
     );
   }
 
-  public getChildrenFromGit(): Branch[] {
-    return this.getChildrenOrParents({
-      direction: "CHILDREN",
-      useMemoizedResults: this.shouldUseMemoizedResults,
-    });
-  }
-
   public getParentsFromGit(): Branch[] {
-    if (
-      // Current branch is trunk
-      this.name === getTrunk().name
-      // Current branch shares
-    ) {
+    if (this.name === getTrunk().name) {
       return [];
     } else if (this.pointsToSameCommitAs(getTrunk())) {
       return [getTrunk()];
     }
-    return this.getChildrenOrParents({
-      direction: "PARENTS",
-      useMemoizedResults: this.shouldUseMemoizedResults,
+
+    if (this.useMemoizedResults() && memoizedParents[this.name]) {
+      return memoizedParents[this.name];
+    }
+
+    const allOtherBranchRefs = Branch.allBranches()
+      .filter(
+        (b) =>
+          b.name != this.name &&
+          !repoConfig.getIgnoreBranches().includes(b.name)
+      )
+      .map((b) => b.ref());
+
+    const mergeBase = this.mergeBase(getTrunk());
+
+    // Check if this branch is even off trunk - if not, it has no valid parents in our eyes.
+    if (!mergeBase) {
+      memoizedParents[this.name] = [];
+      return memoizedParents[this.name];
+    }
+
+    // Find the commit of the first branch between this and trunk
+    const matchingCommitRef = gpExecSync({
+      command: [
+        `git rev-list ${this.mergeBase(getTrunk())}..${this.name}`,
+        `| grep -m 1 -e '${allOtherBranchRefs.join("\\|")}' || true`, // TODO, make this more efficient
+      ].join(" "),
+    })
+      .toString()
+      .trim();
+
+    // If no branches between this and trunk, parent is trunk
+    if (!matchingCommitRef || matchingCommitRef.length == 0) {
+      if (mergeBase === getTrunk().ref()) {
+        memoizedParents[this.name] = [getTrunk()];
+      } else {
+        // If the branch is behind trunk and has no other parents, ignore it.
+        memoizedParents[this.name] = [];
+      }
+      return memoizedParents[this.name];
+    }
+
+    // If we found a commit, return all branches for that commit.
+    const parentBranchNames = gpExecSync({
+      command: `git show-ref --heads | grep ${matchingCommitRef} | awk '{print $2}'`,
+    })
+      .toString()
+      .trim()
+      .split("\n")
+      .map((name) => name.replace("refs/heads/", ""));
+
+    memoizedParents[this.name] = parentBranchNames.map(
+      (name) => new Branch(name)
+    );
+    return memoizedParents[this.name];
+  }
+
+  private mergeBase(other: Branch): string | undefined {
+    const mergeBase = gpExecSync({
+      command: `git merge-base ${this.name} ${other.name}`,
+    })
+      .toString()
+      .trim();
+    return mergeBase.length > 0 ? mergeBase : undefined;
+  }
+
+  private isTrunk(): boolean {
+    return this.name === getTrunk().name;
+  }
+
+  public getChildrenFromGit(): Branch[] {
+    const allOtherBranches = Branch.allBranches()
+      .filter(
+        (b) =>
+          b.name != this.name &&
+          !repoConfig.getIgnoreBranches().includes(b.name)
+      )
+      .filter((other) => {
+        // filter out children who dont have this as a direct parent.
+        // For the remaining branches, its just a question if "this" is the most recent parent.
+        const mergeBase = this.mergeBase(other);
+        return mergeBase === this.ref() || (this.isTrunk() && !!mergeBase);
+      });
+    const children: Branch[] = [];
+    allOtherBranches.forEach((b) => {
+      if (
+        b
+          .getParentsFromGit()
+          .map((p) => p.name)
+          .includes(this.name)
+      ) {
+        children.push(b);
+      }
     });
+    return children;
   }
 
   private pointsToSameCommitAs(branch: Branch): boolean {
     return !!this.branchesWithSameCommit().find((b) => b.name === branch.name);
-  }
-
-  private getChildrenOrParents(opt: {
-    direction: "CHILDREN" | "PARENTS";
-    useMemoizedResults?: boolean;
-  }): Branch[] {
-    const direction = opt.direction;
-    const useMemoizedResults = opt.useMemoizedResults ?? false;
-    return tracer.spanSync(
-      {
-        name: "function",
-        resource: "branch.getChildrenOrParents",
-        meta: { direction: direction },
-      },
-      () => {
-        const gitTree =
-          direction === "CHILDREN"
-            ? getChildrenRevListGitTree({
-                useMemoizedResult: useMemoizedResults,
-              })
-            : getParentRevListGitTree({
-                useMemoizedResult: useMemoizedResults,
-              });
-
-        const headSha = execSync(`git rev-parse ${this.name}`)
-          .toString()
-          .trim();
-
-        return Array.from(
-          traverseGitTreeFromCommitUntilBranch(
-            headSha,
-            gitTree,
-            getBranchList({ useMemoizedResult: useMemoizedResults }),
-            0,
-            {
-              branchName: this.name,
-              direction: direction,
-            }
-          )
-        ).map((name) => {
-          const branch = new Branch(name);
-          return this.shouldUseMemoizedResults
-            ? branch.useMemoizedResults()
-            : branch;
-        });
-      }
-    );
   }
 
   public setPRInfo(prInfo: { number: number; url: string }): void {

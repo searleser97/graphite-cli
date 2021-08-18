@@ -33,7 +33,6 @@ export default class GitStackBuilder extends AbstractStackBuilder {
     })
       .toString()
       .trim();
-
     let baseBranch: Branch = branch;
     let baseBranchParent = baseBranch.getParentsFromGit()[0]; // TODO: greg - support two parents
 
