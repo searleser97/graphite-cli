@@ -212,6 +212,11 @@ export default class Branch {
   }
 
   public setParentBranchName(parentBranchName: string): void {
+    if (new Branch(parentBranchName).getParentFromMeta()?.name === this.name) {
+      throw new ExitFailedError(
+        `Cannot set (${this.name})'s parent (${parentBranchName}) because (${parentBranchName})'s parent is already (${this.name}), and doing so would create a cycle.`
+      );
+    }
     const meta: TMeta = this.getMeta() || {};
     meta.parentBranchName = parentBranchName;
     this.writeMeta(meta);

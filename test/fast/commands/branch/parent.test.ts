@@ -13,5 +13,16 @@ for (const scene of allScenes) {
         "main"
       );
     });
+
+    it("Fails to create a cycle", () => {
+      scene.repo.createChange("a");
+      scene.repo.execCliCommand(`branch create "a" -m "a" -q`);
+
+      scene.repo.createChange("b");
+      scene.repo.execCliCommand(`branch create "b" -m "b" -q`);
+
+      scene.repo.checkoutBranch("a");
+      expect(() => scene.repo.execCliCommand(`branch parent --set "b"`));
+    });
   });
 }
