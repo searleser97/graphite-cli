@@ -1,0 +1,17 @@
+###########################################################################
+# libssh2 installation details
+###########################################################################
+
+prefix=/Users/gregfoster/graphite-cli/rust-src/target/rls/debug/build/libssh2-sys-71659d01f0879d0e/out
+exec_prefix=
+libdir=/Users/gregfoster/graphite-cli/rust-src/target/rls/debug/build/libssh2-sys-71659d01f0879d0e/out/lib
+includedir=/Users/gregfoster/graphite-cli/rust-src/target/rls/debug/build/libssh2-sys-71659d01f0879d0e/out/include
+
+Name: libssh2
+URL: https://www.libssh2.org/
+Description: Library for SSH-based communication
+Version: 1.9.0_DEV
+Requires.private: 
+Libs: -L${libdir} -lssh2 
+Libs.private: 
+Cflags: -I${includedir}
