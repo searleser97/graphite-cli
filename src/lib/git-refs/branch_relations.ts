@@ -1,15 +1,16 @@
 import chalk from "chalk";
-import { execSync } from "child_process";
-import { getTrunk } from ".";
 import Branch from "../../wrapper-classes/branch";
 import { repoConfig } from "../config";
 import { tracer } from "../telemetry";
-import { logDebug } from "./splog";
+import { gpExecSync } from "../utils";
+import { logDebug } from "../utils/splog";
+import { getRef } from "./branch_ref";
+import cache from "./cache";
 
 export function getBranchChildrenOrParentsFromGit(
   branch: Branch,
   opts: {
-    direction: "CHILDREN" | "PARENTS";
+    direction: "children" | "parents";
     useMemoizedResults?: boolean;
   }
 ): Branch[] {
@@ -22,13 +23,12 @@ export function getBranchChildrenOrParentsFromGit(
       meta: { direction: direction },
     },
     () => {
-      const gitTree =
-        direction === "CHILDREN"
-          ? getChildrenRevListGitTree(branch.name)
-          : getParentRevListGitTree(branch.name);
-      const headSha = execSync(`git rev-parse ${branch.name}`)
-        .toString()
-        .trim();
+      const gitTree = getRevListGitTree({
+        useMemoizedResults,
+        direction: opts.direction,
+      });
+
+      const headSha = getRef(branch);
 
       const childrenOrParents = traverseGitTreeFromCommitUntilBranch(
         headSha,
@@ -51,47 +51,56 @@ export function getBranchChildrenOrParentsFromGit(
         );
       }
 
-      return Array.from(childrenOrParents.branches).map((name) => {
-        const branch = new Branch(name);
-        return branch.shouldUseMemoizedResults
-          ? branch.useMemoizedResults()
-          : branch;
-      });
+      return Array.from(childrenOrParents.branches).map(
+        (name) =>
+          new Branch(name, {
+            useMemoizedResults: branch.shouldUseMemoizedResults,
+          })
+      );
     }
   );
 }
 
-function getChildrenRevListGitTree(
-  branchName: string
-): Record<string, string[]> {
-  const otherBranches = Branch.allBranches()
+function getRevListGitTree(opts: {
+  useMemoizedResults: boolean;
+  direction: "parents" | "children";
+}): Record<string, string[]> {
+  const cachedParentsRevList = cache.getParentsRevList();
+  const cachedChildrenRevList = cache.getChildrenRevList();
+  if (
+    opts.useMemoizedResults &&
+    opts.direction === "parents" &&
+    cachedParentsRevList
+  ) {
+    return cachedParentsRevList;
+  } else if (
+    opts.useMemoizedResults &&
+    opts.direction === "children" &&
+    cachedChildrenRevList
+  ) {
+    return cachedChildrenRevList;
+  }
+  const allBranches = Branch.allBranches()
     .map((b) => b.name)
-    .filter((b) => b !== branchName);
-
-  return gitTreeFromRevListOutput(
-    execSync(
-      // Check that there is a commit behind this branch before getting the full list.
-      `git show-ref ${branchName}~1 && git rev-list --children ${otherBranches.join(
-        " "
-        // If there are no commits behind current, just fetch all refs.
-      )} ^${branchName}~1 || git rev-list --children --all`,
-      {
+    .join(" ");
+  const revList = gitTreeFromRevListOutput(
+    gpExecSync({
+      command:
+        // Check that there is a commit behind this branch before getting the full list.
+        `git rev-list --${opts.direction} ^$(git merge-base --octopus ${allBranches})~1 ${allBranches} 2> /dev/null || git rev-list --${opts.direction} --all`,
+      options: {
         maxBuffer: 1024 * 1024 * 1024,
-      }
-    )
-      .toString()
-      .trim()
-  );
-}
-
-function getParentRevListGitTree(branchName: string): Record<string, string[]> {
-  return gitTreeFromRevListOutput(
-    execSync(`git rev-list --parents ${branchName} ^${getTrunk().name}`, {
-      maxBuffer: 1024 * 1024 * 1024,
+      },
     })
       .toString()
       .trim()
   );
+  if (opts.direction === "parents") {
+    cache.setParentsRevList(revList);
+  } else if (opts.direction === "children") {
+    cache.setChildrenRevList(revList);
+  }
+  return revList;
 }
 
 let memoizedBranchList: Record<string, string[]>;
@@ -103,8 +112,9 @@ function getBranchList(opts: {
   }
 
   memoizedBranchList = branchListFromShowRefOutput(
-    execSync("git show-ref --heads", {
-      maxBuffer: 1024 * 1024 * 1024,
+    gpExecSync({
+      command: "git show-ref --heads",
+      options: { maxBuffer: 1024 * 1024 * 1024 },
     })
       .toString()
       .trim()
