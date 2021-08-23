@@ -37,10 +37,10 @@ export async function logShortAction(): Promise<void> {
   const currentBranch = currentBranchPrecondition();
   const stacks = getStacks();
 
-  const needsFix = printStackNode(stacks.trunkStack.source, {
+  const needsFix: boolean = printStackNode(stacks.trunkStack.source, {
     indent: 0,
     currentBranch: currentBranch,
-  });
+  }).needsFix;
 
   stacks.fallenStacks.sort(sortStacksByAge).forEach((s) => {
     printStackNode(s.source, {
