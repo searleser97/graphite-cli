@@ -1,3 +1,11 @@
+# 0.12.3 2020-08-23
+- Fix outdated copy reference to gp.
+- Print error stack trace when --debug flag is used.
+- Flag midstack untracked branches in `gt ls` output.
+- Improve submit to correctly support `gt stack submit` and `gt downstack submit`
+- Reduce unnecessary git ref calls to improve performance in large repos.
+- Support graceful handling of sigint.
+
 # 0.12.2 2020-08-23
 - Fix bug in `gt ls` stack traversal.
 
