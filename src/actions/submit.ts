@@ -105,9 +105,10 @@ function pushBranchesToRemote(branches: Branch[]): Branch[] {
           printStdout: true,
         },
       },
-      (_) => {
+      (err) => {
         throw new ExitFailedError(
-          `Failed to push changes for ${branch.name} to origin. Aborting...`
+          `Failed to push changes for ${branch.name} to origin. Aborting...`,
+          err
         );
       }
     )
@@ -226,7 +227,7 @@ async function submitPRsForBranches(args: {
       }).\n\nResponse: ${JSON.stringify(response)}`
     );
   } catch (error) {
-    throw new ExitFailedError(`Failed to submit PRs: ${error.message}`);
+    throw new ExitFailedError(`Failed to submit PRs`, error);
   }
 }
 
