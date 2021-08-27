@@ -1,6 +1,10 @@
 import { execSync } from "child_process";
 import { repoConfig } from "../lib/config";
-import { ExitFailedError } from "../lib/errors";
+import {
+  ExitFailedError,
+  MultiParentError,
+  SiblingBranchError,
+} from "../lib/errors";
 import {
   getBranchChildrenOrParentsFromGit,
   getRef,
@@ -88,11 +92,9 @@ export default class Branch {
 
   stackByTracingGitParents(branch?: Branch): string[] {
     const curBranch = branch || this;
-    const gitParents = curBranch.getParentsFromGit();
-    if (gitParents.length === 1) {
-      return this.stackByTracingGitParents(gitParents[0]).concat([
-        curBranch.name,
-      ]);
+    const gitParent = curBranch.getParentFromGit();
+    if (gitParent) {
+      return this.stackByTracingGitParents(gitParent).concat([curBranch.name]);
     } else {
       return [curBranch.name];
     }
@@ -348,7 +350,7 @@ export default class Branch {
         if (opts?.excludeTrunk && branch.name === getTrunk().name) {
           return false;
         }
-        return branch.getParentsFromGit().length === 0;
+        return !!branch.getParentFromGit;
       },
       opts: opts,
     });
@@ -358,7 +360,7 @@ export default class Branch {
     opts?: TBranchFilters
   ): Promise<Branch[]> {
     return this.allBranchesWithFilter({
-      filter: (branch) => branch.getParentsFromGit().length > 0,
+      filter: (branch) => !!branch.getParentFromGit(),
       opts: opts,
     });
   }
@@ -384,23 +386,61 @@ export default class Branch {
       direction: "children",
       useMemoizedResults: this.shouldUseMemoizedResults,
     });
+    const siblings = this.branchesWithSameCommit();
+    if (siblings.length > 0) {
+      // consider if siblings are children.
+      siblings.forEach((s) => {
+        if (s.getParentFromMeta()?.name === this.name) {
+          kids.push(s);
+        }
+      });
+    }
     return kids;
   }
 
-  public getParentsFromGit(): Branch[] {
-    if (
-      // Current branch is trunk
-      this.name === getTrunk().name
-      // Current branch shares
-    ) {
-      return [];
+  public getParentFromGit(): Branch | undefined {
+    if (this.name === getTrunk().name) {
+      return undefined;
     } else if (this.pointsToSameCommitAs(getTrunk())) {
-      return [getTrunk()];
+      return getTrunk();
     }
-    return getBranchChildrenOrParentsFromGit(this, {
+
+    const siblings = this.branchesWithSameCommit();
+
+    // If the current branch has siblings (pointing to the same commit)
+    // consider the chance that one of them is the parent of the current branch.
+    // We only consider a sibling a parent if there is metadata pointing to it.
+    // This is the one edge case that we use metadata when deriving a parent from git.
+    // If metadata can't prove the parent relationship, through a sibling error.
+    if (siblings.length > 0) {
+      const metaParent = this.getParentFromMeta();
+      if (!metaParent) {
+        // Without metadata, just throw a sibling error.
+        throw new SiblingBranchError(siblings.concat([this]));
+      }
+      // With meta, attempt to discern between siblings and normal git parents.
+      if (siblings.find((s) => s.name === metaParent.name)) {
+        return metaParent;
+      }
+      // At this point, we have meta, and we know the parent isnt a sibling.
+      // Proceed to check the git parent(s)
+    }
+
+    const parents = getBranchChildrenOrParentsFromGit(this, {
       direction: "parents",
       useMemoizedResults: this.shouldUseMemoizedResults,
     });
+
+    // If there are multiple parents per git, once again use metadata to make a decision.
+    // If there is no metadata to help the decision, through a multi-parent error.
+    if (parents.length > 1) {
+      const metaParent = this.getParentFromMeta();
+      if (metaParent && parents.find((p) => p.name === metaParent.name)) {
+        return metaParent;
+      }
+      throw new MultiParentError(this, parents);
+    }
+    return parents[0];
   }
 
   private pointsToSameCommitAs(branch: Branch): boolean {
