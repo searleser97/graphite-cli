@@ -39,7 +39,11 @@ export async function syncAction(opts: {
   }
 
   await deleteMergedBranches(opts.force);
-  checkoutBranch(oldBranch.name);
+  if (Branch.exists(oldBranch.name)) {
+    checkoutBranch(oldBranch.name);
+  } else {
+    checkoutBranch(trunk);
+  }
   await resubmitBranchesWithNewBases(opts.force);
   cleanDanglingMetadata();
 }
@@ -96,12 +100,14 @@ async function deleteBranch(opts: { branchName: string; force: boolean }) {
       )}), which has been merged into (${getTrunk().name})?`,
       initial: true,
     });
+    console.log("RESPONSE...");
+    console.log(response.value);
+    console.log("^ RESPONSE...");
     if (response.value != true) {
       return;
     }
-  } else {
-    logInfo(`Deleting (${chalk.red(opts.branchName)})`);
   }
+  logInfo(`Deleting (${chalk.red(opts.branchName)})`);
   execSync(`git branch -D ${opts.branchName}`);
 }
 
