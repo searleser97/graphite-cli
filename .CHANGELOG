@@ -10,7 +10,7 @@
 - Support passing through commands to git which aren't supported by Graphite.
 - Add experimental command "stack test".
 - Fix bug causing branches to show up twice in log commands.
-- Show PR and commit into in "log" command
+- Show PR and commit info in "log" command
 - Add tip advising against creating branches without commits.
 
 # 0.12.3 2020-08-23
