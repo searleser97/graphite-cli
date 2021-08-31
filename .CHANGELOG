@@ -1,3 +1,18 @@
+# 0.13.0 2020-08-31
+- "stack submit" now checks if update is needed for each branch.
+- Support "upstack submit" and "branch submit"
+- Fixed bug which was preventing "upstack" from having the alias "us"
+- Added a command "branch rename" to rename branches and correctly update metadata.
+- Better support cancelling out of prompts.
+- Rename "stack clean" to "repo sync" and update to be able to be run from any branch.
+- Update "repo sync" to delete old branch metadata refs.
+- Update "repo sync" to update PR merge bases if necessary.
+- Support passing through commands to git which aren't supported by Graphite.
+- Add experimental command "stack test".
+- Fix bug causing branches to show up twice in log commands.
+- Show PR and commit into in "log" command
+- Add tip advising against creating branches without commits.
+
 # 0.12.3 2020-08-23
 - Fix outdated copy reference to gp.
 - Print error stack trace when --debug flag is used.
