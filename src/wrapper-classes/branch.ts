@@ -324,7 +324,7 @@ export default class Branch {
         if (opts?.excludeTrunk && branch.name === getTrunk().name) {
           return false;
         }
-        return !!branch.getParentFromGit;
+        return branch.getParentFromGit() === undefined;
       },
       opts: opts,
     });
