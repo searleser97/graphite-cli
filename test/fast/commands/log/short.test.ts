@@ -27,5 +27,11 @@ for (const scene of [new TrailingProdScene()]) {
       // b's now has no git-parents, but it's meta points to "a" which still exists but is not off main.
       expect(() => scene.repo.execCliCommand(`log short`)).to.not.throw(Error);
     });
+
+    it("Errors if trunk has two branches pointing to one commit", () => {
+      scene.repo.execCliCommand(`branch create a`);
+      scene.repo.checkoutBranch("main");
+      expect(() => scene.repo.execCliCommand("log short")).to.throw(Error);
+    });
   });
 }
