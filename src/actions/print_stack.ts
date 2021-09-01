@@ -19,11 +19,13 @@ export function printStack(args: {
   const currPrefix = getPrefix(args.indentLevel, args.config);
 
   children.forEach((child, i) => {
-    printStack({
-      baseBranch: child,
-      indentLevel: args.indentLevel + i,
-      config: args.config,
-    });
+    if (!child.isTrunk()) {
+      printStack({
+        baseBranch: child,
+        indentLevel: args.indentLevel + i,
+        config: args.config,
+      });
+    }
   });
 
   // 1) if there is only 1 child, we only need to continue the parent's stem
