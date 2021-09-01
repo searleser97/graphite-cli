@@ -1,3 +1,7 @@
+# 0.13.0 2020-09-01
+- Disable metadata deletion from "repo sync"
+- Disable pull request base pushing from "repo sync"
+
 # 0.13.0 2020-08-31
 - "stack submit" now checks if update is needed for each branch.
 - Support "upstack submit" and "branch submit"
