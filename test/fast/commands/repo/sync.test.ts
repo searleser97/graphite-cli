@@ -120,7 +120,7 @@ for (const scene of allScenes) {
       expectCommits(scene.repo, "squash_b, squash_a, 1");
     });
 
-    it("Deletes dangling metadata refs", async () => {
+    xit("Deletes dangling metadata refs", async () => {
       scene.repo.createChange("2", "a");
       scene.repo.execCliCommand(`branch create "a" -m "a" -q`);
       scene.repo.checkoutBranch("main");
