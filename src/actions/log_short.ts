@@ -97,12 +97,14 @@ function printStackNode(
     ].join(" ")
   );
   node.children.forEach((c) => {
-    const tips = printStackNode(c, {
-      indent: opts.indent + 1,
-      currentBranch: opts.currentBranch,
-    });
-    untracked = tips.untracked || untracked;
-    needsFix = tips.needsFix || needsFix;
+    if (!c.branch.isTrunk()) {
+      const tips = printStackNode(c, {
+        indent: opts.indent + 1,
+        currentBranch: opts.currentBranch,
+      });
+      untracked = tips.untracked || untracked;
+      needsFix = tips.needsFix || needsFix;
+    }
   });
   return { untracked, needsFix };
 }
