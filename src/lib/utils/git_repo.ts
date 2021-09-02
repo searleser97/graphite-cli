@@ -5,8 +5,14 @@ import { rebaseInProgress } from "./";
 const TEXT_FILE_NAME = "test.txt";
 export default class GitRepo {
   dir: string;
-  constructor(dir: string, opts?: { repoUrl: string }) {
+  constructor(
+    dir: string,
+    opts?: { existingRepo?: boolean; repoUrl?: string }
+  ) {
     this.dir = dir;
+    if (opts?.existingRepo) {
+      return;
+    }
     if (opts?.repoUrl) {
       execSync(`git clone ${opts.repoUrl} ${dir}`);
     } else {

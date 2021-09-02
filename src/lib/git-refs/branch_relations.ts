@@ -61,7 +61,7 @@ export function getBranchChildrenOrParentsFromGit(
   );
 }
 
-function getRevListGitTree(opts: {
+export function getRevListGitTree(opts: {
   useMemoizedResults: boolean;
   direction: "parents" | "children";
 }): Record<string, string[]> {

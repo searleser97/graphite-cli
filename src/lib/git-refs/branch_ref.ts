@@ -32,6 +32,14 @@ function refreshRefsCache(): void {
     refToBranches: memoizedRefToBranches,
   });
 }
+
+export function getBranchToRefMapping(): Record<string, string> {
+  if (!cache.getBranchToRef()) {
+    refreshRefsCache();
+  }
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return cache.getBranchToRef()!;
+}
 export function getRef(branch: Branch): string {
   if (!branch.shouldUseMemoizedResults || !cache.getBranchToRef()) {
     refreshRefsCache();
