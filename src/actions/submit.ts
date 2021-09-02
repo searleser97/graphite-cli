@@ -459,7 +459,7 @@ function printSubmittedPRInfo(prs: TSubmittedPR[]): void {
     }
 
     logNewline();
-    logInfo(`See your full stack on "app.graphite.dev"`);
+    logInfo(`See your full stack on https://app.graphite.dev`);
   });
 }
 
