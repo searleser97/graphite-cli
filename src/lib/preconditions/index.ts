@@ -1,7 +1,15 @@
 import Branch from "../../wrapper-classes/branch";
 import { repoConfig, userConfig } from "../config";
 import { PreconditionsFailedError } from "../errors";
-import { detectStagedChanges, gpExecSync, uncommittedChanges } from "../utils";
+import {detectStagedChanges, gpExecSync, logTip, uncommittedChanges, unStagedChanges} from "../utils";
+
+function addAllAvailableTip(): void {
+  if (unStagedChanges()) {
+    logTip(
+        "There are unstaged changes. Use -a option to stage all unstaged changes."
+    );
+  }
+}
 
 function currentBranchPrecondition(): Branch {
   const branch = Branch.getCurrentBranch();
@@ -37,9 +45,12 @@ function uncommittedChangesPrecondition(): void {
   }
 }
 
-function ensureSomeStagedChangesPrecondition(): void {
+function ensureSomeStagedChangesPrecondition(addAllLogTipEnabled?: boolean): void {
   if (!detectStagedChanges()) {
     gpExecSync({ command: `git status`, options: { stdio: "ignore" } });
+    if (addAllLogTipEnabled) {
+      addAllAvailableTip();
+    }
     throw new PreconditionsFailedError(`Cannot run without staged changes.`);
   }
 }
