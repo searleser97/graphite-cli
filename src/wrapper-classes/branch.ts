@@ -75,7 +75,7 @@ export default class Branch {
       return undefined;
     }
 
-    // Cycle untile we find a parent that has a real branch, or just is undefined.
+    // Cycle until we find a parent that has a real branch, or just is undefined.
     if (!Branch.exists(parentName)) {
       while (parentName && !Branch.exists(parentName)) {
         parentName = MetadataRef.getMeta(parentName)?.parentBranchName;
