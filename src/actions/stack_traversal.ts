@@ -67,6 +67,30 @@ async function getNextBranch(
   }
 }
 
+
+function getTopBranch(
+    currentBranch: Branch,
+    interactive: boolean,
+): string| undefined {
+  let branch = currentBranch
+  let candidates = branch.getChildrenFromMeta();
+  let indent = 0
+  while (branch && candidates.length){
+    if (candidates.length === 1) {
+      logInfo(`${"  ".repeat(indent)}↳(${branch})`);
+      branch = candidates[0]
+      indent ++;
+    } else {
+      if (interactive) {
+        //TODO: deal with interactive option
+      }
+    }
+    candidates = branch.getChildrenFromMeta();
+  }
+  logInfo(`${"  ".repeat(indent)}↳(${chalk.cyan(branch)})`);
+  return branch?.name
+}
+
 export async function nextOrPrevAction(opts: {
   nextOrPrev: "next" | "prev";
   numSteps: number;
@@ -100,8 +124,21 @@ export async function bottomBranchAction(): Promise<void> {
   const bottomBranch = getBottomBranch(currentBranch);
   if (bottomBranch && bottomBranch != currentBranch.name) {
     execSync(`git checkout "${bottomBranch}"`, { stdio: "ignore" });
-    logInfo(
-        `${"  ".repeat(0)}↳(${chalk.cyan(bottomBranch)})`
-    );
+    logInfo(`Switched to ${bottomBranch}`);
+  } else {
+    logInfo("Already at the bottom most branch in the stack. Exiting.");
+  }
+}
+
+export async function topBranchAction(opts: {
+  interactive: boolean;
+}): Promise<void> {
+  const currentBranch = currentBranchPrecondition();
+  const topBranch = getTopBranch(currentBranch, opts.interactive);
+  if (topBranch && topBranch !== currentBranch.name) {
+    execSync(`git checkout "${topBranch}"`, { stdio: "ignore" });
+    logInfo(`Switched to ${topBranch}`);
+  } else {
+    logInfo("Already at the top most branch in the stack. Exiting.");
   }
 }
