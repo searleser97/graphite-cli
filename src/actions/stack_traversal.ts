@@ -67,10 +67,10 @@ async function getNextBranch(
 }
 
 
-function getTopBranch(
+async function getTopBranch(
     currentBranch: Branch,
     interactive: boolean,
-): string| undefined {
+): Promise<string| undefined> {
   let branch = currentBranch
   let candidates = branch.getChildrenFromMeta();
   let indent = 0
@@ -81,11 +81,34 @@ function getTopBranch(
       indent ++;
     } else {
       if (interactive) {
-        //TODO: deal with interactive option
+        return (
+            await prompts(
+                {
+                  type: "select",
+                  name: "branch",
+                  message: "Select a branch to checkout",
+                  choices: candidates.map((b) => {
+                    return { title: b.name, value: b.name };
+                  }),
+                },
+                {
+                  onCancel: () => {
+                    throw new KilledError();
+                  },
+                }
+            )
+        ).branch;
+      } else {
+        throw new ExitFailedError(
+            `Cannot get next branch, multiple choices available: [${candidates.join(
+                ", "
+            )}]`
+        );
       }
     }
     candidates = branch.getChildrenFromMeta();
   }
+
   logInfo(`${"  ".repeat(indent)}↳(${chalk.cyan(branch)})`);
   return branch?.name
 }
@@ -133,7 +156,7 @@ export async function topBranchAction(opts: {
   interactive: boolean;
 }): Promise<void> {
   const currentBranch = currentBranchPrecondition();
-  const topBranch = getTopBranch(currentBranch, opts.interactive);
+  const topBranch = await getTopBranch(currentBranch, opts.interactive);
   if (topBranch && topBranch !== currentBranch.name) {
     execSync(`git checkout "${topBranch}"`, { stdio: "ignore" });
     logInfo(`Switched to ${topBranch}`);
