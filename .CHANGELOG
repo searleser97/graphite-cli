@@ -1,4 +1,11 @@
-# 0.13.0 2020-09-01
+# 0.14.0 2020-09-16
+- `gt debug-context` captures debug metadata from your repo and can send that to Screenplay to help troubleshoot issues.
+- `gt repo sync` now pulls in PR information for all local branches from GitHub to link any PRs Graphite doesn't know about/better remove already-merged branches.
+- Re-enable metadata deletion from `repo sync`.
+- Re-enable pull request base pushing from `repo sync`.
+- `gt branch create -m` now has `-a` flag to include staged changes in the commit.
+
+# 0.13.1 2020-09-01
 - Disable metadata deletion from "repo sync"
 - Disable pull request base pushing from "repo sync"
 
