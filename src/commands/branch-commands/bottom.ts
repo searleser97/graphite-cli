@@ -1,5 +1,5 @@
 import yargs from "yargs";
-import { bottomBranchAction } from "../../actions/next_or_prev";
+import { bottomBranchAction } from "../../actions/stack_traversal";
 // import { execStateConfig } from "../../lib/config";
 import { profile } from "../../lib/telemetry";
 
