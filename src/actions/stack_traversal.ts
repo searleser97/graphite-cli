@@ -28,8 +28,8 @@ function getBottomBranch(currentBranch: Branch): string | undefined {
 }
 
 async function getNextBranch(
-  currentBranch: Branch,
-  interactive: boolean
+    currentBranch: Branch,
+    interactive: boolean
 ): Promise<string | undefined> {
   const candidates = currentBranch.getChildrenFromMeta();
 
@@ -39,27 +39,27 @@ async function getNextBranch(
   if (candidates.length > 1) {
     if (interactive) {
       return (
-        await prompts(
-          {
-            type: "select",
-            name: "branch",
-            message: "Select a branch to checkout",
-            choices: candidates.map((b) => {
-              return { title: b.name, value: b.name };
-            }),
-          },
-          {
-            onCancel: () => {
-              throw new KilledError();
-            },
-          }
-        )
+          await prompts(
+              {
+                type: "select",
+                name: "branch",
+                message: "Select a branch to checkout",
+                choices: candidates.map((b) => {
+                  return { title: b.name, value: b.name };
+                }),
+              },
+              {
+                onCancel: () => {
+                  throw new KilledError();
+                },
+              }
+          )
       ).branch;
     } else {
       throw new ExitFailedError(
-        `Cannot get next branch, multiple choices available: [${candidates.join(
-          ", "
-        )}]`
+          `Cannot get next branch, multiple choices available: [${candidates.join(
+              ", "
+          )}]`
       );
     }
   } else {
@@ -75,6 +75,28 @@ async function getTopBranch(
   let branch = currentBranch
   let candidates = branch.getChildrenFromMeta();
   let indent = 0
+
+  async function get_stack_branch() : Promise<string>{
+    return (
+        await prompts(
+            {
+              type: "select",
+              name: "branch",
+              message: "Select a branch to checkout",
+              choices: candidates.map((b) => {
+                return {title: b.name, value: b.name, branch: b};
+              }),
+            },
+            {
+              onCancel: () => {
+                throw new KilledError();
+              },
+            }
+        )
+    ).branch;
+  }
+
+
   while (branch && candidates.length){
     if (candidates.length === 1) {
       logInfo(`${"  ".repeat(indent)}↳(${branch})`);
@@ -82,23 +104,8 @@ async function getTopBranch(
       indent ++;
     } else {
       if (interactive) {
-        return (
-            await prompts(
-                {
-                  type: "select",
-                  name: "branch",
-                  message: "Select a branch to checkout",
-                  choices: candidates.map((b) => {
-                    return { title: b.name, value: b.name };
-                  }),
-                },
-                {
-                  onCancel: () => {
-                    throw new KilledError();
-                  },
-                }
-            )
-        ).branch;
+        const stack_bottom_branch = await get_stack_branch();
+        branch = await Branch.branchWithName(stack_bottom_branch)
       } else {
         throw new ExitFailedError(
             `Cannot get next branch, multiple choices available: [${candidates.join(
@@ -123,18 +130,18 @@ export async function nextOrPrevAction(opts: {
   for (let i = 0; i < opts.numSteps; i++) {
     const currentBranch = currentBranchPrecondition();
     const branch =
-      opts.nextOrPrev === "next"
-        ? await getNextBranch(currentBranch, opts.interactive)
-        : getPrevBranch(currentBranch);
+        opts.nextOrPrev === "next"
+            ? await getNextBranch(currentBranch, opts.interactive)
+            : getPrevBranch(currentBranch);
 
     // Print indented branch names to show traversal.
     if (branch && branch !== currentBranch.name) {
       execSync(`git checkout "${branch}"`, { stdio: "ignore" });
       const indent = opts.nextOrPrev === "next" ? i : opts.numSteps - i - 1;
       logInfo(
-        `${"  ".repeat(indent)}↳(${
-          i === opts.numSteps - 1 ? chalk.cyan(branch) : branch
-        })`
+          `${"  ".repeat(indent)}↳(${
+              i === opts.numSteps - 1 ? chalk.cyan(branch) : branch
+          })`
       );
     } else {
       return;
