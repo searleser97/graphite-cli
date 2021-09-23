@@ -58,7 +58,7 @@ async function getNextBranch(
     } else {
       throw new ExitFailedError(
         `Cannot get next branch, multiple choices available: [${candidates.join(
-            ", "
+          ", "
         )}]`
       );
     }
@@ -131,8 +131,8 @@ export async function nextOrPrevAction(opts: {
     const currentBranch = currentBranchPrecondition();
     const branch =
       opts.nextOrPrev === "next"
-          ? await getNextBranch(currentBranch, opts.interactive)
-          : getPrevBranch(currentBranch);
+        ? await getNextBranch(currentBranch, opts.interactive)
+        : getPrevBranch(currentBranch);
 
     // Print indented branch names to show traversal.
     if (branch && branch !== currentBranch.name) {
@@ -140,7 +140,7 @@ export async function nextOrPrevAction(opts: {
       const indent = opts.nextOrPrev === "next" ? i : opts.numSteps - i - 1;
       logInfo(
         `${"  ".repeat(indent)}↳(${
-            i === opts.numSteps - 1 ? chalk.cyan(branch) : branch
+          i === opts.numSteps - 1 ? chalk.cyan(branch) : branch
         })`
       );
     } else {
