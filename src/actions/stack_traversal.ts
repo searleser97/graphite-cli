@@ -7,6 +7,26 @@ import { currentBranchPrecondition } from "../lib/preconditions";
 import { logInfo } from "../lib/utils";
 import Branch from "../wrapper-classes/branch";
 
+async function getStackBranch(candidates: Branch[]) : Promise<string>{
+  return (
+    await prompts(
+      {
+        type: "select",
+        name: "branch",
+        message: "Multiple branches found at the same level. Select a branch to guide the navigation",
+        choices: candidates.map((b) => {
+          return {title: b.name, value: b.name, branch: b};
+        }),
+      },
+      {
+        onCancel: () => {
+          throw new KilledError();
+        },
+      }
+    )
+  ).branch;
+}
+
 function getPrevBranch(currentBranch: Branch): string | undefined {
   const branch = currentBranch.getParentFromMeta();
   return branch?.name;
@@ -38,23 +58,7 @@ async function getNextBranch(
   }
   if (candidates.length > 1) {
     if (interactive) {
-      return (
-        await prompts(
-          {
-            type: "select",
-            name: "branch",
-            message: "Select a branch to checkout",
-            choices: candidates.map((b) => {
-              return { title: b.name, value: b.name };
-            }),
-          },
-          {
-            onCancel: () => {
-              throw new KilledError();
-            },
-          }
-        )
-      ).branch;
+      return await getStackBranch(candidates);
     } else {
       throw new ExitFailedError(
         `Cannot determine next branch, multiple choices available: [${candidates.join(
@@ -76,27 +80,6 @@ async function getTopBranch(
   let candidates = branch.getChildrenFromMeta();
   let indent = 0
 
-  async function get_stack_branch() : Promise<string>{
-    return (
-      await prompts(
-        {
-          type: "select",
-          name: "branch",
-          message: "Multiple branches found at the same level. Select a branch to guide the navigation to the top",
-          choices: candidates.map((b) => {
-            return {title: b.name, value: b.name, branch: b};
-          }),
-        },
-        {
-          onCancel: () => {
-            throw new KilledError();
-          },
-        }
-      )
-    ).branch;
-  }
-
-
   while (branch && candidates.length){
     if (candidates.length === 1) {
       logInfo(`${"  ".repeat(indent)}↳(${branch})`);
@@ -104,7 +87,7 @@ async function getTopBranch(
       indent ++;
     } else {
       if (interactive) {
-        const stack_bottom_branch = await get_stack_branch();
+        const stack_bottom_branch = await getStackBranch(candidates);
         branch = await Branch.branchWithName(stack_bottom_branch)
       } else {
         throw new ExitFailedError(
