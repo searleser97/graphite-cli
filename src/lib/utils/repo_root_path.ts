@@ -1,6 +1,7 @@
 import { gpExecSync } from "../../lib/utils/exec_sync";
 import { cache } from "../config";
-import { PreconditionsFailedError } from "../errors";
+import { logError } from "./splog";
+
 export function getRepoRootPath(): string {
   const cachedRepoRootPath = cache.getRepoRootPath();
   if (cachedRepoRootPath) {
@@ -17,7 +18,9 @@ export function getRepoRootPath(): string {
     .toString()
     .trim();
   if (!repoRootPath || repoRootPath.length === 0) {
-    throw new PreconditionsFailedError("No .git repository found.");
+    logError("No .git repository found.");
+    // eslint-disable-next-line no-restricted-syntax
+    process.exit(1);
   }
   cache.setRepoRootPath(repoRootPath);
   return repoRootPath;

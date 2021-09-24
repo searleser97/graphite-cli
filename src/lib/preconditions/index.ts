@@ -1,9 +1,8 @@
 import Branch from "../../wrapper-classes/branch";
 import { repoConfig, userConfig } from "../config";
 import { PreconditionsFailedError } from "../errors";
-import { detectStagedChanges, gpExecSync, logTip, uncommittedChanges, unstagedChanges } from "../utils";
+import {detectStagedChanges, gpExecSync, logError, logTip, uncommittedChanges, unstagedChanges} from "../utils";
 import { trackedUncommittedChanges } from "../utils/git_status_utils";
-import { getRepoRootPath } from "../utils/repo_root_path";
 
 function addAllAvailableTip(): void {
   if (unstagedChanges()) {
@@ -76,21 +75,22 @@ function cliAuthPrecondition(): string {
 }
 
 function currentGitRepoPrecondition(): string {
-  return getRepoRootPath();
-  // const repoRootPath = gpExecSync(
-  //   {
-  //     command: `git rev-parse --show-toplevel`,
-  //   },
-  //   () => {
-  //     return Buffer.alloc(0);
-  //   }
-  // )
-  //   .toString()
-  //   .trim();
-  // if (!repoRootPath || repoRootPath.length === 0) {
-  //   throw new PreconditionsFailedError("No .git repository found.");
-  // }
-  // return repoRootPath;
+  const repoRootPath = gpExecSync(
+    {
+      command: `git rev-parse --show-toplevel`,
+    },
+    () => {
+      return Buffer.alloc(0);
+    }
+  )
+    .toString()
+    .trim();
+  if (!repoRootPath || repoRootPath.length === 0) {
+    logError('No .git repository found.');
+    // eslint-disable-next-line no-restricted-syntax
+    process.exit(1);
+  }
+  return repoRootPath;
 }
 
 export {
