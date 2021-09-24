@@ -41,6 +41,12 @@ function getDownstackBranch(currentBranch: Branch,
 	let branch = currentBranch;
 	let prevBranch = branch.getParentFromMeta();
 	let indent = 0
+
+	// Bottom goes to the bottom of the stack but prev can go up to trunk
+	if (direction === TraversalDirection.Previous && prevBranch?.isTrunk()) {
+		branch = prevBranch;
+		indent ++;
+	}
 	while (prevBranch && !prevBranch.isTrunk()){
 		logInfo(`${"  ".repeat(indent)}↳(${branch})`);
 		branch = prevBranch;
