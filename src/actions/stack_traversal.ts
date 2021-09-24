@@ -34,25 +34,46 @@ async function getStackBranch(candidates: Branch[]) : Promise<string>{
   ).branch;
 }
 
+function traverseDownstack(currentBranch: Branch,
+	direction: TraversalDirection.Previous | TraversalDirection.Bottom,
+	numSteps?: number
+): string|undefined {
+	let branch = currentBranch;
+	let prevBranch = branch.getParentFromMeta();
+	let indent = 0
+	while (prevBranch && !prevBranch.isTrunk()){
+		logInfo(`${"  ".repeat(indent)}↳(${branch})`);
+		branch = prevBranch;
+		prevBranch = branch.getParentFromMeta();
+		indent ++;
+		if (direction === TraversalDirection.Previous && indent === numSteps) {
+			break;
+		}
+	}
+	logInfo(`${"  ".repeat(indent)}↳(${chalk.cyan(branch)})`);
+	return branch?.name;
+}
+
 // TODO: Refactor prev and bottom to traverse downstack and support numsteps
-function getPrevBranch(currentBranch: Branch): string | undefined {
-  const branch = currentBranch.getParentFromMeta();
-  return branch?.name;
+function getPrevBranch(currentBranch: Branch, numSteps?: number): string | undefined {
+  // const branch = currentBranch.getParentFromMeta();
+  // return branch?.name;
+	return traverseDownstack(currentBranch, TraversalDirection.Previous, numSteps);
 }
 
 function getBottomBranch(currentBranch: Branch): string | undefined {
-  let branch = currentBranch
-  let prevBranch = branch.getParentFromMeta();
-  let indent = 0;
-  while (prevBranch && !prevBranch.isTrunk()){
-    logInfo(`${"  ".repeat(indent)}↳(${branch})`);
-    branch = prevBranch;
-    prevBranch = branch.getParentFromMeta();
-    indent ++;
-  }
-  logInfo(`${"  ".repeat(indent)}↳(${chalk.cyan(branch)})`);
-
-  return branch?.name;
+  // let branch = currentBranch
+  // let prevBranch = branch.getParentFromMeta();
+  // let indent = 0
+  // while (prevBranch && !prevBranch.isTrunk()){
+  //   logInfo(`${"  ".repeat(indent)}↳(${branch})`);
+  //   branch = prevBranch;
+  //   prevBranch = branch.getParentFromMeta();
+  //   indent ++;
+  // }
+  // logInfo(`${"  ".repeat(indent)}↳(${chalk.cyan(branch)})`);
+  // return branch?.name;
+	return traverseDownstack(currentBranch, TraversalDirection.Bottom);
 }
 
 async function getNextBranch(
@@ -86,7 +107,7 @@ async function traverseUpstack(currentBranch: Branch,
 	interactive: boolean,
 	direction: TraversalDirection.Next | TraversalDirection.Top,
 	numSteps?: number
-){
+): Promise<string | undefined>{
 	let branch = currentBranch
 	let candidates = branch.getChildrenFromMeta();
 	let indent = 0
