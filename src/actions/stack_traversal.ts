@@ -99,8 +99,8 @@ export async function switchBranchAction(direction: TraversalDirection, opts: {
 	let nextBranch;
 	switch (direction) {
 		case TraversalDirection.Bottom: {
-		nextBranch = getDownstackBranch(currentBranch, TraversalDirection.Bottom);
-		break;
+			nextBranch = getDownstackBranch(currentBranch, TraversalDirection.Bottom);
+			break;
 		}
 		case TraversalDirection.Previous: {
 			nextBranch = getDownstackBranch(currentBranch, TraversalDirection.Previous, opts.numSteps);
