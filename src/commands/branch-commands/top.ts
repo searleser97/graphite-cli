@@ -1,5 +1,5 @@
 import yargs from "yargs";
-import { switchBranchAction, TraversalDirection } from "../../actions/stack_traversal";
+import { switchBranchAction, TraversalDirection } from "../../actions/branch_traversal";
 import { profile } from "../../lib/telemetry";
 import { execStateConfig } from "../../lib/config";
 
