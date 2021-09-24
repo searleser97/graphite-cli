@@ -1,9 +1,5 @@
 import yargs from "yargs";
-<<<<<<< HEAD
 import { switchBranchAction, TraversalDirection } from "../../actions/branch_traversal";
-=======
-import { switchBranchAction, TraversalDirection } from "../../actions/stack_traversal";
->>>>>>> 96d535e (refactor(stack_traversal): traverseDownstack function to replace bottom and prev)
 import { execStateConfig } from "../../lib/config";
 import { profile } from "../../lib/telemetry";
 
