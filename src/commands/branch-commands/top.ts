@@ -1,5 +1,5 @@
 import yargs from "yargs";
-import { topBranchAction } from "../../actions/stack_traversal";
+import {switchBranchAction, TraversalDirection} from "../../actions/stack_traversal";
 import { profile } from "../../lib/telemetry";
 import {execStateConfig} from "../../lib/config";
 
@@ -22,7 +22,7 @@ export const description =
 
 export const handler = async (argv: argsT): Promise<void> => {
     return profile(argv, async () => {
-        await topBranchAction({
+        await switchBranchAction(TraversalDirection.Top, {
             interactive: execStateConfig.interactive(),
         });
     });
