@@ -34,7 +34,7 @@ async function getStackBranch(candidates: Branch[]) : Promise<string>{
   ).branch;
 }
 
-function traverseDownstack(currentBranch: Branch,
+function getDownstackBranch(currentBranch: Branch,
 	direction: TraversalDirection.Previous | TraversalDirection.Bottom,
 	numSteps?: number
 ): string|undefined {
@@ -54,56 +54,7 @@ function traverseDownstack(currentBranch: Branch,
 	return branch?.name;
 }
 
-// TODO: Refactor prev and bottom to traverse downstack and support numsteps
-function getPrevBranch(currentBranch: Branch, numSteps?: number): string | undefined {
-  // const branch = currentBranch.getParentFromMeta();
-  // return branch?.name;
-	return traverseDownstack(currentBranch, TraversalDirection.Previous, numSteps);
-}
-
-function getBottomBranch(currentBranch: Branch): string | undefined {
-  // let branch = currentBranch
-  // let prevBranch = branch.getParentFromMeta();
-  // let indent = 0
-  // while (prevBranch && !prevBranch.isTrunk()){
-  //   logInfo(`${"  ".repeat(indent)}↳(${branch})`);
-  //   branch = prevBranch;
-  //   prevBranch = branch.getParentFromMeta();
-  //   indent ++;
-  // }
-  // logInfo(`${"  ".repeat(indent)}↳(${chalk.cyan(branch)})`);
-  // return branch?.name;
-	return traverseDownstack(currentBranch, TraversalDirection.Bottom);
-}
-
-async function getNextBranch(
-  currentBranch: Branch,
-  interactive: boolean,
-	numSteps?: number
-): Promise<string | undefined> {
-	// const candidates = currentBranch.getChildrenFromMeta();
-	//
-	// if (candidates.length === 0) {
-	//   return;
-	// }
-	// if (candidates.length > 1) {
-	//   if (interactive) {
-	//     return await getStackBranch(candidates)
-	//   } else {
-	//     throw new ExitFailedError(
-	//       `Cannot get next branch, multiple choices available: [${candidates.join(
-	//         ", "
-	//       )}]`
-	//     );
-	//   }
-	// } else {
-	//   return candidates[0].name;
-	// }
-	return traverseUpstack(currentBranch, interactive, TraversalDirection.Next, numSteps);
-}
-
-
-async function traverseUpstack(currentBranch: Branch,
+async function getUpstackBranch(currentBranch: Branch,
 	interactive: boolean,
 	direction: TraversalDirection.Next | TraversalDirection.Top,
 	numSteps?: number
@@ -139,40 +90,6 @@ async function traverseUpstack(currentBranch: Branch,
 	return branch?.name
 }
 
-async function getTopBranch(
-	currentBranch: Branch,
-	interactive: boolean,
-): Promise<string | undefined> {
-	return await traverseUpstack(currentBranch, interactive, TraversalDirection.Top);
-}
-
-export async function nextOrPrevAction(opts: {
-  nextOrPrev: "next" | "prev";
-  numSteps: number;
-  interactive: boolean;
-}): Promise<void> {
-  // Support stepping over n branches.
-  for (let i = 0; i < opts.numSteps; i++) {
-    const currentBranch = currentBranchPrecondition();
-    const branch =
-      opts.nextOrPrev === "next"
-        ? await getNextBranch(currentBranch, opts.interactive)
-        : getPrevBranch(currentBranch);
-
-    // Print indented branch names to show traversal.
-    if (branch && branch !== currentBranch.name) {
-      execSync(`git checkout "${branch}"`, { stdio: "ignore" });
-      const indent = opts.nextOrPrev === "next" ? i : opts.numSteps - i - 1;
-      logInfo(
-        `${"  ".repeat(indent)}↳(${
-          i === opts.numSteps - 1 ? chalk.cyan(branch) : branch
-        })`
-      );
-    } else {
-      return;
-    }
-  }
-}
 
 export async function switchBranchAction(direction: TraversalDirection, opts: {
 	numSteps?: number;
@@ -182,19 +99,19 @@ export async function switchBranchAction(direction: TraversalDirection, opts: {
 	let nextBranch;
 	switch (direction) {
 		case TraversalDirection.Bottom: {
-		nextBranch = getBottomBranch(currentBranch);
+		nextBranch = getDownstackBranch(currentBranch, TraversalDirection.Bottom);
 		break;
 		}
 		case TraversalDirection.Previous: {
-			nextBranch = getPrevBranch(currentBranch);
+			nextBranch = getDownstackBranch(currentBranch, TraversalDirection.Previous, opts.numSteps);
 			break;
 		}
 		case TraversalDirection.Top: {
-			nextBranch = await getTopBranch(currentBranch, opts.interactive);
+			nextBranch = await getUpstackBranch(currentBranch, opts.interactive, TraversalDirection.Top);
 			break;
 		}
 		case TraversalDirection.Next: {
-			nextBranch = await getNextBranch(currentBranch, opts.interactive, opts.numSteps);
+			nextBranch = await getUpstackBranch(currentBranch, opts.interactive, TraversalDirection.Next, opts.numSteps);
 			break;
 		}
 	}
@@ -204,28 +121,4 @@ export async function switchBranchAction(direction: TraversalDirection, opts: {
 	} else {
 		logInfo(`Already at the ${direction} branch in the stack. Exiting.`);
 	}
-}
-
-export async function bottomBranchAction(): Promise<void> {
-  const currentBranch = currentBranchPrecondition();
-  const bottomBranch = getBottomBranch(currentBranch);
-  if (bottomBranch && bottomBranch != currentBranch.name) {
-    execSync(`git checkout "${bottomBranch}"`, { stdio: "ignore" });
-    logInfo(`Switched to ${bottomBranch}`);
-  } else {
-    logInfo("Already at the bottom most branch in the stack. Exiting.");
-  }
-}
-
-export async function topBranchAction(opts: {
-  interactive: boolean;
-}): Promise<void> {
-  const currentBranch = currentBranchPrecondition();
-  const topBranch = await getTopBranch(currentBranch, opts.interactive);
-  if (topBranch && topBranch !== currentBranch.name) {
-    execSync(`git checkout "${topBranch}"`, { stdio: "ignore" });
-    logInfo(`Switched to ${topBranch}`);
-  } else {
-    logInfo("Already at the top most branch in the stack. Exiting.");
-  }
 }
