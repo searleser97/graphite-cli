@@ -1,7 +1,7 @@
 import yargs from "yargs";
-import {switchBranchAction, TraversalDirection} from "../../actions/stack_traversal";
+import { switchBranchAction, TraversalDirection } from "../../actions/stack_traversal";
 import { profile } from "../../lib/telemetry";
-import {execStateConfig} from "../../lib/config";
+import { execStateConfig } from "../../lib/config";
 
 const args = {} as const;
 
