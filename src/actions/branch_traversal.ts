@@ -125,6 +125,6 @@ export async function switchBranchAction(direction: TraversalDirection, opts: {
 		execSync(`git checkout "${nextBranch}"`, {stdio: "ignore"});
 		logInfo(`Switched to ${nextBranch}`);
 	} else {
-		logInfo(`Already at the ${direction} branch in the stack. Exiting.`);
+		logInfo(`Already at the ${direction === TraversalDirection.Previous || TraversalDirection.Bottom? 'bottom most' : 'top most'} branch in the stack. Exiting.`);
 	}
 }
