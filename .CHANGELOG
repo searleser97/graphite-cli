@@ -1,3 +1,8 @@
+# 0.14.1 2020-09-27
+- Assorted improvements to the `gt repo sync` merged branch deletion logic and options to fix dangling branches.
+- `gt branch parent --reset` resets Graphite's recorded parent for a branch (to undefined).
+- `gt branch sync --reset` resets Graphite's recorded PR info a branch (to undefined).
+
 # 0.14.0 2020-09-16
 - `gt debug-context` captures debug metadata from your repo and can send that to Screenplay to help troubleshoot issues.
 - `gt repo sync` now pulls in PR information for all local branches from GitHub to link any PRs Graphite doesn't know about/better remove already-merged branches.
