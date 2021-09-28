@@ -41,11 +41,45 @@ export default abstract class AbstractStackBuilder {
     });
 
     let nodes: StackNode[] = [sourceNode];
+
+    /**
+     * TODO(nicholasyan): In our logic below, we traverse a branch's children
+     * to figure out the rest of the stack.
+     *
+     * However, this works substantially less efficiently/breaks down in the
+     * presence of merges.
+     *
+     * Consider the following (a branch B off of A that's later merged back
+     * into C, also off of A):
+     *
+     * C
+     * |\
+     * | B
+     * |/
+     * A
+     *
+     * In this case, our logic will traverse the subtrees (sub-portions of the
+     * "stack") twice - which only gets worse the more merges/more potential
+     * paths there are.
+     *
+     * This is a short-term workaround to at least prevent duplicate traversal
+     * in the near-term: we mark already-visited nodes and make sure if we
+     * hit an already-visited node, we just skip it.
+     */
+    const visitedBranches: string[] = [];
+
     do {
       const curNode = nodes.pop();
       if (!curNode) {
         break;
       }
+
+      if (visitedBranches.includes(curNode.branch.name)) {
+        continue;
+      } else {
+        visitedBranches.push(curNode.branch.name);
+      }
+
       curNode.children = this.getChildrenForBranch(curNode.branch).map(
         (child) => {
           return new StackNode({
