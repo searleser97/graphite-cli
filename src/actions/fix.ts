@@ -13,10 +13,11 @@ import {
 } from "../lib/preconditions";
 import {
   checkoutBranch,
+  getTrunk,
   gpExecSync,
+  logDebug,
   logInfo,
   rebaseInProgress,
-  getTrunk,
 } from "../lib/utils";
 import {
   Branch,
@@ -79,8 +80,13 @@ export async function fixAction(opts: {
   const currentBranch = currentBranchPrecondition();
   uncommittedChangesPrecondition();
 
+  logDebug("Calculating meta stack...");
   const metaStack = new MetaStackBuilder().fullStackFromBranch(currentBranch);
+  logDebug("Finished calculating meta stack");
+
+  logDebug("Calculating git stack...");
   const gitStack = new GitStackBuilder().fullStackFromBranch(currentBranch);
+  logDebug("Finished calculating git stack");
 
   // Consider noop
   if (metaStack.equals(gitStack)) {

@@ -1,5 +1,5 @@
 import { Stack, StackNode } from ".";
-import { getTrunk } from "../lib/utils";
+import { getTrunk, logDebug } from "../lib/utils";
 import Branch from "./branch";
 
 export default abstract class AbstractStackBuilder {
@@ -121,8 +121,13 @@ export default abstract class AbstractStackBuilder {
   };
 
   public fullStackFromBranch = (branch: Branch): Stack => {
+    logDebug("Getting stack base branch...");
     const base = this.getStackBaseBranch(branch, { excludingTrunk: true });
+    logDebug("Found stack base branch");
+
+    logDebug("Getting rest of the stack from base...");
     const stack = this.upstackInclusiveFromBranchWithoutParents(base);
+    logDebug("Found rest of the stack");
 
     if (branch.name == getTrunk().name) {
       return stack;
