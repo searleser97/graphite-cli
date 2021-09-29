@@ -15,10 +15,14 @@ function getPrevBranch(currentBranch: Branch): string | undefined {
 function getBottomBranch(currentBranch: Branch): string | undefined {
   let branch = currentBranch
   let prevBranch = branch.getParentFromMeta();
+  let indent = 0;
   while (prevBranch && !prevBranch.isTrunk()){
+    logInfo(`${"  ".repeat(indent)}↳(${branch})`);
     branch = prevBranch;
     prevBranch = branch.getParentFromMeta();
+    indent ++;
   }
+  logInfo(`${"  ".repeat(indent)}↳(${chalk.cyan(branch)})`);
 
   return branch?.name;
 }
