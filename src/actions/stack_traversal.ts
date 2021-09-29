@@ -43,7 +43,7 @@ async function getNextBranch(
           {
             type: "select",
             name: "branch",
-            message: "Multiple branches found at the same level. Select a branch to guide the navigation to the top",
+            message: "Select a branch to checkout",
             choices: candidates.map((b) => {
               return { title: b.name, value: b.name };
             }),
@@ -57,7 +57,7 @@ async function getNextBranch(
       ).branch;
     } else {
       throw new ExitFailedError(
-        `Cannot determine top branch, multiple choices available: [${candidates.join(
+        `Cannot determine next branch, multiple choices available: [${candidates.join(
           ", "
         )}]`
       );
@@ -82,7 +82,7 @@ async function getTopBranch(
         {
           type: "select",
           name: "branch",
-          message: "Select a branch to checkout",
+          message: "Multiple branches found at the same level. Select a branch to guide the navigation to the top",
           choices: candidates.map((b) => {
             return {title: b.name, value: b.name, branch: b};
           }),
@@ -108,7 +108,7 @@ async function getTopBranch(
         branch = await Branch.branchWithName(stack_bottom_branch)
       } else {
         throw new ExitFailedError(
-          `Cannot get next branch, multiple choices available: [${candidates.join(
+          `Cannot determine the top branch, multiple choices available: [${candidates.join(
               ", "
           )}]`
         );
