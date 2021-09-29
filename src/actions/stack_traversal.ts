@@ -43,7 +43,7 @@ async function getNextBranch(
           {
             type: "select",
             name: "branch",
-            message: "Select a branch to checkout",
+            message: "Multiple branches found at the same level. Select a branch to guide the navigation to the top",
             choices: candidates.map((b) => {
               return { title: b.name, value: b.name };
             }),
@@ -57,7 +57,7 @@ async function getNextBranch(
       ).branch;
     } else {
       throw new ExitFailedError(
-        `Cannot get next branch, multiple choices available: [${candidates.join(
+        `Cannot determine top branch, multiple choices available: [${candidates.join(
           ", "
         )}]`
       );
