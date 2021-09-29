@@ -1,3 +1,7 @@
+# 0.14.2 2020-09-29
+- Tacit support for merge-based workflows; merges no longer cause exponential branching in `gt log` and hang `gt upstack onto`.
+- Fixes to recreation of debug state in `gt feedback debug-context --recreate`.
+
 # 0.14.1 2020-09-27
 - Assorted improvements to the `gt repo sync` merged branch deletion logic and options to fix dangling branches.
 - `gt branch parent --reset` resets Graphite's recorded parent for a branch (to undefined).
