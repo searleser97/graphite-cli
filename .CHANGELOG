@@ -1,3 +1,7 @@
+# 0.14.3 2020-09-30
+- Improved `gt repo sync` performance when repos have a high number of stale branches. `gt repo sync` now deletes branches more eagerly and has an optional flag to show progress (`--show-delete-progress`).
+- New command `gt repo fix` searches for common problems that cause degraded Graphite performance and suggests common remediations.
+
 # 0.14.2 2020-09-29
 - Tacit support for merge-based workflows; merges no longer cause exponential branching in `gt log` and hang `gt upstack onto`.
 - Fixes to recreation of debug state in `gt feedback debug-context --recreate`.
