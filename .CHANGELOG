@@ -1,3 +1,9 @@
+# 0.14.4 2020-10-1
+- Improve performance of stack logic on repos with a high number of local branches.
+- Allow `gt commit create` to be used without `-m`, launching the system editor.
+- Infer the body of a PR from the commit message body (if it exists).
+- Add `gt repo trunk --set`.
+
 # 0.14.3 2020-09-30
 - Improved `gt repo sync` performance when repos have a high number of stale branches. `gt repo sync` now deletes branches more eagerly and has an optional flag to show progress (`--show-delete-progress`).
 - New command `gt repo fix` searches for common problems that cause degraded Graphite performance and suggests common remediations.
