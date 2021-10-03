@@ -1,5 +1,5 @@
 import yargs from "yargs";
-import { nextOrPrevAction } from "../../actions/stack_traversal";
+import { switchBranchAction, TraversalDirection } from "../../actions/branch_traversal";
 import { execStateConfig } from "../../lib/config";
 import { profile } from "../../lib/telemetry";
 
@@ -22,8 +22,7 @@ export const description =
 export const builder = args;
 export const handler = async (argv: argsT): Promise<void> => {
   return profile(argv, async () => {
-    await nextOrPrevAction({
-      nextOrPrev: "next",
+    await switchBranchAction(TraversalDirection.Next, {
       numSteps: argv.steps,
       interactive: execStateConfig.interactive(),
     });
