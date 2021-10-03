@@ -12,6 +12,21 @@ function getPrevBranch(currentBranch: Branch): string | undefined {
   return branch?.name;
 }
 
+function getBottomBranch(currentBranch: Branch): string | undefined {
+  let branch = currentBranch
+  let prevBranch = branch.getParentFromMeta();
+  let indent = 0;
+  while (prevBranch && !prevBranch.isTrunk()){
+    logInfo(`${"  ".repeat(indent)}↳(${branch})`);
+    branch = prevBranch;
+    prevBranch = branch.getParentFromMeta();
+    indent ++;
+  }
+  logInfo(`${"  ".repeat(indent)}↳(${chalk.cyan(branch)})`);
+
+  return branch?.name;
+}
+
 async function getNextBranch(
   currentBranch: Branch,
   interactive: boolean
@@ -77,5 +92,16 @@ export async function nextOrPrevAction(opts: {
     } else {
       return;
     }
+  }
+}
+
+export async function bottomBranchAction(): Promise<void> {
+  const currentBranch = currentBranchPrecondition();
+  const bottomBranch = getBottomBranch(currentBranch);
+  if (bottomBranch && bottomBranch != currentBranch.name) {
+    execSync(`git checkout "${bottomBranch}"`, { stdio: "ignore" });
+    logInfo(
+        `${"  ".repeat(0)}↳(${chalk.cyan(bottomBranch)})`
+    );
   }
 }
