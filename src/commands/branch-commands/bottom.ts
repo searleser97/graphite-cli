@@ -2,15 +2,7 @@ import yargs from "yargs";
 import { bottomBranchAction } from "../../actions/stack_traversal";
 import { profile } from "../../lib/telemetry";
 
-const args = {
-    // steps: {
-    //     describe: `The number of levels to traverse downstack.`,
-    //     demandOption: false,
-    //     default: 1,
-    //     type: "number",
-    //     alias: "n",
-    // },
-} as const;
+const args = {} as const;
 
 type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 
