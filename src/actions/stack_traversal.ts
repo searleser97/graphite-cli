@@ -57,7 +57,7 @@ async function getNextBranch(
       ).branch;
     } else {
       throw new ExitFailedError(
-        `Cannot get next branch, multiple choices available: [${candidates.join(
+        `Cannot determine next branch, multiple choices available: [${candidates.join(
           ", "
         )}]`
       );
@@ -65,6 +65,60 @@ async function getNextBranch(
   } else {
     return candidates[0].name;
   }
+}
+
+
+async function getTopBranch(
+    currentBranch: Branch,
+    interactive: boolean,
+): Promise<string| undefined> {
+  let branch = currentBranch
+  let candidates = branch.getChildrenFromMeta();
+  let indent = 0
+
+  async function get_stack_branch() : Promise<string>{
+    return (
+      await prompts(
+        {
+          type: "select",
+          name: "branch",
+          message: "Multiple branches found at the same level. Select a branch to guide the navigation to the top",
+          choices: candidates.map((b) => {
+            return {title: b.name, value: b.name, branch: b};
+          }),
+        },
+        {
+          onCancel: () => {
+            throw new KilledError();
+          },
+        }
+      )
+    ).branch;
+  }
+
+
+  while (branch && candidates.length){
+    if (candidates.length === 1) {
+      logInfo(`${"  ".repeat(indent)}↳(${branch})`);
+      branch = candidates[0]
+      indent ++;
+    } else {
+      if (interactive) {
+        const stack_bottom_branch = await get_stack_branch();
+        branch = await Branch.branchWithName(stack_bottom_branch)
+      } else {
+        throw new ExitFailedError(
+          `Cannot determine the top branch, multiple choices available: [${candidates.join(
+              ", "
+          )}]`
+        );
+      }
+    }
+    candidates = branch.getChildrenFromMeta();
+  }
+
+  logInfo(`${"  ".repeat(indent)}↳(${chalk.cyan(branch)})`);
+  return branch?.name
 }
 
 export async function nextOrPrevAction(opts: {
@@ -100,8 +154,21 @@ export async function bottomBranchAction(): Promise<void> {
   const bottomBranch = getBottomBranch(currentBranch);
   if (bottomBranch && bottomBranch != currentBranch.name) {
     execSync(`git checkout "${bottomBranch}"`, { stdio: "ignore" });
-    logInfo(
-        `${"  ".repeat(0)}↳(${chalk.cyan(bottomBranch)})`
-    );
+    logInfo(`Switched to ${bottomBranch}`);
+  } else {
+    logInfo("Already at the bottom most branch in the stack. Exiting.");
+  }
+}
+
+export async function topBranchAction(opts: {
+  interactive: boolean;
+}): Promise<void> {
+  const currentBranch = currentBranchPrecondition();
+  const topBranch = await getTopBranch(currentBranch, opts.interactive);
+  if (topBranch && topBranch !== currentBranch.name) {
+    execSync(`git checkout "${topBranch}"`, { stdio: "ignore" });
+    logInfo(`Switched to ${topBranch}`);
+  } else {
+    logInfo("Already at the top most branch in the stack. Exiting.");
   }
 }
