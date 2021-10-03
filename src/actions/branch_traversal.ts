@@ -8,10 +8,10 @@ import { logInfo } from "../lib/utils";
 import Branch from "../wrapper-classes/branch";
 
 export enum TraversalDirection {
-	Top = "TOP",
-	Bottom = "BOTTOM",
-	Next = "NEXT",
-	Previous = "PREV",
+  Top = "TOP",
+  Bottom = "BOTTOM",
+  Next = "NEXT",
+  Previous = "PREV",
 }
 
 async function getStackBranch(candidates: Branch[]) : Promise<string>{
