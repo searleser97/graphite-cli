@@ -1,3 +1,7 @@
+# 0.15.0 2020-10-4
+- Support for `gt stack top` and `gt stack bottom`.
+- Adjusted logic for cleaning metadata in `gt repo sync`.
+
 # 0.14.4 2020-10-1
 - Improve performance of stack logic on repos with a high number of local branches.
 - Allow `gt commit create` to be used without `-m`, launching the system editor.
