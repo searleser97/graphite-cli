@@ -1,3 +1,6 @@
+# 0.15.1 2020-10-4
+- Fix `gt commit create -m` multi-word commit messages.
+
 # 0.15.0 2020-10-4
 - Support for `gt stack top` and `gt stack bottom`.
 - Adjusted logic for cleaning metadata in `gt repo sync`.
