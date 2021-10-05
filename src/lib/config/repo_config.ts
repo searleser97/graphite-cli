@@ -231,8 +231,8 @@ function getOwnerAndNameFromURL(originURL: string): {
     url = url.slice(0, -".git".length);
   }
 
-  if (url.startsWith("git@github.com")) {
-    regex = /git@github.com:([^/]+)\/(.+)/;
+  if (url.startsWith("git@")) {
+    regex = /git@[^:]+:([^/]+)\/(.+)/;
   } else if (url.startsWith("https://")) {
     regex = /https:\/\/github.com\/([^/]+)\/(.+)/;
   } else {

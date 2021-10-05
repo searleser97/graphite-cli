@@ -38,5 +38,13 @@ for (const scene of [new BasicScene()]) {
       expect(sshClone.owner === "screenplaydev").to.be.true;
       expect(sshClone.name === "graphite-cli").to.be.true;
     });
+
+    it("Can infer a self-hosted .git repo", () => {
+      const { owner, name } = getOwnerAndNameFromURLForTesting(
+        "git@dub.duckduckgo.com:duckduckgo/Android-Vpn.git"
+      );
+      expect(owner === 'duckduckgo').to.be.true;
+      expect(name === 'Android-Vpn').to.be.true;
+    })
   });
 }
