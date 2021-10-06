@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 import graphiteCLIRoutes from "@screenplaydev/graphite-cli-routes";
 import { request } from "@screenplaydev/retyped-routes";
-import chalk from "chalk";
 import cp from "child_process";
 import { getUserEmail, SHOULD_REPORT_TELEMETRY } from ".";
 import { version } from "../../../package.json";
 import { API_SERVER } from "../api";
 import { messageConfig, repoConfig } from "../config";
+import { logMessageFromGraphite } from "../utils";
 
 function printAndClearOldMessage(): void {
   const oldMessage = messageConfig.getMessage();
@@ -14,7 +14,7 @@ function printAndClearOldMessage(): void {
   // double-check before showing the message if the CLI is still an old version
   // (i.e. the user hasn't updated the CLI in the meantime)."
   if (oldMessage && version == oldMessage.cliVersion) {
-    console.log(chalk.yellow(oldMessage.contents) + "\n\n");
+    logMessageFromGraphite(oldMessage.contents);
     messageConfig.setMessage(undefined);
   }
 }
