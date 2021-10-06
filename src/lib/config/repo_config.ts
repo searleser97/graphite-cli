@@ -2,8 +2,8 @@ import chalk from "chalk";
 import fs from "fs-extra";
 import path from "path";
 import { ExitFailedError } from "../../lib/errors";
-import { getRepoRootPath } from "../../lib/utils";
 import { gpExecSync } from "../../lib/utils/exec_sync";
+import { getRepoRootPath } from "./repo_root_path";
 
 const CONFIG_NAME = ".graphite_repo_config";
 const CURRENT_REPO_CONFIG_PATH = path.join(getRepoRootPath(), CONFIG_NAME);
