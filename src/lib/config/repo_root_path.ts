@@ -1,6 +1,6 @@
-import { gpExecSync } from "../../lib/utils/exec_sync";
-import { cache } from "../config";
 import { PreconditionsFailedError } from "../errors";
+import { gpExecSync } from "../utils/exec_sync";
+import cache from "./cache";
 export function getRepoRootPath(): string {
   const cachedRepoRootPath = cache.getRepoRootPath();
   if (cachedRepoRootPath) {
