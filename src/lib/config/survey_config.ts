@@ -38,7 +38,7 @@ export class SurveyConfig {
   }
 
   public async shouldSurvey(): Promise<boolean> {
-    let lastSurveyedMs = this._data.lastSurveyedMs;
+    let lastSurveyedMs = this.getLastSurveyTimeMs();
 
     // We're not sure if this user has been surveyed before -- we need to
     // confirm by double-checking with the network.
@@ -91,6 +91,10 @@ export class SurveyConfig {
 
   public setLastSurveyTimeMs(time: number | null | undefined): void {
     this._data.lastSurveyedMs = time;
+  }
+
+  public getLastSurveyTimeMs(): number | null | undefined {
+    return this._data.lastSurveyedMs;
   }
 
   public setSurveyResponses(responses: SurveyResponseT): void {

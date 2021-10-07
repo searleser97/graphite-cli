@@ -1,10 +1,12 @@
 import graphiteCLIRoutes from "@screenplaydev/graphite-cli-routes";
 import { expect } from "chai";
 import nock from "nock";
+import prompts from "prompts";
 import { API_SERVER } from "../../../src/lib/api";
 import surveyConfig, {
   MS_BETWEEN_SURVEYS,
 } from "../../../src/lib/config/survey_config";
+import { survey } from "../../../src/lib/telemetry/survey/survey";
 import { BasicScene } from "../../lib/scenes";
 import { configureTest } from "../../lib/utils";
 
@@ -81,6 +83,18 @@ for (const scene of [new BasicScene()]) {
       surveyConfig.setLastSurveyTimeMs(Date.now() - MS_BETWEEN_SURVEYS - 100);
       const shouldSurvey = await surveyConfig.shouldSurvey();
       expect(shouldSurvey).to.be.true;
+    });
+
+    it("After a user is surveyed, should survey should be false", async () => {
+      surveyConfig.setLastSurveyTimeMs(Date.now() - MS_BETWEEN_SURVEYS - 100);
+      let shouldSurvey = await surveyConfig.shouldSurvey();
+      expect(shouldSurvey).to.be.true;
+
+      prompts.inject(["Very disappointed", "test", "test", "test"]);
+      await survey();
+
+      shouldSurvey = await surveyConfig.shouldSurvey();
+      expect(shouldSurvey).to.be.false;
     });
   });
 }
