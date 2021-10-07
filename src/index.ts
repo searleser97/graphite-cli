@@ -12,6 +12,7 @@ import {
   fetchUpgradePromptInBackground,
   postTelemetryInBackground,
 } from "./lib/telemetry";
+import { postSurveyResponsesInBackground } from "./lib/telemetry/survey/post_survey";
 import {
   logError,
   preprocessCommand,
@@ -20,6 +21,8 @@ import {
 
 fetchUpgradePromptInBackground();
 refreshPRInfoInBackground();
+postSurveyResponsesInBackground();
+
 // https://www.npmjs.com/package/tmp#graceful-cleanup
 tmp.setGracefulCleanup();
 
