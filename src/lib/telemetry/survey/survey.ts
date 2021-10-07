@@ -1,4 +1,5 @@
 import prompts from "prompts";
+import surveyConfig from "../../config/survey_config";
 import { logMessageFromGraphite, logNewline } from "../../utils";
 
 type SurveyQuestionsT = (
@@ -125,5 +126,5 @@ async function askSurvey(responses: SurveyResponseT): Promise<void> {
 }
 
 async function logAnswers(responses: SurveyResponseT): Promise<void> {
-  return;
+  surveyConfig.setSurveyResponses(responses);
 }
