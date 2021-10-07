@@ -9,12 +9,11 @@ export async function handleSurveyRequestsInBackground(): Promise<void> {
       return;
     } else {
       surveyConfig.setPostingSurveyResponse(true);
+      cp.spawn("/usr/bin/env", ["node", __filename], {
+        detached: true,
+        stdio: "ignore",
+      });
     }
-
-    cp.spawn("/usr/bin/env", ["node", __filename], {
-      detached: true,
-      stdio: "ignore",
-    });
   }
 }
 

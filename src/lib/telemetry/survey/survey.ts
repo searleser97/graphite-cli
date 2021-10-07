@@ -69,6 +69,8 @@ export async function survey(): Promise<void> {
  * early.
  */
 async function askSurvey(responses: SurveyResponseT): Promise<void> {
+  surveyConfig.setLastSurveyTimeMs(Date.now());
+
   logNewline();
   logMessageFromGraphite(
     [

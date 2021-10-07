@@ -4,6 +4,7 @@ import { request } from "@screenplaydev/retyped-routes";
 import chalk from "chalk";
 import { API_SERVER } from "../../lib/api";
 import { execStateConfig, repoConfig } from "../../lib/config";
+import surveyConfig from "../../lib/config/survey_config";
 import {
   ExitFailedError,
   PreconditionsFailedError,
@@ -14,6 +15,7 @@ import {
   currentBranchPrecondition,
 } from "../../lib/preconditions";
 import { syncPRInfoForBranches } from "../../lib/sync/pr_info";
+import { survey } from "../../lib/telemetry/survey/survey";
 import {
   gpExecSync,
   logError,
@@ -84,7 +86,7 @@ export async function submitAction(args: {
 
   // Force a sync to link any PRs that have remote equivalents, but weren't
   // previously tracked with Graphite.
-  await syncPRInfoForBranches(branchesToSubmit);
+  syncPRInfoForBranches(branchesToSubmit);
 
   logInfo(
     chalk.blueBright(
@@ -194,18 +196,25 @@ export async function submitBranches(args: {
     }
   );
 
-  const prInfo = await submitPRsForBranches({
-    submissionInfo: submissionInfo,
-    branchesPushedToRemote: branchesPushedToRemote,
-    cliAuthToken: args.cliAuthToken,
-    repoOwner: args.repoOwner,
-    repoName: args.repoName,
-    editPRFieldsInline: args.editPRFieldsInline,
-    createNewPRsAsDraft: args.createNewPRsAsDraft,
-  });
+  const [prInfo, shouldSurvey] = await Promise.all([
+    submitPRsForBranches({
+      submissionInfo: submissionInfo,
+      branchesPushedToRemote: branchesPushedToRemote,
+      cliAuthToken: args.cliAuthToken,
+      repoOwner: args.repoOwner,
+      repoName: args.repoName,
+      editPRFieldsInline: args.editPRFieldsInline,
+      createNewPRsAsDraft: args.createNewPRsAsDraft,
+    }),
+    surveyConfig.shouldSurvey(),
+  ]);
 
   saveBranchPRInfo(prInfo);
   printSubmittedPRInfo(prInfo);
+
+  if (shouldSurvey) {
+    await survey();
+  }
 }
 
 async function getPRInfoForBranches(args: {
