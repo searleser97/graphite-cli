@@ -1,5 +1,6 @@
 import { execSync } from "child_process";
 import fs from "fs-extra";
+import path from "path";
 import { rebaseInProgress, unstagedChanges } from "./";
 
 const TEXT_FILE_NAME = "test.txt";
@@ -21,8 +22,9 @@ export default class GitRepo {
   }
 
   execCliCommand(command: string): void {
+    this.distPath();
     execSync(
-      `NODE_ENV=development node ${__dirname}/../../../dist/src/index.js ${command}`,
+      `NODE_ENV=development node ${this.distPath()}/src/index.js ${command}`,
       {
         stdio: process.env.DEBUG ? "inherit" : "ignore",
         cwd: this.dir,
@@ -32,13 +34,21 @@ export default class GitRepo {
 
   execCliCommandAndGetOutput(command: string): string {
     return execSync(
-      `NODE_ENV=development node ${__dirname}/../../../dist/src/index.js ${command}`,
+      `NODE_ENV=development node ${this.distPath()}/src/index.js ${command}`,
       {
         cwd: this.dir,
       }
     )
       .toString()
       .trim();
+  }
+
+  distPath(): string {
+    let graphiteCLIPath = __dirname;
+    while (path.basename(graphiteCLIPath) !== "graphite-cli") {
+      graphiteCLIPath = path.dirname(graphiteCLIPath);
+    }
+    return path.join(graphiteCLIPath, "dist/");
   }
 
   unstagedChanges(): boolean {
