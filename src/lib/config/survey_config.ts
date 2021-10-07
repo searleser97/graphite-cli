@@ -12,7 +12,7 @@ const SURVEY_CONFIG_PATH = path.join(os.homedir(), SURVEY_CONFIG_NAME);
 
 const MS_IN_DAY = 60 * 60 * 24 * 1000;
 const MS_IN_WEEK = 7 * MS_IN_DAY;
-const MS_BETWEEN_SURVEYS = 2 * MS_IN_WEEK;
+export const MS_BETWEEN_SURVEYS = 2 * MS_IN_WEEK;
 
 type TSurveyConfig = {
   responses?: SurveyResponseT;
@@ -30,7 +30,7 @@ type TSurveyConfig = {
   lastSurveyedMs?: number | null;
 };
 
-class SurveyConfig {
+export class SurveyConfig {
   _data: TSurveyConfig;
 
   constructor(data: TSurveyConfig) {
@@ -59,10 +59,11 @@ class SurveyConfig {
       return true;
     }
 
-    return lastSurveyedMs < Date.now() - MS_BETWEEN_SURVEYS;
+    const comparison = Date.now() - MS_BETWEEN_SURVEYS;
+    return lastSurveyedMs < comparison;
   }
 
-  private async getLastSurveyedTimeFromNetwork(): Promise<
+  public async getLastSurveyedTimeFromNetwork(): Promise<
     number | null | undefined
   > {
     try {
@@ -166,10 +167,15 @@ class SurveyConfig {
 
     // If we've reached this point, the survey config fields are empty - so we
     // clean up the now unnecessary file.
-    SurveyConfig.delete();
+    SurveyConfig.deleteFile();
   }
 
-  static delete(): void {
+  public delete(): void {
+    this._data = {};
+    SurveyConfig.deleteFile();
+  }
+
+  static deleteFile(): void {
     if (fs.existsSync(SURVEY_CONFIG_PATH)) {
       fs.unlinkSync(SURVEY_CONFIG_PATH);
       return;
@@ -186,7 +192,7 @@ function readSurveyConfig(): SurveyConfig {
     } catch (e) {
       // There was some error so just silently clean up the file - hopefully
       // we'll fix the malformed survey config on the next creation/save.
-      SurveyConfig.delete();
+      SurveyConfig.deleteFile();
     }
   }
   return new SurveyConfig({});
