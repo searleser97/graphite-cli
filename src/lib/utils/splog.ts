@@ -1,6 +1,10 @@
 import chalk from "chalk";
 import { execStateConfig, userConfig } from "../config";
 
+export function logMessageFromGraphite(msg: string): void {
+  console.log(chalk.yellow(msg) + "\n\n");
+}
+
 export function logError(msg: string): void {
   console.log(chalk.redBright(`ERROR: ${msg}`));
 }
