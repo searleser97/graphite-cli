@@ -1,11 +1,6 @@
 import { validate } from "../actions/validate";
 import { cache } from "../lib/config";
-import {
-  ExitFailedError,
-  PreconditionsFailedError,
-  RebaseConflictError,
-  ValidationFailedError,
-} from "../lib/errors";
+import { PreconditionsFailedError, ValidationFailedError } from "../lib/errors";
 import {
   branchExistsPrecondition,
   currentBranchPrecondition,
@@ -13,9 +8,7 @@ import {
 import {
   checkoutBranch,
   getTrunk,
-  gpExecSync,
   logInfo,
-  rebaseInProgress,
   uncommittedChanges,
 } from "../lib/utils";
 import Branch from "../wrapper-classes/branch";
@@ -36,47 +29,19 @@ async function stackOnto(currentBranch: Branch, onto: string) {
   branchExistsPrecondition(onto);
   checkBranchCanBeMoved(currentBranch, onto);
   validateStack();
-  const parent = await getParentForRebaseOnto(currentBranch, onto);
-  // Save the old ref from before rebasing so that children can find their bases.
-  currentBranch.setMetaPrevRef(currentBranch.getCurrentRef());
 
-  // Add try catch check for rebase interactive....
-  gpExecSync(
-    {
-      command: `git rebase --onto ${onto} $(git merge-base ${currentBranch.name} ${parent.name}) ${currentBranch.name}`,
-      options: { stdio: "ignore" },
-    },
-    (err) => {
-      if (rebaseInProgress()) {
-        throw new RebaseConflictError(
-          "Please resolve the rebase conflict and then continue with your `upstack onto` command."
-        );
-      } else {
-        throw new ExitFailedError(
-          `Rebase failed when moving (${currentBranch.name}) onto (${onto}).`,
-          err
-        );
-      }
-    }
-  );
   cache.clearAll();
-  // set current branch's parent only if the rebase succeeds.
+
+  // The idea here is that we change the branch's meta parent and then kick
+  // of a stack fix rebase, forcibly rebasing the first branch (which we just
+  // altered the parent of).
   console.log(`setting ${currentBranch.name} parent to ${onto}`);
   currentBranch.setParentBranchName(onto);
+  await restackBranch(currentBranch, {
+    forceRestack: true,
+  });
 
-  // Now perform a fix starting from the onto branch:
-  await restackBranch(currentBranch);
   logInfo(`Successfully moved (${currentBranch.name}) onto (${onto})`);
-}
-
-function getParentForRebaseOnto(branch: Branch, onto: string): Branch {
-  const metaParent = branch.getParentFromMeta();
-  if (metaParent) {
-    return metaParent;
-  }
-  // If no meta parent, automatically recover:
-  branch.setParentBranchName(onto);
-  return new Branch(onto);
 }
 
 function validateStack() {

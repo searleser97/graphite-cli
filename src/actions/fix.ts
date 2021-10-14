@@ -112,13 +112,25 @@ export async function fixAction(opts: {
   checkoutBranch(currentBranch.name);
 }
 
-export async function restackBranch(branch: Branch): Promise<void> {
+export async function restackBranch(
+  branch: Branch,
+  opts?: {
+    forceRestack?: boolean;
+  }
+): Promise<void> {
   const metaStack =
     new MetaStackBuilder().upstackInclusiveFromBranchWithParents(branch);
-  await restackNode(metaStack.source);
+  await restackNode(metaStack.source, {
+    forceRestack: opts?.forceRestack,
+  });
 }
 
-async function restackNode(node: StackNode): Promise<void> {
+async function restackNode(
+  node: StackNode,
+  opts?: {
+    forceRestack?: boolean;
+  }
+): Promise<void> {
   if (rebaseInProgress()) {
     throw new RebaseConflictError(
       `Interactive rebase in progress, cannot fix (${node.branch.name}). Complete the rebase and re-run fix command.`
@@ -137,7 +149,7 @@ async function restackNode(node: StackNode): Promise<void> {
     );
   }
 
-  if (parentBranch.ref() !== mergeBase) {
+  if (parentBranch.ref() !== mergeBase || opts?.forceRestack) {
     logInfo(
       `Fixing (${chalk.green(node.branch.name)}) on (${parentBranch.name})`
     );
