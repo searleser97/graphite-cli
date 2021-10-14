@@ -37,8 +37,14 @@ async function stackOnto(currentBranch: Branch, onto: string) {
   // altered the parent of).
   console.log(`setting ${currentBranch.name} parent to ${onto}`);
   currentBranch.setParentBranchName(onto);
+
+  const rebaseConflictCheckpoint = {
+    baseBranchName: currentBranch.name,
+    followUp: null,
+  };
   await restackBranch(currentBranch, {
     forceRestack: true,
+    rebaseConflictCheckpoint: rebaseConflictCheckpoint,
   });
 
   logInfo(`Successfully moved (${currentBranch.name}) onto (${onto})`);

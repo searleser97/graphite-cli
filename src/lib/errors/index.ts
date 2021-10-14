@@ -1,4 +1,8 @@
 import Branch from "../../wrapper-classes/branch";
+import {
+  RebaseConflictCheckpointT,
+  recordCheckpoint,
+} from "../config/rebase_conflict_checkpoint_config";
 
 class ExitError extends Error {}
 class ExitCancelledError extends ExitError {
@@ -28,9 +32,13 @@ class ExitFailedError extends ExitError {
 }
 
 class RebaseConflictError extends ExitError {
-  constructor(message: string) {
+  constructor(
+    message: string,
+    rebaseConflictCheckpoint: RebaseConflictCheckpointT
+  ) {
     super(message);
     this.name = "RebaseConflict";
+    recordCheckpoint(rebaseConflictCheckpoint);
   }
 }
 

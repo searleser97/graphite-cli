@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import prompts from "prompts";
 import { cache } from "../lib/config";
+import { RebaseConflictCheckpointT } from "../lib/config/rebase_conflict_checkpoint_config";
 import {
   ExitCancelledError,
   ExitFailedError,
@@ -105,8 +106,14 @@ export async function fixAction(opts: {
   if (action === "regen") {
     await regen(currentBranch);
   } else {
+    const rebaseConflictCheckpoint = {
+      baseBranchName: currentBranch.name,
+      followUp: null,
+    };
     for (const child of metaStack.source.children) {
-      await restackNode(child);
+      await restackNode(child, {
+        rebaseConflictCheckpoint: rebaseConflictCheckpoint,
+      });
     }
   }
   checkoutBranch(currentBranch.name);
@@ -114,7 +121,8 @@ export async function fixAction(opts: {
 
 export async function restackBranch(
   branch: Branch,
-  opts?: {
+  opts: {
+    rebaseConflictCheckpoint: RebaseConflictCheckpointT;
     forceRestack?: boolean;
   }
 ): Promise<void> {
@@ -122,18 +130,21 @@ export async function restackBranch(
     new MetaStackBuilder().upstackInclusiveFromBranchWithParents(branch);
   await restackNode(metaStack.source, {
     forceRestack: opts?.forceRestack,
+    rebaseConflictCheckpoint: opts.rebaseConflictCheckpoint,
   });
 }
 
 async function restackNode(
   node: StackNode,
-  opts?: {
+  opts: {
+    rebaseConflictCheckpoint: RebaseConflictCheckpointT;
     forceRestack?: boolean;
   }
 ): Promise<void> {
   if (rebaseInProgress()) {
     throw new RebaseConflictError(
-      `Interactive rebase in progress, cannot fix (${node.branch.name}). Complete the rebase and re-run fix command.`
+      `Interactive rebase in progress, cannot fix (${node.branch.name}). Complete the rebase and re-run fix command.`,
+      opts.rebaseConflictCheckpoint
     );
   }
   const parentBranch = node.parent?.branch;
@@ -163,7 +174,8 @@ async function restackNode(
       () => {
         if (rebaseInProgress()) {
           throw new RebaseConflictError(
-            "Resolve the conflict (via `git rebase --continue`) and then rerun `gt stack fix` to fix the remaining stack."
+            "Resolve the conflict (via `git rebase --continue`) and then rerun `gt stack fix` to fix the remaining stack.",
+            opts.rebaseConflictCheckpoint
           );
         }
       }
@@ -176,7 +188,9 @@ async function restackNode(
   }
 
   for (const child of node.children) {
-    await restackNode(child);
+    await restackNode(child, {
+      rebaseConflictCheckpoint: opts.rebaseConflictCheckpoint,
+    });
   }
 }
 
