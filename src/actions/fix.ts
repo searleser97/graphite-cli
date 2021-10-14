@@ -137,11 +137,7 @@ async function restackNode(node: StackNode): Promise<void> {
     );
   }
 
-  if (parentBranch.ref() === mergeBase) {
-    logInfo(
-      `No fix needed for (${node.branch.name}) on (${parentBranch.name})`
-    );
-  } else {
+  if (parentBranch.ref() !== mergeBase) {
     logInfo(
       `Fixing (${chalk.green(node.branch.name)}) on (${parentBranch.name})`
     );
@@ -161,6 +157,10 @@ async function restackNode(node: StackNode): Promise<void> {
       }
     );
     cache.clearAll();
+  } else {
+    logInfo(
+      `No fix needed for (${node.branch.name}) on (${parentBranch.name})`
+    );
   }
 
   for (const child of node.children) {
