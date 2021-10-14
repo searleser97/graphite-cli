@@ -6,7 +6,14 @@ import { PreconditionsFailedError } from "../lib/errors";
 import { profile } from "../lib/telemetry";
 import { rebaseInProgress } from "../lib/utils/rebase_in_progress";
 
-const args = {} as const;
+const args = {
+  "no-edit": {
+    describe: `Don't edit the commit message for an amended, resolved merge conflict.`,
+    demandOption: false,
+    type: "boolean",
+    alias: "f",
+  },
+} as const;
 
 type argsT = yargs.Arguments<yargs.InferredOptionTypes<typeof args>>;
 
@@ -28,7 +35,11 @@ export const handler = async (argv: argsT): Promise<void> => {
     }
 
     // TODO (nicholasyan): Do a better job here of enforcing that we can continue
-    execSync(`git rebase --continue`, {
+
+    // stdio needs to be 'inherit' here to allow the editor to pop open with
+    // the amend message if the 'no-edit' option is false.
+    const noEdit = argv["no-edit"];
+    execSync(`${noEdit ? "GIT_EDITOR=true" : ""} git rebase --continue`, {
       stdio: "inherit",
     });
 

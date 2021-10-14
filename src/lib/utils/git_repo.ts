@@ -83,12 +83,20 @@ export default class GitRepo {
     return rebaseInProgress({ dir: this.dir });
   }
 
+  resolveMergeConflicts(opts?: { mergeStrategy?: "THEIRS" }): void {
+    execSync(`git -C "${this.dir}" checkout --theirs .`);
+  }
+
+  markMergeConflictsAsResolved(): void {
+    execSync(`git -C "${this.dir}" add .`, { stdio: "ignore" });
+  }
+
   finishInteractiveRebase(opts?: { mergeStrategy?: "THEIRS" }): void {
     while (this.rebaseInProgress()) {
-      if (opts?.mergeStrategy === "THEIRS") {
-        execSync(`git -C "${this.dir}" checkout --theirs .`);
+      if (opts?.mergeStrategy !== undefined) {
+        this.resolveMergeConflicts({ mergeStrategy: opts?.mergeStrategy });
       }
-      execSync(`git -C "${this.dir}" add .`, { stdio: "ignore" });
+      this.markMergeConflictsAsResolved();
       execSync(`GIT_EDITOR="touch $1" git -C ${this.dir} rebase --continue`, {
         stdio: "ignore",
       });
