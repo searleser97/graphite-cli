@@ -1,6 +1,10 @@
 import { validate } from "../actions/validate";
 import { cache } from "../lib/config";
 import {
+  OntoCheckpointT,
+  recordCheckpoint,
+} from "../lib/config/checkpoint_config";
+import {
   ExitFailedError,
   PreconditionsFailedError,
   RebaseConflictError,
@@ -20,6 +24,7 @@ import {
 } from "../lib/utils";
 import Branch from "../wrapper-classes/branch";
 import { restackBranch } from "./fix";
+
 export async function ontoAction(onto: string): Promise<void> {
   if (uncommittedChanges()) {
     throw new PreconditionsFailedError("Cannot fix with uncommitted changes");
@@ -27,12 +32,11 @@ export async function ontoAction(onto: string): Promise<void> {
 
   const originalBranch = currentBranchPrecondition();
 
-  await stackOnto(originalBranch, onto);
-
-  checkoutBranch(originalBranch.name);
+  await rebaseCurrentBranch(originalBranch, onto);
+  await fixStackAndCheckoutOriginalBranch(originalBranch, onto);
 }
 
-async function stackOnto(currentBranch: Branch, onto: string) {
+async function rebaseCurrentBranch(currentBranch: Branch, onto: string) {
   branchExistsPrecondition(onto);
   checkBranchCanBeMoved(currentBranch, onto);
   validateStack();
@@ -48,6 +52,10 @@ async function stackOnto(currentBranch: Branch, onto: string) {
     },
     (err) => {
       if (rebaseInProgress()) {
+        recordCheckpoint({
+          action: "ONTO",
+          args: { currentBranchName: currentBranch.name, onto: onto },
+        });
         throw new RebaseConflictError(
           "Please resolve the rebase conflict and then continue with your `upstack onto` command."
         );
@@ -59,6 +67,21 @@ async function stackOnto(currentBranch: Branch, onto: string) {
       }
     }
   );
+}
+
+export async function ontoFromCheckpoint(
+  checkpoint: OntoCheckpointT
+): Promise<void> {
+  const originalBranch = await Branch.branchWithName(
+    checkpoint.currentBranchName
+  );
+  await fixStackAndCheckoutOriginalBranch(originalBranch, checkpoint.onto);
+}
+
+async function fixStackAndCheckoutOriginalBranch(
+  currentBranch: Branch,
+  onto: string
+) {
   cache.clearAll();
   // set current branch's parent only if the rebase succeeds.
   console.log(`setting ${currentBranch.name} parent to ${onto}`);
@@ -67,6 +90,8 @@ async function stackOnto(currentBranch: Branch, onto: string) {
   // Now perform a fix starting from the onto branch:
   await restackBranch(currentBranch);
   logInfo(`Successfully moved (${currentBranch.name}) onto (${onto})`);
+
+  checkoutBranch(currentBranch.name);
 }
 
 function getParentForRebaseOnto(branch: Branch, onto: string): Branch {
