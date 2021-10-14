@@ -1,3 +1,7 @@
+# 0.16.1 2021-10-14
+- Fix issue with `gt repo sync` deleting metadata for existing branches.
+- Reduce merge conflicts caused by `gt commit amend`.
+
 # 0.16.0 2021-10-12
 - Support for branch autocomplete functionality on gt branch-related commands. Enable this functionality by running `gt completion` and adding the ouputted bash script to your relevant bash profile (e.g. ~/.bashrc, ~/.zshrc).
 - Added functionality to query users for feedback on the Graphite CLI.
