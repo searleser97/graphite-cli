@@ -1,11 +1,17 @@
 import { execSync } from "child_process";
 import yargs from "yargs";
-import { restackBranch } from "../actions/fix";
-import { getMostRecentCheckpoint } from "../lib/config/rebase_conflict_checkpoint_config";
+import {
+  fixAction,
+  fixFollowUps as stackFixFixFollowUps,
+} from "../actions/fix";
+import {
+  getMostRecentCheckpoint,
+  RebaseConflictFollowUpInfoT,
+} from "../lib/config/rebase_conflict_checkpoint_config";
 import { PreconditionsFailedError } from "../lib/errors";
 import { profile } from "../lib/telemetry";
+import { checkoutBranch } from "../lib/utils";
 import { rebaseInProgress } from "../lib/utils/rebase_in_progress";
-import Branch from "../wrapper-classes/branch";
 
 const args = {
   "no-edit": {
@@ -38,12 +44,30 @@ export const handler = async (argv: argsT): Promise<void> => {
       });
     }
 
-    const baseBranch = await Branch.branchWithName(
-      mostRecentCheckpoint.baseBranchName
-    );
-
-    await restackBranch(baseBranch, {
+    checkoutBranch(mostRecentCheckpoint.baseBranchName);
+    await fixAction({
+      action: "rebase",
       rebaseConflictCheckpoint: mostRecentCheckpoint,
     });
+
+    if (mostRecentCheckpoint.followUpInfo !== null) {
+      await handleFollowUp(mostRecentCheckpoint.followUpInfo);
+    }
   });
 };
+
+async function handleFollowUp(
+  followUpInfo: RebaseConflictFollowUpInfoT
+): Promise<void> {
+  switch (followUpInfo.action) {
+    case "STACK_FIX":
+      stackFixFixFollowUps(followUpInfo);
+      break;
+    default:
+      assertUnreachable(followUpInfo.action);
+      break;
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+function assertUnreachable(arg: never): void {}

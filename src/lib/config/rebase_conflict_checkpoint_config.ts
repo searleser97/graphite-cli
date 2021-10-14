@@ -25,8 +25,15 @@ const CURRENT_REPO_CONFIG_PATH = path.join(getRepoRootPath(), CONFIG_NAME);
  */
 export type RebaseConflictCheckpointT = {
   baseBranchName: string;
-  followUp: null;
+  followUpInfo: RebaseConflictFollowUpInfoT | null;
 } | null;
+
+export type RebaseConflictFollowUpInfoT = StackFixFollowUpInfoT;
+
+export type StackFixFollowUpInfoT = {
+  action: "STACK_FIX";
+  checkoutBranchName: string;
+};
 
 export function recordCheckpoint(checkpoint: RebaseConflictCheckpointT): void {
   if (checkpoint !== null) {

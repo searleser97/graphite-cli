@@ -1,7 +1,10 @@
 import chalk from "chalk";
 import prompts from "prompts";
 import { cache } from "../lib/config";
-import { RebaseConflictCheckpointT } from "../lib/config/rebase_conflict_checkpoint_config";
+import {
+  RebaseConflictCheckpointT,
+  StackFixFollowUpInfoT,
+} from "../lib/config/rebase_conflict_checkpoint_config";
 import {
   ExitCancelledError,
   ExitFailedError,
@@ -77,6 +80,7 @@ async function promptStacks(opts: {
 
 export async function fixAction(opts: {
   action: "regen" | "rebase" | undefined;
+  rebaseConflictCheckpoint?: RebaseConflictCheckpointT;
 }): Promise<void> {
   const currentBranch = currentBranchPrecondition();
   uncommittedChangesPrecondition();
@@ -106,17 +110,26 @@ export async function fixAction(opts: {
   if (action === "regen") {
     await regen(currentBranch);
   } else {
-    const rebaseConflictCheckpoint = {
+    const rebaseConflictFollowUp = {
+      action: "STACK_FIX" as const,
+      checkoutBranchName: currentBranch.name,
+    };
+    const rebaseConflictCheckpoint = opts.rebaseConflictCheckpoint ?? {
       baseBranchName: currentBranch.name,
-      followUp: null,
+      followUpInfo: rebaseConflictFollowUp,
     };
     for (const child of metaStack.source.children) {
       await restackNode(child, {
         rebaseConflictCheckpoint: rebaseConflictCheckpoint,
       });
     }
+
+    fixFollowUps(rebaseConflictFollowUp);
   }
-  checkoutBranch(currentBranch.name);
+}
+
+export function fixFollowUps(info: StackFixFollowUpInfoT): void {
+  checkoutBranch(info.checkoutBranchName);
 }
 
 export async function restackBranch(
