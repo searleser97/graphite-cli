@@ -26,7 +26,7 @@ const CURRENT_REPO_CONFIG_PATH = path.join(getRepoRootPath(), CONFIG_NAME);
 export type RebaseConflictCheckpointT = {
   baseBranchName: string;
   followUpInfo: RebaseConflictFollowUpInfoT[];
-} | null;
+};
 
 export type RebaseConflictFollowUpInfoT = StackFixFollowUpInfoT;
 
@@ -44,7 +44,7 @@ export function recordCheckpoint(checkpoint: RebaseConflictCheckpointT): void {
   }
 }
 
-export function getMostRecentCheckpoint(): RebaseConflictCheckpointT {
+export function getMostRecentCheckpoint(): RebaseConflictCheckpointT | null {
   if (fs.existsSync(CURRENT_REPO_CONFIG_PATH)) {
     const repoConfigRaw = fs.readFileSync(CURRENT_REPO_CONFIG_PATH);
     try {

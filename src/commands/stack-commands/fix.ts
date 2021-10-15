@@ -1,6 +1,7 @@
 import yargs from "yargs";
 import { fixAction } from "../../actions/fix";
 import { ExitFailedError } from "../../lib/errors";
+import { currentBranchPrecondition } from "../../lib/preconditions";
 import { profile } from "../../lib/telemetry";
 
 export const command = "fix";
@@ -33,8 +34,13 @@ export const handler = async (argv: argsT): Promise<void> => {
         'Please specify either the "--rebase" or "--regen" method, not both'
       );
     }
+    const branch = currentBranchPrecondition();
     await fixAction({
       action: argv.rebase ? "rebase" : argv.regen ? "regen" : undefined,
+      rebaseConflictCheckpoint: {
+        baseBranchName: branch.name,
+        followUpInfo: [],
+      },
     });
   });
 };

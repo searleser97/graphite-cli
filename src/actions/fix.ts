@@ -80,7 +80,7 @@ async function promptStacks(opts: {
 
 export async function fixAction(opts: {
   action: "regen" | "rebase" | undefined;
-  rebaseConflictCheckpoint?: RebaseConflictCheckpointT;
+  rebaseConflictCheckpoint: RebaseConflictCheckpointT;
 }): Promise<void> {
   const currentBranch = currentBranchPrecondition();
   uncommittedChangesPrecondition();
@@ -115,10 +115,9 @@ export async function fixAction(opts: {
       checkoutBranchName: currentBranch.name,
     };
     const rebaseConflictCheckpoint = {
-      baseBranchName:
-        opts.rebaseConflictCheckpoint?.baseBranchName ?? currentBranch.name,
+      baseBranchName: opts.rebaseConflictCheckpoint.baseBranchName,
       followUpInfo: [rebaseConflictFollowUp].concat(
-        opts.rebaseConflictCheckpoint?.followUpInfo ?? []
+        opts.rebaseConflictCheckpoint.followUpInfo
       ),
     };
     for (const child of metaStack.source.children) {
