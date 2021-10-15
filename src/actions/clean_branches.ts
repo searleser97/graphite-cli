@@ -2,17 +2,23 @@ import chalk from "chalk";
 import { execSync } from "child_process";
 import prompts from "prompts";
 import { cache } from "../lib/config";
+import { DeleteMergedBranchesFollowUpInfoT } from "../lib/config/rebase_conflict_checkpoint_config";
 import { KilledError } from "../lib/errors";
 import { checkoutBranch, getTrunk, logInfo } from "../lib/utils";
 import Branch from "../wrapper-classes/branch";
 import { deleteBranchAction } from "./delete_branch";
 import { ontoAction } from "./onto";
 
+/**
+ * It is assumed that this method is idempotent - so that if it is interrupted
+ * by a merge conflict, that it can just be re-called with the same starting
+ * information and run again until completion.
+ */
+
 // eslint-disable-next-line max-lines-per-function
-export async function deleteMergedBranches(opts: {
-  force: boolean;
-  showDeleteProgress: boolean;
-}): Promise<void> {
+export async function deleteMergedBranches(
+  mergeConflictCheckpoint: DeleteMergedBranchesFollowUpInfoT
+): Promise<void> {
   const trunkChildren = getTrunk().getChildrenFromMeta();
 
   /**
@@ -48,7 +54,7 @@ export async function deleteMergedBranches(opts: {
    * of trunk (> 50).
    */
   const trunkChildrenProgressMarkers: Record<string, string> = {};
-  if (opts.showDeleteProgress) {
+  if (mergeConflictCheckpoint.showDeleteProgress) {
     trunkChildren.forEach((child, i) => {
       // Ignore the first child - don't show 0% progress.
       if (i === 0) {
@@ -75,7 +81,7 @@ export async function deleteMergedBranches(opts: {
     }
 
     if (
-      opts.showDeleteProgress &&
+      mergeConflictCheckpoint.showDeleteProgress &&
       branch.name in trunkChildrenProgressMarkers
     ) {
       logInfo(
@@ -87,7 +93,7 @@ export async function deleteMergedBranches(opts: {
 
     const shouldDelete = await shouldDeleteBranch({
       branch: branch,
-      force: opts.force,
+      force: mergeConflictCheckpoint.force,
     });
     if (shouldDelete) {
       const children = branch.getChildrenFromMeta();
@@ -110,7 +116,10 @@ export async function deleteMergedBranches(opts: {
       if (parentName !== undefined && parentName in branchesToDelete) {
         checkoutBranch(branch.name);
         logInfo(`upstacking (${branch.name}) onto (${getTrunk().name})`);
-        await ontoAction(getTrunk().name);
+        await ontoAction({
+          onto: getTrunk().name,
+          rebaseConflictCheckpointFollowUps: mergeConflictCheckpoint,
+        });
 
         branchesToDelete[parentName].children = branchesToDelete[
           parentName

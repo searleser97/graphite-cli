@@ -5,6 +5,10 @@ import {
   existsDanglingBranches,
   fixDanglingBranches,
 } from "../../actions/fix_dangling_branches";
+import {
+  RebaseConflictFollowUpInfoT,
+  RepoFixDeleteMergedBranchesFollowUpInfoT,
+} from "../../lib/config/rebase_conflict_checkpoint_config";
 import { profile } from "../../lib/telemetry";
 import { logInfo, logNewline, logTip } from "../../lib/utils";
 import Branch from "../../wrapper-classes/branch";
@@ -38,6 +42,7 @@ export const handler = async (argv: argsT): Promise<void> => {
     await branchCountSanityCheck({
       force: argv.force,
       showDeleteProgress: argv["show-delete-progress"],
+      rebaseConflictFollowUp: null,
     });
   });
 };
@@ -66,6 +71,7 @@ async function branchMetadataSanityChecks(force: boolean): Promise<void> {
 async function branchCountSanityCheck(opts: {
   force: boolean;
   showDeleteProgress: boolean;
+  rebaseConflictFollowUp: RebaseConflictFollowUpInfoT;
 }): Promise<void> {
   const branchCount = Branch.allBranches().length;
   if (branchCount > 50) {
@@ -82,11 +88,24 @@ async function branchCountSanityCheck(opts: {
 
   logInfo(`Searching for any stale branches that can be removed...`);
 
+  const mergeConflictFollowUp = {
+    action: "REPO_FIX_DELETE_MERGED_BRANCHES" as const,
+    additionalFollowUp: opts.rebaseConflictFollowUp,
+  };
+
   await deleteMergedBranches({
+    action: "DELETE_MERGED_BRANCHES",
     showDeleteProgress: opts.showDeleteProgress,
     force: opts.force,
+    additionalFollowUp: mergeConflictFollowUp,
   });
 
+  repoFixDeleteMergedBranchesMergeConflictFollowUp(mergeConflictFollowUp);
+}
+
+export function repoFixDeleteMergedBranchesMergeConflictFollowUp(
+  info: RepoFixDeleteMergedBranchesFollowUpInfoT
+): void {
   logNewline();
   logInfo(
     `Still seeing issues with Graphite? Send us feedback via \`gt feedback '<your_issue'> --with-debug-context\` and we'll dig in!`

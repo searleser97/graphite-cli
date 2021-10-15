@@ -1,5 +1,6 @@
 import { validate } from "../actions/validate";
 import { cache } from "../lib/config";
+import { RebaseConflictCheckpointT } from "../lib/config/rebase_conflict_checkpoint_config";
 import { PreconditionsFailedError, ValidationFailedError } from "../lib/errors";
 import {
   branchExistsPrecondition,
@@ -13,19 +14,33 @@ import {
 } from "../lib/utils";
 import Branch from "../wrapper-classes/branch";
 import { restackBranch } from "./fix";
-export async function ontoAction(onto: string): Promise<void> {
+export async function ontoAction(args: {
+  onto: string;
+  rebaseConflictCheckpointFollowUps: RebaseConflictCheckpointT["followUpInfo"];
+}): Promise<void> {
   if (uncommittedChanges()) {
     throw new PreconditionsFailedError("Cannot fix with uncommitted changes");
   }
 
   const originalBranch = currentBranchPrecondition();
 
-  await stackOnto(originalBranch, onto);
+  await stackOnto({
+    currentBranch: originalBranch,
+    onto: args.onto,
+    rebaseConflictCheckpointFollowUps: args.rebaseConflictCheckpointFollowUps,
+  });
 
   checkoutBranch(originalBranch.name);
 }
 
-async function stackOnto(currentBranch: Branch, onto: string) {
+async function stackOnto(args: {
+  currentBranch: Branch;
+  onto: string;
+  rebaseConflictCheckpointFollowUps: RebaseConflictCheckpointT["followUpInfo"];
+}) {
+  const onto = args.onto;
+  const currentBranch = args.currentBranch;
+
   branchExistsPrecondition(onto);
   checkBranchCanBeMoved(currentBranch, onto);
   validateStack();
@@ -38,13 +53,12 @@ async function stackOnto(currentBranch: Branch, onto: string) {
   console.log(`setting ${currentBranch.name} parent to ${onto}`);
   currentBranch.setParentBranchName(onto);
 
-  const rebaseConflictCheckpoint = {
-    baseBranchName: currentBranch.name,
-    followUpInfo: [],
-  };
   await restackBranch(currentBranch, {
     forceRestack: true,
-    rebaseConflictCheckpoint: rebaseConflictCheckpoint,
+    rebaseConflictCheckpoint: {
+      baseBranchName: currentBranch.name,
+      followUpInfo: args.rebaseConflictCheckpointFollowUps,
+    },
   });
 
   logInfo(`Successfully moved (${currentBranch.name}) onto (${onto})`);

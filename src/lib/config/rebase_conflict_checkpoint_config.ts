@@ -25,14 +25,40 @@ const CURRENT_REPO_CONFIG_PATH = path.join(getRepoRootPath(), CONFIG_NAME);
  */
 export type RebaseConflictCheckpointT = {
   baseBranchName: string;
-  followUpInfo: RebaseConflictFollowUpInfoT[];
+  followUpInfo: RebaseConflictFollowUpInfoT;
 };
 
-export type RebaseConflictFollowUpInfoT = StackFixFollowUpInfoT;
+export type RebaseConflictFollowUpInfoT =
+  | StackFixFollowUpInfoT
+  | DeleteMergedBranchesFollowUpInfoT
+  | RepoSyncDeleteMergedBranchesFollowUpInfoT
+  | RepoFixDeleteMergedBranchesFollowUpInfoT
+  | null;
 
 export type StackFixFollowUpInfoT = {
   action: "STACK_FIX";
+  additionalFollowUp: RebaseConflictFollowUpInfoT;
   checkoutBranchName: string;
+};
+
+export type DeleteMergedBranchesFollowUpInfoT = {
+  action: "DELETE_MERGED_BRANCHES";
+  additionalFollowUp: RebaseConflictFollowUpInfoT;
+  force: boolean;
+  showDeleteProgress: boolean;
+};
+
+export type RepoSyncDeleteMergedBranchesFollowUpInfoT = {
+  action: "REPO_SYNC_DELETE_MERGED_BRANCHES";
+  additionalFollowUp: RebaseConflictFollowUpInfoT;
+  resubmit: boolean;
+  force: boolean;
+  oldBranchName: string;
+};
+
+export type RepoFixDeleteMergedBranchesFollowUpInfoT = {
+  action: "REPO_FIX_DELETE_MERGED_BRANCHES";
+  additionalFollowUp: RebaseConflictFollowUpInfoT;
 };
 
 export function recordCheckpoint(checkpoint: RebaseConflictCheckpointT): void {

@@ -1,9 +1,11 @@
 import { execSync } from "child_process";
 import yargs from "yargs";
+import { deleteMergedBranches } from "../actions/clean_branches";
 import {
   fixAction,
   fixFollowUps as stackFixFixFollowUps,
 } from "../actions/fix";
+import { repoSyncDeleteMergedBranchesFollowUps } from "../actions/sync";
 import {
   getMostRecentCheckpoint,
   RebaseConflictFollowUpInfoT,
@@ -12,6 +14,7 @@ import { PreconditionsFailedError } from "../lib/errors";
 import { profile } from "../lib/telemetry";
 import { checkoutBranch } from "../lib/utils";
 import { rebaseInProgress } from "../lib/utils/rebase_in_progress";
+import { repoFixDeleteMergedBranchesMergeConflictFollowUp } from "./repo-commands/fix";
 
 const args = {
   "no-edit": {
@@ -50,25 +53,36 @@ export const handler = async (argv: argsT): Promise<void> => {
       rebaseConflictCheckpoint: mostRecentCheckpoint,
     });
 
-    if (mostRecentCheckpoint.followUpInfo.length > 0) {
-      for (const followUpInfo of mostRecentCheckpoint.followUpInfo) {
-        await handleFollowUp(followUpInfo);
-      }
-    }
+    await handleFollowUp(mostRecentCheckpoint.followUpInfo);
   });
 };
 
 async function handleFollowUp(
   followUpInfo: RebaseConflictFollowUpInfoT
 ): Promise<void> {
+  if (followUpInfo === null) {
+    return;
+  }
+
   switch (followUpInfo.action) {
     case "STACK_FIX":
       stackFixFixFollowUps(followUpInfo);
       break;
+    case "DELETE_MERGED_BRANCHES":
+      await deleteMergedBranches(followUpInfo);
+      break;
+    case "REPO_SYNC_DELETE_MERGED_BRANCHES":
+      await repoSyncDeleteMergedBranchesFollowUps(followUpInfo);
+      break;
+    case "REPO_FIX_DELETE_MERGED_BRANCHES":
+      await repoFixDeleteMergedBranchesMergeConflictFollowUp(followUpInfo);
+      break;
     default:
-      assertUnreachable(followUpInfo.action);
+      assertUnreachable(followUpInfo);
       break;
   }
+
+  await handleFollowUp(followUpInfo.additionalFollowUp);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function

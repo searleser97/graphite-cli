@@ -1,5 +1,6 @@
 import prompts from "prompts";
 import { repoConfig } from "../lib/config";
+import { RepoSyncDeleteMergedBranchesFollowUpInfoT } from "../lib/config/rebase_conflict_checkpoint_config";
 import { ExitFailedError, PreconditionsFailedError } from "../lib/errors";
 import {
   cliAuthPrecondition,
@@ -57,21 +58,39 @@ export async function syncAction(opts: {
     await fixDanglingBranches(opts.force);
   }
 
+  const fixFollowUpInfo = {
+    action: "REPO_SYNC_DELETE_MERGED_BRANCHES" as const,
+    additionalFollowUp: null,
+    resubmit: opts.resubmit,
+    force: opts.force,
+    oldBranchName: oldBranch.name,
+  };
   if (opts.delete) {
     logNewline();
     logInfo(`Checking if any branches have been merged and can be deleted...`);
     logTip(`Disable this behavior at any point in the future with --no-delete`);
     await deleteMergedBranches({
+      action: "DELETE_MERGED_BRANCHES",
       force: opts.force,
       showDeleteProgress: opts.showDeleteProgress,
+      additionalFollowUp: fixFollowUpInfo,
     });
   }
 
-  if (opts.resubmit) {
-    await resubmitBranchesWithNewBases(opts.force);
+  repoSyncDeleteMergedBranchesFollowUps(fixFollowUpInfo);
+}
+
+export async function repoSyncDeleteMergedBranchesFollowUps(
+  info: RepoSyncDeleteMergedBranchesFollowUpInfoT
+): Promise<void> {
+  if (info.resubmit) {
+    await resubmitBranchesWithNewBases(info.force);
   }
 
-  checkoutBranch(Branch.exists(oldBranch.name) ? oldBranch.name : trunk);
+  const trunk = getTrunk().name;
+  checkoutBranch(
+    Branch.exists(info.oldBranchName) ? info.oldBranchName : trunk
+  );
 }
 
 /**

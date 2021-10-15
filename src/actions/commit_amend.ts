@@ -57,7 +57,7 @@ export async function commitAmendAction(opts: {
         action: "rebase",
         rebaseConflictCheckpoint: {
           baseBranchName: currentBranch.name,
-          followUpInfo: [],
+          followUpInfo: null,
         },
       });
     }

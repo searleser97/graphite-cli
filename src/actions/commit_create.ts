@@ -64,7 +64,7 @@ export async function commitCreateAction(opts: {
         action: "rebase",
         rebaseConflictCheckpoint: {
           baseBranchName: currentBranch.name,
-          followUpInfo: [],
+          followUpInfo: null,
         },
       });
     }
