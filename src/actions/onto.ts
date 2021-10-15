@@ -40,7 +40,7 @@ async function stackOnto(currentBranch: Branch, onto: string) {
 
   const rebaseConflictCheckpoint = {
     baseBranchName: currentBranch.name,
-    followUpInfo: null,
+    followUpInfo: [],
   };
   await restackBranch(currentBranch, {
     forceRestack: true,

@@ -51,7 +51,16 @@ export async function commitAmendAction(opts: {
   // Only restack if working tree is now clean.
   try {
     uncommittedChangesPrecondition();
-    await fixAction({ action: "rebase" });
+
+    if (currentBranch !== null) {
+      await fixAction({
+        action: "rebase",
+        rebaseConflictCheckpoint: {
+          baseBranchName: currentBranch.name,
+          followUpInfo: [],
+        },
+      });
+    }
   } catch {
     logWarn(
       "Cannot fix upstack automatically, some uncommitted changes remain. Please commit or stash, and then `gt stack fix --rebase`"

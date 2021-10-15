@@ -114,9 +114,12 @@ export async function fixAction(opts: {
       action: "STACK_FIX" as const,
       checkoutBranchName: currentBranch.name,
     };
-    const rebaseConflictCheckpoint = opts.rebaseConflictCheckpoint ?? {
-      baseBranchName: currentBranch.name,
-      followUpInfo: rebaseConflictFollowUp,
+    const rebaseConflictCheckpoint = {
+      baseBranchName:
+        opts.rebaseConflictCheckpoint?.baseBranchName ?? currentBranch.name,
+      followUpInfo: [rebaseConflictFollowUp].concat(
+        opts.rebaseConflictCheckpoint?.followUpInfo ?? []
+      ),
     };
     for (const child of metaStack.source.children) {
       await restackNode(child, {

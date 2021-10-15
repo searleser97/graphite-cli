@@ -25,7 +25,7 @@ const CURRENT_REPO_CONFIG_PATH = path.join(getRepoRootPath(), CONFIG_NAME);
  */
 export type RebaseConflictCheckpointT = {
   baseBranchName: string;
-  followUpInfo: RebaseConflictFollowUpInfoT | null;
+  followUpInfo: RebaseConflictFollowUpInfoT[];
 } | null;
 
 export type RebaseConflictFollowUpInfoT = StackFixFollowUpInfoT;

@@ -50,8 +50,10 @@ export const handler = async (argv: argsT): Promise<void> => {
       rebaseConflictCheckpoint: mostRecentCheckpoint,
     });
 
-    if (mostRecentCheckpoint.followUpInfo !== null) {
-      await handleFollowUp(mostRecentCheckpoint.followUpInfo);
+    if (mostRecentCheckpoint.followUpInfo.length > 0) {
+      for (const followUpInfo of mostRecentCheckpoint.followUpInfo) {
+        await handleFollowUp(followUpInfo);
+      }
     }
   });
 };
