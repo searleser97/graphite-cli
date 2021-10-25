@@ -1,3 +1,6 @@
+# 0.16.2 2021-10-25
+- Support for `gt continue` to continue the previous Graphite command when interrupted by a rebase.
+
 # 0.16.1 2021-10-14
 - Fix issue with `gt repo sync` deleting metadata for existing branches.
 - Reduce merge conflicts caused by `gt commit amend`.
